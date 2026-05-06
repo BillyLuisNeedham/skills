@@ -1,4 +1,6 @@
 android-agp-9-upgrade
+android-base
+android-camera1-to-camerax
 android-display-ai-glasses-with-jetpack-compose-glimmer
 android-edge-to-edge
 android-migrate-xml-views-to-jetpack-compose

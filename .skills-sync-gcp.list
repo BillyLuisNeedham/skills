@@ -1,4 +1,9 @@
+gcp-agent-platform-deploy
+gcp-agent-platform-prompt-management
+gcp-agent-platform-rag-engine-management
 gcp-agent-platform-skill-registry
+gcp-agent-platform-tuning
+gcp-agent-platform-tuning-management
 gcp-alloydb-basics
 gcp-bigquery-basics
 gcp-cloud-run-basics

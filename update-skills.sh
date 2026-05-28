@@ -6,10 +6,12 @@
 #   1. Pulls mattpocock/skills (upstream) into this fork.
 #   2. Clones android/skills and copies each skill dir flat with `android-` prefix.
 #   3. Clones google/skills and copies each skill dir flat (under skills/) with `gcp-` prefix.
-#   4. Removes any previously-synced skill that no longer exists upstream.
-#   5. On a directory collision that we don't recognise as previously-synced,
+#   4. Pulls the thermo-nuclear-code-quality-review skill from cursor/plugins into
+#      skills/personal/, overwriting it each run.
+#   5. Removes any previously-synced skill that no longer exists upstream.
+#   6. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   6. Commits and pushes to origin.
+#   7. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -106,6 +108,29 @@ sync_source() {
   write_manifest "$prefix" "${newly_synced[@]+"${newly_synced[@]}"}"
 }
 
+# Sync a single named skill into skills/personal/, keeping its original name.
+# Overwrites the target each run so we always pull the latest version.
+sync_personal_skill() {
+  local repo_url="$1" skill_subpath="$2"
+  local skill_name target
+  skill_name="$(basename "$skill_subpath")"
+  target="$REPO_DIR/skills/personal/$skill_name"
+
+  echo "==> Syncing personal skill '$skill_name' from $repo_url"
+  local clone_dir="$TMP_DIR/personal-$skill_name"
+  git clone --depth 1 --quiet "$repo_url" "$clone_dir"
+
+  local src="$clone_dir/$skill_subpath"
+  if [[ ! -d "$src" ]]; then
+    echo "    ! source path not found: $skill_subpath (skipping)" >&2
+    return 0
+  fi
+
+  rm -rf "$target"
+  cp -r "$src" "$target"
+  echo "    + skills/personal/$skill_name"
+}
+
 cd "$REPO_DIR"
 
 ensure_remote upstream "https://github.com/mattpocock/skills.git"
@@ -119,12 +144,14 @@ git merge --no-edit upstream/main
 sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
+sync_personal_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
+
 echo "==> Committing and pushing fork..."
 git add -A
 if git diff --cached --quiet; then
   echo "    (no changes to commit)"
 else
-  git commit -m "Sync skills: mattpocock + android + gcp"
+  git commit -m "Sync skills: mattpocock + android + gcp + cursor"
   git push origin main
 fi
 

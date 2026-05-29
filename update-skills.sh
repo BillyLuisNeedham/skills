@@ -11,7 +11,9 @@
 #   5. Removes any previously-synced skill that no longer exists upstream.
 #   6. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   7. Commits and pushes to origin.
+#   7. Links every skill in the repo (except deprecated/) into
+#      ~/.claude/skills and ~/.cursor/skills via scripts/link-skills.sh.
+#   8. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -145,6 +147,9 @@ sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
 sync_personal_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
+
+echo "==> Linking skills to ~/.claude/skills and ~/.cursor/skills..."
+bash "$REPO_DIR/scripts/link-skills.sh"
 
 echo "==> Committing and pushing fork..."
 git add -A

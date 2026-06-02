@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{TITLE} — reference</title>
+<style>
+  :root {
+    --bg: #f8f9fb;
+    --surface: #ffffff;
+    --text: #1a1d26;
+    --muted: #5c6370;
+    --border: #e2e5ec;
+    --accent: #2d6a4f;
+    --accent-dark: #1b4332;
+    --accent-light: #e8f5ef;
+    --warn: #b8860b;
+    --warn-light: #fff6e0;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg);
+  }
+  main { max-width: 52rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h1 { font-size: 1.9rem; margin: 0 0 .35rem; color: var(--accent-dark); }
+  .subtitle { color: var(--muted); font-size: 1.05rem; margin: 0 0 1rem; }
+  h2 {
+    font-size: 1.3rem; margin: 0 0 .9rem; padding-bottom: .35rem;
+    border-bottom: 2px solid var(--border);
+  }
+  h3 { font-size: 1.05rem; margin: 1.4rem 0 .5rem; }
+  p { margin: 0 0 .9rem; }
+  a { color: var(--accent); }
+
+  /* badges */
+  .badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.5rem; }
+  .badge {
+    display: inline-block; font-size: .78rem; font-weight: 600;
+    padding: .2rem .6rem; border-radius: 999px;
+    background: var(--accent-light); color: var(--accent-dark);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .badge-warn { background: var(--warn-light); color: var(--warn);
+    border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+
+  /* table of contents */
+  nav.toc {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+  }
+  nav.toc ol {
+    margin: 0; padding: 0; list-style: none;
+    columns: 2; column-gap: 2rem; font-size: .92rem;
+  }
+  nav.toc li { margin: .25rem 0; break-inside: avoid; }
+  @media (max-width: 540px) { nav.toc ol { columns: 1; } }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: .5rem 0 1rem; font-size: .92rem; }
+  th, td { text-align: left; padding: .5rem .65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+    background: var(--accent-light); color: var(--accent-dark);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:nth-child(even) { background: #fbfcfe; }
+
+  /* definition list (glossary) */
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: .8rem; }
+  dd { margin: .15rem 0 0; color: var(--muted); }
+
+  /* callouts */
+  .callout {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    padding: .8rem 1rem; border-radius: 0 var(--radius) var(--radius) 0; margin: 1rem 0;
+  }
+  .callout-warn { background: var(--warn-light); border-left-color: var(--warn); }
+
+  /* code */
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em;
+    background: #eef0f5; padding: .12em .4em; border-radius: 4px; }
+  pre {
+    background: #1a1d26; color: #e6e8ee; padding: 1rem; border-radius: var(--radius);
+    overflow-x: auto; font-size: .85rem; line-height: 1.45;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  /* diagram wrapper */
+  .diagram {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); padding: 1rem; overflow-x: auto; margin: 1rem 0;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+  .diagram .caption { color: var(--muted); font-size: .85rem; margin-top: .6rem; text-align: center; }
+  /* SVG diagram primitives — reuse across diagrams */
+  .node { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; rx: 6; }
+  .node.key { fill: var(--accent-light); stroke: var(--accent); }
+  .node-label { fill: var(--text); font: 600 13px system-ui, sans-serif; }
+  .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .edge-label { fill: var(--muted); font: 11px system-ui, sans-serif; }
+
+  /* Q&A cards */
+  .qa-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: .9rem 1.1rem; margin: .7rem 0;
+  }
+  .qa-item .q { font-weight: 600; margin-bottom: .35rem; }
+  .qa-item .a { color: var(--muted); margin: 0; }
+
+  footer { text-align: center; color: var(--muted); font-size: .85rem;
+    margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>{TITLE}</h1>
+    <p class="subtitle">{SUBTITLE}</p>
+    <div class="badges">
+      <span class="badge">{epic / id}</span>
+      <span class="badge">{branch}</span>
+      <span class="badge badge-warn">{status, e.g. Uncommitted}</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Table of contents">
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#callers">Entry points</a></li>
+      <li><a href="#scope">Scope</a></li>
+      <li><a href="#qa">Mental model Q&amp;A</a></li>
+    </ol>
+  </nav>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>{1–2 paragraph summary of what this is and why it exists.}</p>
+    <ul>
+      <li>{key responsibility}</li>
+    </ul>
+  </section>
+
+  <section id="glossary">
+    <h2>Glossary</h2>
+    <dl>
+      <dt>{Term}</dt>
+      <dd>{definition, using the project's domain vocabulary}</dd>
+    </dl>
+  </section>
+
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <p>{Short prose. Diagram only because this relationship is branching.}</p>
+    <!-- SAMPLE inline-SVG diagram: layered stack. Edit labels; keep arrow marker. -->
+    <div class="diagram">
+      <svg viewBox="0 0 360 320" role="img" aria-label="Architecture stack">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                  orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#5c6370"></path>
+          </marker>
+        </defs>
+        <!-- nodes: <rect class="node[ key]"> + centered <text class="node-label"> -->
+        <rect class="node key" x="100" y="10"  width="160" height="40" rx="6"></rect>
+        <text class="node-label" x="180" y="35" text-anchor="middle">Entry / routing</text>
+
+        <rect class="node" x="100" y="80"  width="160" height="40" rx="6"></rect>
+        <text class="node-label" x="180" y="105" text-anchor="middle">UI Screen</text>
+
+        <rect class="node" x="100" y="150" width="160" height="40" rx="6"></rect>
+        <text class="node-label" x="180" y="175" text-anchor="middle">ViewModel</text>
+
+        <rect class="node" x="100" y="220" width="160" height="40" rx="6"></rect>
+        <text class="node-label" x="180" y="245" text-anchor="middle">Interactor</text>
+
+        <rect class="node" x="100" y="290" width="160" height="40" rx="6" transform="translate(0,-10)"></rect>
+        <text class="node-label" x="180" y="305" text-anchor="middle">Repository</text>
+
+        <!-- edges: top of next box to bottom of previous, marker-end arrow -->
+        <line class="edge" x1="180" y1="50"  x2="180" y2="78"  marker-end="url(#arrow)"></line>
+        <line class="edge" x1="180" y1="120" x2="180" y2="148" marker-end="url(#arrow)"></line>
+        <line class="edge" x1="180" y1="190" x2="180" y2="218" marker-end="url(#arrow)"></line>
+        <line class="edge" x1="180" y1="260" x2="180" y2="278" marker-end="url(#arrow)"></line>
+      </svg>
+      <div class="caption">{caption}</div>
+    </div>
+  </section>
+
+  <section id="callers">
+    <h2>Entry points</h2>
+    <table>
+      <thead><tr><th>Caller</th><th>Contract</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>{caller}</td><td>{how}</td><td>{note}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="scope">
+    <h2>Scope</h2>
+    <table>
+      <thead><tr><th>In scope</th><th>Out of scope</th></tr></thead>
+      <tbody>
+        <tr><td>{in}</td><td>{out}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="qa">
+    <h2>Mental model Q&amp;A</h2>
+    <div class="qa-item">
+      <p class="q">{Question?}</p>
+      <p class="a">{Short answer.}</p>
+    </div>
+  </section>
+
+  <footer>Personal reference — {topic}</footer>
+</main>
+</body>
+</html>

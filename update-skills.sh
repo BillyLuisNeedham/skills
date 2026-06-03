@@ -7,7 +7,7 @@
 #   2. Clones android/skills and copies each skill dir flat with `android-` prefix.
 #   3. Clones google/skills and copies each skill dir flat (under skills/) with `gcp-` prefix.
 #   4. Pulls the thermo-nuclear-code-quality-review skill from cursor/plugins into
-#      skills/engineering/, overwriting it each run.
+#      skills/personal/, overwriting it each run.
 #   5. Removes any previously-synced skill that no longer exists upstream.
 #   6. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
@@ -110,13 +110,13 @@ sync_source() {
   write_manifest "$prefix" "${newly_synced[@]+"${newly_synced[@]}"}"
 }
 
-# Sync a single named skill into skills/engineering/, keeping its original name.
+# Sync a single named skill into skills/personal/, keeping its original name.
 # Overwrites the target each run so we always pull the latest version.
 sync_personal_skill() {
   local repo_url="$1" skill_subpath="$2"
   local skill_name target
   skill_name="$(basename "$skill_subpath")"
-  target="$REPO_DIR/skills/engineering/$skill_name"
+  target="$REPO_DIR/skills/personal/$skill_name"
 
   echo "==> Syncing personal skill '$skill_name' from $repo_url"
   local clone_dir="$TMP_DIR/personal-$skill_name"
@@ -130,7 +130,7 @@ sync_personal_skill() {
 
   rm -rf "$target"
   cp -r "$src" "$target"
-  echo "    + skills/engineering/$skill_name"
+  echo "    + skills/personal/$skill_name"
 }
 
 cd "$REPO_DIR"

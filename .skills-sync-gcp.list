@@ -1,4 +1,6 @@
 gcp-agent-platform-deploy
+gcp-agent-platform-eval-flywheel
+gcp-agent-platform-model-registry
 gcp-agent-platform-prompt-management
 gcp-agent-platform-rag-engine-management
 gcp-agent-platform-skill-registry
@@ -9,6 +11,7 @@ gcp-bigquery-basics
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
 gcp-firebase-basics
+gcp-gcloud
 gcp-gemini-agents-api
 gcp-gemini-api
 gcp-gemini-interactions-api

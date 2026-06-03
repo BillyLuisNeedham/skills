@@ -58,35 +58,41 @@ Use when you need to create a new managed prompt in Agent Platform.
 ### List Prompts (Tier R)
 
 ```python
+import vertexai
 from vertexai.preview import prompts
+
+vertexai.init(project="PROJECT_ID", location="LOCATION_ID")
 
 all_prompts = prompts.list()
 for p in all_prompts:
-    print(f"Name: {p.display_name}, ID: {p.name}")
+    print(f"Name: {p.display_name}, ID: {p.prompt_id}")
 ```
 
 ### Retrieve and Use a Prompt (Tier R)
 
 ```python
+import vertexai
 from vertexai.preview import prompts
 
-retrieved_prompt = prompts.get(prompt_id="projects/PROJECT_ID/locations/LOCATION_ID/prompts/PROMPT_ID")
-# Versions are supported: prompts.get(prompt_id=..., version_id="2")
+vertexai.init(project="PROJECT_ID", location="LOCATION_ID")
 
-# Assemble with variables
-assembled = retrieved_prompt.assemble(text="The quick brown fox...")
+retrieved_prompt = prompts.get(prompt_id="PROMPT_ID")
+# Versions are supported: prompts.get(prompt_id="PROMPT_ID", version_id="2")
+
+# Assemble with variables (kwargs must match template variable names)
+assembled = retrieved_prompt.assemble_contents(text="The quick brown fox...")
 print(assembled)
 ```
 
 ### Delete a Prompt (Tier D)
 
-**CRITICAL**: You must use the full resource name (e.g.,
-`projects/PROJECT_ID/locations/LOCATION_ID/prompts/PROMPT_ID`) when deleting a
-prompt. Do not pass just the numeric ID.
+**CRITICAL**: You must pass the numeric prompt ID (e.g., `"1234567890123456789"`)
+to `prompts.delete()`. The SDK constructs the full resource path internally
+using the project and location from `vertexai.init()`.
 
 **Confirmation Required**: As a Tier D (Destructive) operation, the agent MUST
-pause and request explicit, high-friction typed re-confirmation of the prompt
-resource name from the user before generating or providing the deletion code.
+pause and request explicit, high-friction typed re-confirmation of the prompt ID
+from the user before generating or providing the deletion code.
 The action is irreversible.
 
 > [!IMPORTANT]
@@ -96,11 +102,12 @@ The action is irreversible.
 > a single parallel turn is a severe safety violation.
 
 ```python
+import vertexai
 from vertexai.preview import prompts
 
-# Always use full resource name
-resource_name = "projects/PROJECT_ID/locations/LOCATION_ID/prompts/PROMPT_ID"
-prompts.delete(prompt_id=resource_name)
+vertexai.init(project="PROJECT_ID", location="LOCATION_ID")
+
+prompts.delete(prompt_id="PROMPT_ID")
 ```
 
 ## 2. Best Practices

@@ -20,25 +20,27 @@ name, and model before providing the creation code.
 > an infinite loop. Yield immediately for the user's reply.
 
 ```python
-from google.cloud import vertexai
-from google.genai import types as genai_types
+import vertexai
 from vertexai.preview import prompts
+from vertexai.preview.prompts import Prompt
 
-# Define contents
-part = genai_types.Part(text="Hello, how are you?")
-content = genai_types.Content(role="user", parts=[part])
+vertexai.init(project="PROJECT_ID", location="LOCATION_ID")
 
-prompt_data = vertexai.types.PromptData(
-    model="gemini-2.5-pro",
-    contents=[content],
+# Construct a local Prompt object. `prompt_name` is the display name shown
+# in Agent Platform Studio; `prompt_data` is the prompt text/template
+# (use `{variable_name}` placeholders for variables passed to
+# `assemble_contents()`); `model_name` is the target model.
+local_prompt = Prompt(
+    prompt_name="my_new_prompt",
+    prompt_data="Hello, how are you? {text}",
+    model_name="gemini-2.5-pro",
 )
 
-prompt = vertexai.types.Prompt(prompt_data=prompt_data)
-
-create_config = vertexai.types.CreatePromptConfig(
-    prompt_display_name="my_new_prompt"
-)
-
-new_prompt = prompts.create(prompt=prompt, config=create_config)
-print(f"Created prompt ID: {new_prompt.prompt_id}")
+# Persist the local Prompt as a new managed prompt resource. This creates
+# the prompt AND its first version in a single call. The returned
+# `persisted_prompt` is a Prompt object with `prompt_id` and `version_id`
+# populated.
+persisted_prompt = prompts.create_version(prompt=local_prompt)
+print(f"Created prompt ID: {persisted_prompt.prompt_id}")
+print(f"Version ID: {persisted_prompt.version_id}")
 ```

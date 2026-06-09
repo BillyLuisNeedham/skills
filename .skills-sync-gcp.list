@@ -1,5 +1,8 @@
 gcp-agent-platform-deploy
+gcp-agent-platform-endpoint-management
 gcp-agent-platform-eval-flywheel
+gcp-agent-platform-inference
+gcp-agent-platform-migrate-from-ai-studio
 gcp-agent-platform-model-registry
 gcp-agent-platform-prompt-management
 gcp-agent-platform-rag-engine-management

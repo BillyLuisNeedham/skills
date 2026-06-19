@@ -52,14 +52,14 @@ Provide these key capabilities:
     ```
 
 > [!WARNING]
-> Legacy SDKs like `google-cloud-aiplatform`, `@google-cloud/vertexai`, and `google-generativeai` are deprecated. Migrate to the new SDKs above urgently by following the [Migration Guide](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk).
+> Legacy SDKs like `google-cloud-aiplatform`, `@google-cloud/vertexai`, and `google-generativeai` are deprecated. Migrate to the new SDKs above urgently by following the [Migration Guide](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.md.txt).
 
 ## Authentication & Configuration
 
 Prefer environment variables over hard-coding parameters when creating the client. Initialize the client without parameters to automatically pick up these values.
 
 ### Application Default Credentials (ADC)
-Set these variables for standard [Google Cloud authentication](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/gcp-auth):
+Set these variables for standard [Google Cloud authentication](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/gcp-auth.md.txt):
 ```bash
 export GOOGLE_CLOUD_PROJECT='your-project-id'
 export GOOGLE_CLOUD_LOCATION='global'
@@ -67,10 +67,10 @@ export GOOGLE_GENAI_USE_ENTERPRISE=true
 ```
 
 - By default, use `location="global"` to access the global endpoint, which provides automatic routing to regions with available capacity.
-- If a user explicitly asks to use a specific region (e.g., `us-central1`, `europe-west4`), specify that region in the `GOOGLE_CLOUD_LOCATION` parameter instead. Reference the [supported regions documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#google-models) if needed.
+- If a user explicitly asks to use a specific region (e.g., `us-central1`, `europe-west4`), specify that region in the `GOOGLE_CLOUD_LOCATION` parameter instead. Reference the [supported regions documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations.md.txt) if needed.
 
 ### Agent Platform in Express Mode
-Set these variables when using [Express Mode](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/api-keys?usertype=expressmode) with an API key:
+Set these variables when using [Express Mode](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/api-keys.md.txt) with an API key:
 ```bash
 export GOOGLE_API_KEY='your-api-key'
 export GOOGLE_GENAI_USE_ENTERPRISE=true
@@ -213,7 +213,7 @@ Console.WriteLine(response.Text);
 
 When implementing or debugging API integration for Agent Platform, refer to the official Agent Platform documentation:
 - **Agent Platform Documentation**: https://docs.cloud.google.com/gemini-enterprise-agent-platform/overview.md.txt
-- **REST API Reference**: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest
+- **REST API Reference**: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest.md.txt
 
 The Gen AI SDK on Agent Platform uses the `v1beta1` or `v1` REST API endpoints (e.g., `https://{LOCATION}-aiplatform.googleapis.com/v1beta1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{MODEL}:generateContent`).
 

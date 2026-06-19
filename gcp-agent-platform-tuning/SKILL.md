@@ -315,7 +315,7 @@ Check if `scripts/tune_gemini_model.py` exists.
 Submit the open model tuning job using `scripts/tune_open_model.py`. Identify
 the model id using available models documentation at
 <!-- disableFinding(LINE_OVER_80) -->
-[documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-model-tuning#supported-models).
+[documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-model-tuning.md.txt).
 <!-- enableFinding(LINE_OVER_80) -->
 
 ```bash

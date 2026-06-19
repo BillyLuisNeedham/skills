@@ -99,7 +99,7 @@ gcloud container clusters describe <CLUSTER_NAME> --region <REGION> \
 - Audit permissions via MCP: `check_k8s_auth(parent="...", verb="list", resourceType="pods", namespace="...")` (or `kubectl auth can-i --list --as=<user>`)
 - Review bindings via MCP: `get_k8s_resource(parent="...", resourceType="clusterrolebinding")` (or `kubectl get clusterrolebindings,rolebindings --all-namespaces`)
 
-> See [gke-multitenancy.md](./gke-multitenancy.md) for enterprise RBAC planning and https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/rbac
+> See [gke-multitenancy.md](./gke-multitenancy.md) for enterprise RBAC planning and https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/rbac.md.txt
 
 ## Binary Authorization
 

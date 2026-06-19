@@ -11,6 +11,7 @@ gcp-agent-platform-tuning
 gcp-agent-platform-tuning-management
 gcp-alloydb-basics
 gcp-bigquery-basics
+gcp-bigtable-basics
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
 gcp-firebase-basics
@@ -19,6 +20,7 @@ gcp-gemini-agents-api
 gcp-gemini-api
 gcp-gemini-interactions-api
 gcp-gke-basics
+gcp-gke-upgrades
 gcp-google-cloud-networking-observability
 gcp-google-cloud-recipe-auth
 gcp-google-cloud-recipe-onboarding
@@ -28,3 +30,5 @@ gcp-google-cloud-waf-performance-optimization
 gcp-google-cloud-waf-reliability
 gcp-google-cloud-waf-security
 gcp-google-cloud-waf-sustainability
+gcp-iam-recommendations-fetcher
+gcp-workload-manager-basics

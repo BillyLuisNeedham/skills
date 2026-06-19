@@ -16,6 +16,34 @@ This skill provides instructions for authenticating and connecting to Google
 Cloud Agent Platform to use Generative AI models. It covers both First-Party
 (Gemini) and Third-Party (OpenMaaS) models.
 
+## Safety & Confirmation Tiers (CRITICAL)
+
+Before executing any commands or scripts on behalf of the user, you must adhere
+to the following safety tiers based on the action requested. (The skill is
+read-only; other safety tiers are omitted):
+
+1.  **Tier R: Read-only / Inference (`client.models.generate_content`, `client.chat.completions.create`, `client.completions.create`, `client.embeddings.create`)**
+    *   Requires **interactive confirmation** with 'Yes'/
+    'No' options before executing model inference on
+    behalf of the user, to prevent unexpected cost or
+    quota consumption. The confirmation prompt must
+    clearly explain the proposed inference execution and
+    its key parameters (e.g., target model ID, SDK
+    choice, input prompt). Natural-language paraphrases
+    without specifying the parameters are NOT sufficient.
+    *   **Same-turn restriction**: Do not execute the
+    inference scripts or commands in the same turn as
+    presenting the confirmation prompt. Stop and wait
+    for the user's reply; only execute after explicit
+    'Yes' / approval.
+    *   **Gold Standard Example**:
+        > I will perform model inference with the following parameters. Please
+        > confirm this information before I proceed:
+        > *   **Model ID**: `deepseek-ai/deepseek-v3.2-maas`
+        > *   **SDK**: OpenAI SDK (via Vertex AI Endpoint)
+        > *   **Input Prompt**: "Explain the concept of quantum computing..."
+        > Do you confirm? [Yes/No]
+
 ## Phase 0: Environment Setup
 
 **CRITICAL**: Before running any of the Python sample scripts in the `scripts/`

@@ -4,7 +4,7 @@ The GKE MCP server provides 23 structured tools for cluster management, Kubernet
 
 ## Connecting to the GKE MCP Server
 
-The GKE remote MCP server is available for AI clients that support the Model Context Protocol. For setup instructions, see https://docs.cloud.google.com/kubernetes-engine/docs/how-to/use-gke-mcp.
+The GKE remote MCP server is available for AI clients that support the Model Context Protocol. For setup instructions, see https://docs.cloud.google.com/kubernetes-engine/docs/how-to/use-gke-mcp.md.txt
 
 ## Available Tools
 

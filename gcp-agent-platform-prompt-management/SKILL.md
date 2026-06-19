@@ -10,10 +10,52 @@ description: >-
 ## Usage Guide
 
 To use this skill effectively:
+
 1. **Generate Code**: Provide the Python snippets below to the user to help them
 manage prompts in Agent Platform.
+
 2. **No File System Search**: Do not try to find Python files or scripts on the
 file system for these operations.
+
+## Safety & Confirmation Tiers (CRITICAL)
+
+Before executing any commands or scripts on behalf of the user, you must adhere
+to the following safety tiers based on the action requested, to prevent
+accidental mutation or permanent deletion of prompt resources:
+
+1.  **Tier R: Read-only (`list`, `get`)**
+    *   No confirmation needed. Execute immediately to gather information.
+2.  **Tier M: Mutating & Reversible (`create`)**
+    *   Requires **interactive confirmation** with 'Yes'/'No' options
+    before executing prompt creation, to prevent unintended resource
+    proliferation or misconfiguration. The confirmation prompt must
+    clearly explain the proposed prompt creation and its key parameters
+    (e.g., display name, template text, target model). Natural-language
+    paraphrases without specifying the parameters are not sufficient.
+    *   **Same-turn restriction**: Do not execute the creation code in the same
+        turn as presenting the confirmation prompt. Stop and wait for the user's
+        reply; only execute after explicit 'Yes' / approval.
+    *   **Gold Standard Example**:
+        > I will create a prompt in Agent Platform with the following
+        > parameters. Please confirm this information before I proceed:
+        > *   **Display Name**: `Customer Support Greeting`
+        > *   **Target Model**: `gemini-2.5-pro`
+        > *   **Template Text**: "Hello {{user_name}}, how can I help..."
+        > Do you confirm? [Yes/No]
+3.  **Tier D: Destructive & Irreversible (`delete`)**
+    *   Requires **explicit typed confirmation** (e.g. "I confirm" or "Yes,
+    delete it") before executing prompt deletion, to prevent accidental
+    permanent loss of production prompt assets. Ask for confirmation
+    before any pre-flight checks.
+    *   **Same-turn restriction**: NEVER execute in the same turn as asking for
+        typed confirmation. Wait for the user to reply in a new turn.
+    *   **Gold Standard Example**:
+        > I will permanently delete the following prompt from Agent Platform.
+        > This action is irreversible. Please explicitly type your
+        > confirmation (e.g., "I confirm") before I proceed:
+        > *   **Prompt ID**: `prompt_12345abc`
+        > *   **Display Name**: `Legacy Outdated Prompt`
+        > Please type your confirmation to proceed.
 
 ## Phase 0: Environment Setup
 
@@ -49,13 +91,13 @@ these steps:
 
 The SDK provides a high-level `Prompt` class in the preview module.
 
-### Create a Prompt (Tier M)
+### Create a Prompt
 
 Use when you need to create a new managed prompt in Agent Platform.
 
 *   **Reference**: See [create.md](references/create.md) for detailed instructions and Python snippets.
 
-### List Prompts (Tier R)
+### List Prompts
 
 ```python
 import vertexai
@@ -68,7 +110,7 @@ for p in all_prompts:
     print(f"Name: {p.display_name}, ID: {p.prompt_id}")
 ```
 
-### Retrieve and Use a Prompt (Tier R)
+### Retrieve and Use a Prompt
 
 ```python
 import vertexai
@@ -84,7 +126,7 @@ assembled = retrieved_prompt.assemble_contents(text="The quick brown fox...")
 print(assembled)
 ```
 
-### Delete a Prompt (Tier D)
+### Delete a Prompt
 
 **CRITICAL**: You must pass the numeric prompt ID (e.g., `"1234567890123456789"`)
 to `prompts.delete()`. The SDK constructs the full resource path internally

@@ -5,7 +5,20 @@ set -euo pipefail
 # ~/.claude/skills and ~/.cursor/skills for local agents.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-DESTS=("$HOME/.claude/skills" "$HOME/.cursor/skills")
+CURSOR_DEST="$HOME/.cursor/skills"
+DESTS=("$HOME/.claude/skills" "$CURSOR_DEST")
+
+# Names of current (non-deprecated) repo skills, one per line.
+repo_skill_names() {
+  find "$REPO" -name SKILL.md \
+    -not -path '*/node_modules/*' \
+    -not -path '*/.git/*' \
+    -not -path '*/deprecated/*' \
+    -print0 | while IFS= read -r -d '' skill_md; do
+      basename "$(dirname "$skill_md")"
+    done
+}
+VALID_NAMES="$(repo_skill_names)"
 
 guard_dest() {
   local dest="$1"
@@ -27,33 +40,51 @@ link_skill() {
   local src="$1" name="$2"
   for dest in "${DESTS[@]}"; do
     local target="$dest/$name"
-    if [ -e "$target" ] && [ ! -L "$target" ]; then
+    if [ "$dest" = "$CURSOR_DEST" ]; then
+      # Cursor's slash-command picker does not follow symlinks; it needs real
+      # dirs. Drop any prior symlink/dir and copy so the picker sees the skill.
       rm -rf "$target"
+      cp -R "$src" "$target"
+      echo "copied $name -> $src ($dest)"
+    else
+      if [ -e "$target" ] && [ ! -L "$target" ]; then
+        rm -rf "$target"
+      fi
+      ln -sfn "$src" "$target"
+      echo "linked $name -> $src ($dest)"
     fi
-    ln -sfn "$src" "$target"
-    echo "linked $name -> $src ($dest)"
   done
 }
 
 prune_stale() {
   local dest="$1"
   for target in "$dest"/*; do
-    [[ -L "$target" ]] || continue
+    [[ -e "$target" || -L "$target" ]] || continue
     local name resolved
     name="$(basename "$target")"
-    resolved="$(readlink -f "$target" 2>/dev/null || true)"
-    case "$resolved" in
-      "$REPO"/skills/deprecated/*|"$REPO"/skills/*/deprecated/*)
-        rm "$target"
-        echo "removed deprecated $name ($dest)"
-        ;;
-      "$REPO"/*)
-        if [[ ! -f "$resolved/SKILL.md" ]]; then
+    if [[ -L "$target" ]]; then
+      resolved="$(readlink -f "$target" 2>/dev/null || true)"
+      case "$resolved" in
+        "$REPO"/skills/deprecated/*|"$REPO"/skills/*/deprecated/*)
           rm "$target"
-          echo "removed orphan $name ($dest)"
-        fi
-        ;;
-    esac
+          echo "removed deprecated $name ($dest)"
+          ;;
+        "$REPO"/*)
+          if [[ ! -f "$resolved/SKILL.md" ]]; then
+            rm "$target"
+            echo "removed orphan $name ($dest)"
+          fi
+          ;;
+      esac
+    elif [[ "$dest" = "$CURSOR_DEST" && -d "$target" && -f "$target/SKILL.md" ]]; then
+      # Cursor copies are real dirs, not symlinks: stale if the name is no
+      # longer a current repo skill. Restrict to dirs holding a SKILL.md so we
+      # never touch unrelated Cursor content.
+      if ! grep -qxF "$name" <<<"$VALID_NAMES"; then
+        rm -rf "$target"
+        echo "removed stale $name ($dest)"
+      fi
+    fi
   done
   for name in github-triage triage-issue; do
     local target="$dest/$name"

@@ -1,11 +1,15 @@
 ---
 name: agent-platform-prompt-management
+metadata:
+  category: AiAndMachineLearning
 description: >-
   Manages and orchestrates prompts in Agent Platform. Use when you need to create,
   list, retrieve, version, or delete managed prompts in Agent Platform. Don't use
   for model training, model deployment to endpoints, or managing non-Agent Platform
   prompts.
 ---
+
+# Agent Platform Prompt Management
 
 ## Usage Guide
 
@@ -66,16 +70,19 @@ these steps:
 1. **Google Cloud Authentication**: Authenticate with your Google Cloud account
    and configure active Application Default Credentials (ADC) for Agent
    Platform access:
+   
    ```bash
    gcloud auth login
    gcloud auth application-default login
    ```
 2. **Virtual Environment**: Create and activate a dedicated virtual environment:
+   
    ```bash
    python3 -m venv ~/prompt_agent_venv
    source ~/prompt_agent_venv/bin/activate
    ```
 3. **Install Dependencies**: Install the required Agent Platform SDKs:
+   
    ```bash
    pip install google-cloud-aiplatform google-genai
    ```

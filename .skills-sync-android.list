@@ -1,12 +1,12 @@
 android-adaptive
 android-agp-9-upgrade
 android-android-cli
+android-android-intent-security
 android-appfunctions
 android-camera1-to-camerax
 android-display-glasses-with-jetpack-compose-glimmer
 android-edge-to-edge
 android-engage-sdk-integration
-android-jetpack-compose-m3
 android-migrate-xml-views-to-jetpack-compose
 android-navigation-3
 android-perfetto-sql
@@ -16,3 +16,4 @@ android-r8-analyzer
 android-styles
 android-testing-setup
 android-verified-email
+android-wear-compose-m3

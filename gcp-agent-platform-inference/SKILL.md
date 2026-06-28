@@ -1,5 +1,7 @@
 ---
 name: agent-platform-inference
+metadata:
+  category: AiAndMachineLearning
 description: >-
   Connects to and performs inference with Google Cloud Agent Platform GenAI
   models, including First-Party Gemini models and Third-Party OpenMaaS models
@@ -53,26 +55,31 @@ environment is correctly initialized by following these steps:
 1.  **Google Cloud Authentication**: Authenticate with your Google Cloud
     credentials and configure active Application Default Credentials (ADC) for
     Agent Platform access:
+    
     ```bash
     gcloud auth login
     gcloud auth application-default login
     ```
 2.  **Enable API** (if not already enabled):
+    
     ```bash
     gcloud services enable aiplatform.googleapis.com
     ```
 3.  **Virtual Environment**: Create and activate a dedicated local virtual
     environment:
+    
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate
     ```
 4.  **Install Dependencies**: Install the required SDKs:
+    
     ```bash
     pip install -r scripts/requirements.txt
     ```
 5.  **Verify Setup (Optional)**: Run all sample scripts at once to verify the
     environment is working end-to-end:
+    
     ```bash
     ./scripts/verify_all.sh
     ```
@@ -81,6 +88,7 @@ environment is correctly initialized by following these steps:
     activated first.
 
 <!-- disableFinding(LINE_OVER_80) -->
+
 > [!IMPORTANT]
 > **CRITICAL: Model IDs & Availability**
 > *   **Gemini Models**: See [Gemini Models][gemini-models-docs] for valid
@@ -226,6 +234,7 @@ complete code.
 > [!TIP]
 > **Alternative: Environment Variables**
 > You can set environment variables in your shell instead of updating the code.
+>
 > ```bash
 > export OPENAI_BASE_URL="https://aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi"
 > export OPENAI_API_KEY="$(gcloud auth print-access-token)"

@@ -1,5 +1,7 @@
 ---
 name: google-cloud-waf-performance-optimization
+metadata:
+  category: WellArchitectedFramework
 description: >-
   Generates performance-focused guidance for Google Cloud workloads based on the
   design principles and recommendations in the Performance Optimization pillar

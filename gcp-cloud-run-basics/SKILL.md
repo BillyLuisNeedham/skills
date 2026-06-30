@@ -1,5 +1,7 @@
 ---
 name: cloud-run-basics
+metadata:
+  category: Serverless
 description: >-
   Manages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications
   responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs),

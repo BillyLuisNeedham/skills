@@ -1,5 +1,7 @@
 ---
 name: google-cloud-waf-sustainability
+metadata:
+  category: WellArchitectedFramework
 description: >-
   Generates sustainability-focused guidance for Google Cloud workloads based on
   the design principles and recommendations in the Google Cloud Well-Architected

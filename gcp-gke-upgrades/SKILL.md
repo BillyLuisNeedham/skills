@@ -1,5 +1,7 @@
 ---
 name: gke-upgrades
+metadata:
+  category: Containers
 description: >-
   Plans, executes, and validates Google Kubernetes Engine (GKE) cluster upgrades
   and maintenance operations for both Standard and Autopilot clusters. Produces
@@ -26,6 +28,7 @@ Always frame guidance around the auto-upgrade model: auto-upgrade with maintenan
 ## Context Gathering
 
 Before producing any upgrade artifact, establish:
+
 - **Cluster mode** — Standard or Autopilot? (Autopilot has no node pool management, mandatory resource requests, no SSH)
 - **Current and target versions** — Node version skew must be within 2 minor versions of control plane.
 - **Release channel** — Rapid, Regular, Stable, or Extended.
@@ -57,6 +60,7 @@ GKE versions follow Kubernetes version terminology: **Major.Minor.Patch** (e.g.,
 
 ### Support Lifecycle
 Standard GKE versions are supported for 14 months after they become available in the **Regular** channel. This means:
+
 - **Rapid** channel versions may be supported for longer than 14 months (since they enter Rapid before Regular).
 - **Stable** channel versions may be supported for less than 14 months (since they enter Stable after Regular).
 - **Extended** support extends this period up to 24 months. Note that extra cost applies only during the extended support period (months 15-24).
@@ -66,6 +70,7 @@ Standard GKE versions are supported for 14 months after they become available in
 Configure maintenance windows to control auto-upgrade timing. GKE also supports node pool level maintenance exclusions (in addition to cluster level) to block upgrades for specific workloads.
 
 **Exclusion types & Limits:**
+
 - **"No upgrades" (Scope: `no_upgrades`)**: Blocks all upgrades (minor, patch, node).
   - **Limit**: Max **90 days** of total exclusion duration in any **rolling 365-day window**.
   - **Chaining constraint**: Because of the rolling 365-day limit, you cannot chain multiple exclusions to cover a continuous period longer than 90 days (e.g., you cannot cover a 100-day freeze using `no_upgrades`).
@@ -75,6 +80,7 @@ Configure maintenance windows to control auto-upgrade timing. GKE also supports 
   - **Limit**: Up to **180 days per exclusion**. Can be extended up to EoS.
 
 **Important Exclusion Rules (MUST follow when recommending exclusions and MUST include in the final text response):**
+
 1. **Auto-upgrades only**: Maintenance exclusions **only block automatic upgrades**. Manual upgrades initiated by the user will bypass exclusions. You MUST explain this to the user.
 2. **Warn against "No channel"**: You MUST explicitly warn that disabling release channels ("No channel" / static versioning) is deprecated and must not be used as a replacement for exclusions.
 3. **Compare Scopes**: You MUST explain the difference between 'No upgrades' (limitations, blocks patches) and 'No minor or node upgrades' (allows patches, longer duration). Recommend 'No minor or node upgrades' when the user wants to allow security patches/fixes while blocking minor version jumps.
@@ -87,12 +93,14 @@ Configure maintenance windows to control auto-upgrade timing. GKE also supports 
 GKE reserves the right to override user-defined maintenance windows and exclusions for mandatory operations. These overrides cannot be disabled or blocked.
 
 **Common Override Scenarios:**
+
 - **Critical Security Patches**: Urgent vulnerability fixes that must be applied immediately to protect infrastructure.
 - **End of Support (EoS) / End of Life (EOL) Enforcement**: If a cluster is running an unsupported version, GKE will force upgrade it to a supported version.
 - **Expiring Certificates**: If control plane certificates (CAs) are expiring (within 30 days) and rotation is required to prevent cluster unrecoverability.
 - **Maintenance Starvation**: GKE requires at least 48 hours of maintenance availability in any rolling 32-day window. If exclusions block too much, GKE may force an upgrade.
 
 **Guidance (MUST follow when overrides are discussed):**
+
 1. **Correlate with Bulletins**: If GKE performs an unexpected upgrade, you MUST explicitly suggest checking GKE Release Notes or Security Bulletins to correlate the event with emergency patches (do not just suggest checking Cloud Audit Logs).
 2. **Design for Resilience**: Workloads must be designed to survive unexpected control plane or node rotation. You MUST recommend:
    - Regional clusters (multi-master) to ensure API availability during control plane upgrades.
@@ -103,6 +111,7 @@ GKE reserves the right to override user-defined maintenance windows and exclusio
 ## Upgrade Planning
 
 When asked to plan an upgrade, produce a structured document covering:
+
 - Version compatibility (breaking changes, deprecated APIs) (minor version upgrades only)
 - Upgrade path (sequential minor version upgrades) (minor version upgrades only)
 - Node pool upgrade strategy (Standard only)
@@ -110,11 +119,13 @@ When asked to plan an upgrade, produce a structured document covering:
 - Rollback/Contingency procedure (how to revert node pools or coordinate with GKE Support for master rollback)
 
 **Compatibility Search Rule:**
+
 - If compatibility information (e.g., third-party operator compatibility, GPU driver/CUDA compatibility matrix) is not immediately available in the workspace or via a quick web search, **do NOT loop or make multiple search attempts**. Instead, list the compatibility verification as a **critical pre-upgrade action item** for the user in the checklist.
 
 ### Node Pool Strategy (Standard Only)
 
 Recommend **Surge upgrade** as the default and most common strategy, with per-pool settings:
+
 - **Stateless**: Higher `maxSurge` (2-3) for speed, `maxUnavailable=0` for safety.
 - **Stateful/DB**: `maxSurge=1, maxUnavailable=0` (conservative).
 - **GPU (fixed reservation)**: `maxSurge=0, maxUnavailable=1` (no surge capacity).
@@ -152,6 +163,7 @@ Produce checklists as copyable markdown with checkboxes. See [`references/checkl
 **Stateful Workloads:** When stateful workloads (databases) are present, always include checks for PV backup completion and verification of PV reclaim policies (e.g., Retain vs Delete) in the pre-upgrade checklist.
 
 **Autopilot Checklists:** For Autopilot clusters, ensure the checklists include:
+
 - Verification of `resources.requests` on all containers (Autopilot requirement).
 - You MUST include specific `kubectl` commands for API deprecation checks, specifically: `kubectl get --raw /metrics | grep apiserver_request_total | grep deprecated` to check if any active workloads are using deprecated APIs.
 - Verifying PDBs to ensure they don't block node drain (even though GKE manages nodes, PDBs are still respected).
@@ -165,6 +177,7 @@ Produce step-by-step runbooks with actual `gcloud` and `kubectl` commands. See `
 ## Maintenance Window Pauses
 
 When diagnosing a \"stuck\" upgrade, consider if it was paused by a maintenance window:
+
 - **Silent Pause Behavior:** If a maintenance window closes before an upgrade (auto or manual) completes, GKE intentionally pauses the rollout to prevent disruption outside allowed times.
 - **Mixed-Version State:** The cluster is left in a stable mixed-version state (some nodes upgraded, some not). You MUST explicitly state that this is a supported and safe intended outcome.
 - **Resumption:** The upgrade will automatically resume when the next maintenance window opens.
@@ -173,6 +186,7 @@ When diagnosing a \"stuck\" upgrade, consider if it was paused by a maintenance 
 ## Troubleshooting
 
 When a user reports a stuck or failing upgrade, you MUST systematically analyze and address ALL 5 potential causes in your final response. Do not omit checks even if you suspect one is the primary cause:
+
 1. **PDB blocking drain:** Identify if any PDB has `ALLOWED DISRUPTIONS = 0` using `kubectl get pdb -A`.
 2. **Resource constraints:** Check if pods are stuck in `Pending` due to capacity limits.
 3. **Bare pods:** Identify pods without owner references that are blocking the drain (recommend deleting them).
@@ -180,6 +194,7 @@ When a user reports a stuck or failing upgrade, you MUST systematically analyze 
 5. **PVC attachment issues:** Check for volume attachment failures (especially zone constraints).
 
 **Stockout / Quota Exhaustion Rule:**
+
 - If the upgrade is stuck due to `ZONE_RESOURCE_POOL_EXHAUSTED` (stockout) or `QUOTA_EXCEEDED` for Compute Engine resources:
   1. Recommend modifying the upgrade strategy to `maxSurge=0` (rolling in-place) to bypass quota limits.
   2. For `QUOTA_EXCEEDED`, suggest requesting a quota increase from Google Cloud.

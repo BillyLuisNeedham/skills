@@ -1,5 +1,7 @@
 ---
 name: google-cloud-waf-operational-excellence
+metadata:
+  category: WellArchitectedFramework
 description: >-
   Generates operations-focused guidance for Google Cloud workloads based on the
   design principles and recommendations in the Operational Excellence pillar of

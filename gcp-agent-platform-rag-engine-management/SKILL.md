@@ -1,5 +1,7 @@
 ---
 name: agent-platform-rag-engine-management
+metadata:
+  category: AiAndMachineLearning
 description: >-
   Manage and query Agent Platform RAG Engine Corpora and retrieve grounded
   contexts using the Google GenAI SDK. Use when listing RAG corpora or files,
@@ -50,17 +52,20 @@ the environment is correctly initialized by following these steps:
 1.  **Google Cloud Authentication**: Authenticate with your Google Cloud
     credentials and configure active Application Default Credentials (ADC) for
     Agent Platform access:
+    
     ```bash
     gcloud auth login
     gcloud auth application-default login
     ```
 2.  **Virtual Environment**: Create and activate a dedicated virtual
     environment:
+    
     ```bash
     python3 -m venv ~/rag_agent_venv
     source ~/rag_agent_venv/bin/activate
     ```
 3.  **Install Dependencies**: Install the required Agent Platform SDKs:
+    
     ```bash
     pip install google-cloud-aiplatform google-genai
     ```

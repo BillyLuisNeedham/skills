@@ -1,5 +1,7 @@
 ---
 name: iam-recommendations-fetcher
+metadata:
+  category: Identity
 description: >-
   Fetches raw IAM recommendations and associated security insights from Google Cloud for a
   specified target scope (Organization, Folder, or Project). Use when you need to

@@ -1,5 +1,7 @@
 ---
 name: gemini-api
+metadata:
+  category: AiAndMachineLearning
 description: Use when the user asks about using Gemini in an enterprise environment or explicitly mentions Vertex AI, Google Cloud, or Agent Platform. Guides the usage of the Gemini API on Agent Platform with the Google Gen AI SDK. Covers SDK usage (Python, JS/TS, Go, Java, C#), capabilities like multimodal inputs, tools, media generation, caching, batch prediction, and Live API.
 compatibility: Requires active Google Cloud credentials and Agent Platform API enabled.
 ---
@@ -60,6 +62,7 @@ Prefer environment variables over hard-coding parameters when creating the clien
 
 ### Application Default Credentials (ADC)
 Set these variables for standard [Google Cloud authentication](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/gcp-auth.md.txt):
+
 ```bash
 export GOOGLE_CLOUD_PROJECT='your-project-id'
 export GOOGLE_CLOUD_LOCATION='global'
@@ -71,6 +74,7 @@ export GOOGLE_GENAI_USE_ENTERPRISE=true
 
 ### Agent Platform in Express Mode
 Set these variables when using [Express Mode](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/api-keys.md.txt) with an API key:
+
 ```bash
 export GOOGLE_API_KEY='your-api-key'
 export GOOGLE_GENAI_USE_ENTERPRISE=true
@@ -78,6 +82,7 @@ export GOOGLE_GENAI_USE_ENTERPRISE=true
 
 ### Initialization
 Initialize the client without arguments to pick up environment variables:
+
 ```python
 from google import genai
 
@@ -119,6 +124,7 @@ Use the following models only if explicitly requested:
 ## Quick Start
 
 ### Python
+
 ```python
 from google import genai
 
@@ -131,6 +137,7 @@ print(response.text)
 ```
 
 ### TypeScript/JavaScript
+
 ```typescript
 import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({ enterprise: { project: "your-project-id", location: "global" } });
@@ -142,6 +149,7 @@ console.log(response.text);
 ```
 
 ### Go
+
 ```go
 package main
 
@@ -173,6 +181,7 @@ func main() {
 ```
 
 ### Java
+
 ```java
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
@@ -192,6 +201,7 @@ public class GenerateTextFromTextInput {
 ```
 
 ### C#/.NET
+
 ```csharp
 using Google.GenAI;
 
@@ -212,6 +222,7 @@ Console.WriteLine(response.Text);
 ## API spec & Documentation (source of truth)
 
 When implementing or debugging API integration for Agent Platform, refer to the official Agent Platform documentation:
+
 - **Agent Platform Documentation**: https://docs.cloud.google.com/gemini-enterprise-agent-platform/overview.md.txt
 - **REST API Reference**: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest.md.txt
 

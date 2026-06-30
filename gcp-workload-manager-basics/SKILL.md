@@ -1,5 +1,7 @@
 ---
 name: workload-manager-basics
+metadata:
+  category: CloudObservabilityAndMonitoring
 description: >-
   Use this skill to manage Google Cloud Workload Manager evaluations, rules,
   scanned resources, and validation results by using public client libraries

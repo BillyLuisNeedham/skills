@@ -17,8 +17,10 @@ gcp-bigquery-bigframes
 gcp-bigtable-basics
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
+gcp-datalineage-bigquery-asset-impact-analysis
 gcp-data-manager-api-audience-ingestion
 gcp-data-manager-api-event-ingestion
+gcp-data-manager-api-setup
 gcp-detection_engineering_coverage_evaluation
 gcp-firebase-basics
 gcp-gcloud

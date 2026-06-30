@@ -1,5 +1,19 @@
 # mattpocock-skills
 
+## 1.1.0
+
+### Minor Changes
+
+- [`850873c`](https://github.com/mattpocock/skills/commit/850873cd73d5f81826ebf512ad35d2b1e113001f) Thanks [@mattpocock](https://github.com/mattpocock)! - Make the **`prototype`** skill model-invoked, so the agent can reach for it autonomously (and other skills can too). Its description is rewritten around the leading word _prototype_ — throwaway code that answers a design question — with one trigger per branch (state/logic sanity-check, or UI exploration).
+
+### Patch Changes
+
+- [#394](https://github.com/mattpocock/skills/pull/394) [`7a4c756`](https://github.com/mattpocock/skills/commit/7a4c7561d4d8d866a9ae6e0073648ac94785ac8a) Thanks [@mattpocock](https://github.com/mattpocock)! - Give the in-progress **`review`** skill an always-on Fowler smell baseline on its Standards axis. A curated ~12 high-signal "Bad Smells in Code" (Mysterious Name, Duplicated Code, Feature Envy, Data Clumps, Primitive Obsession, Repeated Switches, Shotgun Surgery, Divergent Change, Speculative Generality, Message Chains, Middle Man, Refused Bequest) are inlined into `SKILL.md` as a fixed baseline alongside whatever the repo documents — not a new third axis. Two binding rules keep it safe: a documented repo standard overrides the baseline, and every smell is reported as a judgement call, never a hard violation.
+
+- [`43ea088`](https://github.com/mattpocock/skills/commit/43ea0884b07a3e67a5a07f025ce92aefa983177b) Thanks [@mattpocock](https://github.com/mattpocock)! - Add the **tautological test** anti-pattern to the `tdd` skill. Tests whose assertion is recomputed the way the code computes it pass by construction and give zero confidence — distinct from the implementation-coupling anti-pattern already covered. Added as a peer at the same three sites: a Philosophy principle (expected values must come from an independent source of truth), a per-cycle checklist gate, and a BAD/GOOD example pair in `tests.md`.
+
+- [`e00eadb`](https://github.com/mattpocock/skills/commit/e00eadb4bb32c3d5a631ead1a5ed5d6a7c5f74e2) Thanks [@mattpocock](https://github.com/mattpocock)! - Extend the **`triage`** skill to triage external pull requests, treating a PR as an issue with attached code that runs through the same roles and state machine. PRs flow inline alongside issues (gated by a per-repo setup toggle), discovery surfaces only external PRs, the bug-only "reproduce" step is generalized into a single "verify the claim" step, and a redundancy check resolves already-implemented requests to `wontfix` without polluting the out-of-scope knowledge base. `setup-matt-pocock-skills` gains the PRs-as-a-request-surface toggle for GitHub/GitLab.
+
 ## 1.0.1
 
 ### Patch Changes

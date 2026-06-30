@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Links every skill in this repo (SKILL.md, excluding deprecated/) to
-# ~/.claude/skills and ~/.cursor/skills for local agents.
+# Links every skill in this repo (SKILL.md, excluding deprecated/) into the
+# local skill directories used by each agent harness:
+#   - ~/.claude/skills  — Claude Code        (symlink)
+#   - ~/.agents/skills  — pi / Agent-Skills-standard harnesses (symlink)
+#   - ~/.cursor/skills  — Cursor             (real copy; its picker won't follow symlinks)
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 CURSOR_DEST="$HOME/.cursor/skills"
-DESTS=("$HOME/.claude/skills" "$CURSOR_DEST")
+DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills" "$CURSOR_DEST")
 
 # Names of current (non-deprecated) repo skills, one per line.
 repo_skill_names() {

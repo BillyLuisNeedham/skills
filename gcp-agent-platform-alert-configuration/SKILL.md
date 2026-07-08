@@ -10,10 +10,7 @@ description: >-
   monitors for quality evaluation, or analyzing live metrics traffic footprints.
   NOTE: This skill currently only works for the Agent Runtime. Don't use for
   configuring general GCP alert policies or non-agent GCP alerting policies.
-allowed-tools:
-  - terraform
-  - gcloud
-  - python
+allowed-tools: terraform gcloud python
 ---
 
 # Agent Platform Alert Configuration

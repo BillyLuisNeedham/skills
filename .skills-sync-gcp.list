@@ -31,6 +31,7 @@ gcp-gke-app-onboarding
 gcp-gke-backup-dr
 gcp-gke-basics
 gcp-gke-batch-hpc
+gcp-gke-cluster-autoscaler
 gcp-gke-cluster-creation
 gcp-gke-compute-classes
 gcp-gke-cost
@@ -53,6 +54,8 @@ gcp-google-cloud-networking-observability
 gcp-google-cloud-recipe-auth
 gcp-google-cloud-recipe-foundation-builder
 gcp-google-cloud-recipe-onboarding
+gcp-google-cloud-solution-agentic-ai-bidirectional-streaming
+gcp-google-cloud-solution-architecture
 gcp-google-cloud-waf-cost-optimization
 gcp-google-cloud-waf-operational-excellence
 gcp-google-cloud-waf-performance-optimization

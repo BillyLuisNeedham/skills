@@ -1,10 +1,7 @@
 ---
 name: google-ads-api-mcp-setup
 description: Guides developers through downloading, configuring, and installing the official open-source Google Ads MCP Server. Use this skill when a user wants to connect their AI assistant (such as Gemini, Claude Code, or Cursor) to their Google Ads account to query campaigns or retrieve reporting metrics using natural language.
-compatibility:
-  python: "3.12+"
-  dependencies:
-    - pipx
+compatibility: Python 3.12+, pipx
 metadata:
   author: google-ads-api-team
   version: "1.0"
@@ -143,7 +140,7 @@ If `google-ads-mcp --help` fails with a "command not found" error:
 
 1. **DO NOT** assume the installation failed or get stuck in an installation loop.
 2. Verify the installation using the absolute path to the `pipx` binary directory:
-   
+
    ```bash
    ~/.local/bin/google-ads-mcp --help
    ```
@@ -235,7 +232,7 @@ Add the server entry to your Claude configuration file.
     *   **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
 *   **Configuration JSON:**
-    
+
     ```json
     {
       "mcpServers": {
@@ -291,12 +288,12 @@ When answering questions about connecting the Google Ads MCP server to Antigravi
 
 1.  **Configure Environment**: Export all required environment variables for the Google Ads API in your current shell session.
 2.  **Start Antigravity CLI**: Launch the CLI:
-    
+
     ```bash
     agy
     ```
 3.  **Verify MCP Status**: Inside the Antigravity CLI prompt, run the `/mcp` command to list active tools and servers:
-    
+
     ```text
     /mcp
     ```
@@ -315,7 +312,7 @@ Instead of hosting this MCP server locally, you can host it on Google Cloud Run 
 
 1. A Google Cloud project.
 2. The [`gcloud` command-line tool](https://cloud.google.com/cli) installed, authenticated, and with an active project configured:
-   
+
    ```bash
    gcloud config set project YOUR_PROJECT_ID
    ```
@@ -324,12 +321,12 @@ Instead of hosting this MCP server locally, you can host it on Google Cloud Run 
 You can use Cloud Build to build and push the image to the Artifact Registry without needing Docker installed locally:
 
 1. Create a repository in Artifact Registry:
-   
+
    ```bash
    gcloud artifacts repositories create mcp-servers --repository-format=docker --location=us-central1
    ```
 2. Build and submit the image:
-   
+
    ```bash
    gcloud builds submit --tag us-central1-docker.pkg.dev/YOUR_PROJECT_ID/mcp-servers/google-ads-mcp:latest .
    ```

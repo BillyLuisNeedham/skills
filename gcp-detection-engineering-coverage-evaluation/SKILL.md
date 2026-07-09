@@ -1,5 +1,7 @@
 ---
 name: detection-engineering-coverage-evaluation
+metadata:
+  category: Security
 description: >-
   Automates the end-to-end detection engineering workflow in Google SecOps using MCP tools.
   Use when fetching threat intelligence from blogs, generating Threat Detection Opportunities (TDOs),

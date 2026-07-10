@@ -27,3 +27,5 @@ Model- or user-reachable (rich trigger phrasing so the model can reach for them)
 - **[domain-modeling](./domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms, stress-test with scenarios, update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: small interfaces, clean seams, testable through the interface.
 - **[code-review](./code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (does it follow the repo's coding standards, plus a Fowler smell baseline?) and **Spec** (does it faithfully implement the originating issue/PRD?), run as parallel sub-agents.
+
+- **[fits-the-codebase](./fits-the-codebase/SKILL.md)** — Judge whether a change reads as native to the codebase — written *with the grain* of the surrounding code, not merely working. Infers the team's undocumented conventions from neighbouring code and flags each *tell* that gives the change away, with a cited local precedent and a fix.

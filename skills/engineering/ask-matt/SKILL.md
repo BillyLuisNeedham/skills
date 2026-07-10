@@ -25,6 +25,8 @@ The route most work travels. You have an idea and want it built.
 
    Either way, **`/implement`** builds each issue by driving **`/tdd`** internally — one red-green slice at a time — then closes out by running **`/code-review`**, a two-axis review (Standards + Spec) of the diff, before committing. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
 
+   Alongside `/code-review` sits **`/fits-the-codebase`** — the other half of review. Where `/code-review` asks *is it built right, is it the right thing?* against documented standards and the spec, `/fits-the-codebase` asks *does it read like the team wrote it?* against the codebase's **undocumented** grain — the naming, reuse, and idiom no `CONTRIBUTING.md` records. Reach for it when code is correct but you doubt it *belongs* — especially work a contractor, new hire, or agent wrote. It flags each **tell** that gives the change away, every one anchored to a cited local precedent. Run both for a full review.
+
 ### Context hygiene
 
 Keep steps 1–3 in **one unbroken context window** — don't compact or clear until after `/to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket.

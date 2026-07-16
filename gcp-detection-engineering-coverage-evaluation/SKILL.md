@@ -6,7 +6,7 @@ description: >-
   Automates the end-to-end detection engineering workflow in Google SecOps using MCP tools.
   Use when fetching threat intelligence from blogs, generating Threat Detection Opportunities (TDOs),
   simulating attacker behavior with synthetic UDM events, evaluating rule coverage,
-  and generating new YARA-L 2.0 rules to close coverage gaps.
+  generating new YARA-L 2.0 rules to close coverage gaps, and with user approval, deploy them to SecOps.
   Don't use when asked to perform threat hunting actions, and SOC investigative actions.
 ---
 
@@ -28,6 +28,7 @@ Copy this checklist and track progress for each iteration:
 -   [ ] Step 5: For identified rules, check enablement and alerting status.
 -   [ ] Step 6: Generate new rules for identified gaps.
 -   [ ] Step 7: Provide a structured summary of findings and gaps.
+-   [ ] Step 8: Ask the user to approve adding newly generated rules to their SecOps environment and create them.
 
 ## Detailed Steps
 
@@ -111,6 +112,32 @@ If gaps are found:
 
 -   **Next Step:** Provide a final structured summary of all findings and gaps.
 
+### 7. Provide Summary
+
+-   Format and present a final structured summary of all findings and gaps.
+    Refer to the **Output Format** section below for the required schema.
+
+-   **Summary of Step:** Present the structured summary of TDOs, coverage,
+    missing coverage, and errors.
+
+-   **Next Step:** Ask the user if they would like to create the newly generated
+    rules in their SecOps environment.
+
+### 8. Rule Creation
+
+-   If new rules were generated in Step 6, present them to the user and ask if
+    they would like to create these rules in their SecOps environment. Allow
+    the user to approve or reject each rule. For each approved rule, use the
+    user's configured SecOps MCP server and the SecOps tool `create_rule` to add
+    the rule to their SecOps environment. Pass the YARA-L rule text string via
+    the `rule` parameter of the `create_rule` tool.
+
+-   **Summary of Step:** Report which rules were approved and successfully
+    created in the SecOps environment.
+
+-   **Next Step:** The detection engineering coverage evaluation workflow is
+    complete.
+
 ## Output Format
 
 Provide a summary for each TDO processed:
@@ -134,3 +161,4 @@ Provide a summary for each TDO processed:
 -   **get_rule**: Use to check `alerting_enabled` and `enabled` status of SIEM
     rules.
 -   **generate_rules**: Codifies detection logic for gaps.
+-   **create_rule**: Deploys the rule in the SecOps environment.

@@ -20,13 +20,16 @@ description: >-
 
 The solution-architecture process consists of the following phases:
 
-* **Phase 1: Requirements discovery**. Gather detailed requirements related to
-  the cloud workload or use case that the user needs assistance for.
-* **Phase 2: Solution architecture**. Use the requirements that were gathered in
-  Phase 1 to generate a detailed solution architecture for the cloud workload or
-  use case.
-* **Phase 3: Solution packing and presentation**. Consolidate the generated
-  content and present the solution.
+*  **Phase 1: Requirements discovery**. Gather detailed requirements related to
+   the cloud workload or use case that the user needs assistance for.
+*  **Phase 2: Solution architecture**. Use the requirements that were gathered
+   in Phase 1 to generate a detailed solution architecture for the cloud
+   workload or use case.
+*  **Phase 3: Solution validation**. Create a plan to validate the generated
+   solution, generate validation instructions and scripts, and run the
+   validation.
+*  **Phase 4: Solution packing and presentation**. Consolidate the generated
+   content and present the solution.
 
 ## Phase 1: Requirements discovery
 
@@ -99,7 +102,7 @@ relevant official Google Cloud documentation pages.
   * Do not recommend any deprecated products. Verify the status of the products
     by using the resources that are listed in the
     "Ground all generated content" section.
-  * Do not recommend any deprecated products. Verify the status of the features
+  * Do not recommend any deprecated features. Verify the status of the features
     by using the resources that are listed in the
     "Ground all generated content" section.
   * If multiple products or features can be used for a component of the
@@ -169,14 +172,35 @@ relevant official Google Cloud documentation pages.
    guidance meets their requirements.
 5. Proceed to Phase 3.
 
-## Phase 3: Solution packaging and presentation
+## Phase 3: Solution validation
+
+1.  Create a plan to validate the generated solution. The plan must outline the
+    steps to verify that the generated solution meets the workload's
+    requirements. The following are examples of validation steps:
+    *   **Deployment dry-run**: Commands like `terraform plan` to preview
+        the infrastructure resources that will be provisioned.
+    *   **Connectivity and routing**: Verification of network paths, load
+        balancer routing, and service endpoints.
+    *   **Security policies**: Verification of restricted access, firewall
+        rules, and IAM enforcement.
+2.  Present the validation plan to the user and request feedback or approval.
+3.  If the user requests changes, update the plan as required.
+4.  Repeat steps 2 and 3 until the user approves the validation plan.
+5.  Generate scripts or commands using tools like `curl` or `gcloud` to perform
+    the steps in the approved validation plan.
+6.  Request permission from the user to perform the validation checks.
+7.  If the user gives permission, run the validation checks and troubleshoot any
+    deployment issues.
+8.  When all the validation checks pass, proceed to Phase 4.
+
+## Phase 4: Solution packaging and presentation
 
 In this phase, you package the generated text and code artifacts and present
 the package.
 
-1. Consolidate the text artifacts that were generated in Phase 2 into a single
-   Markdown file named `solution-architecture-guide.md`, based on the template
-   in `assets/output-template.md`.
+1. Consolidate the text artifacts that were generated in Phase 2 and Phase 3
+   into a single Markdown file named `solution-architecture-guide.md`, based on
+   the template in `assets/output-template.md`.
 2. Request the user's permission to write the code files in the user's
    workspace.
 3. After the user gives permission, write the code files in the user's

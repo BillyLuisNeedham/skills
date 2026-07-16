@@ -162,6 +162,10 @@ kubectl apply -f inference.yaml
 -   **ALWAYS** ask for `region`
 -   **ALWAYS** ask for a unique `cluster_name`
 -   **DEFAULT** to golden path Autopilot unless customer specifies otherwise
+-   **ALWAYS WARN** when deviating to GKE Standard, highlighting that it
+    deviates from the golden path and explaining the added
+    operational/management overhead (manually managing node pools, upgrades, and
+    autoscaling).
 -   **WARN** about Day-0 decisions (networking, private nodes) that are hard to
     change later
 -   **WARN** about cost for GPU or multi-region clusters

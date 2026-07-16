@@ -63,6 +63,7 @@ Setting                                                            | Golden Path
 `autoscaling.autoscalingProfile`                                   | `OPTIMIZE_UTILIZATION`
 `verticalPodAutoscaling.enabled`                                   | `true`
 `monitoringConfig` components                                      | SYSTEM_COMPONENTS, STORAGE, POD, DEPLOYMENT, STATEFULSET, DAEMONSET, HPA, JOBSET, CADVISOR, KUBELET, DCGM, APISERVER, SCHEDULER, CONTROLLER_MANAGER
+`loggingConfig` components                                         | SYSTEM_COMPONENTS, WORKLOADS (enabled by default)
 `advancedDatapathObservabilityConfig.enableMetrics`                | `true`
 `nodeConfig.shieldedInstanceConfig.enableSecureBoot`               | `true`
 `nodeConfig.workloadMetadataConfig.mode`                           | `GKE_METADATA`

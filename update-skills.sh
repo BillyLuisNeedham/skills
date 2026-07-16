@@ -8,12 +8,14 @@
 #   3. Clones google/skills and copies each skill dir flat (under skills/) with `gcp-` prefix.
 #   4. Pulls the thermo-nuclear-code-quality-review skill from cursor/plugins into
 #      skills/personal/, overwriting it each run.
-#   5. Removes any previously-synced skill that no longer exists upstream.
-#   6. On a directory collision that we don't recognise as previously-synced,
+#   5. Clones EveryInc/compound-engineering-plugin and copies its skills/ subtree
+#      into compound-engineering/, wiping and recopying the whole dir each run.
+#   6. Removes any previously-synced skill that no longer exists upstream.
+#   7. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   7. Links every skill in the repo (except deprecated/) into
+#   8. Links every skill in the repo (except deprecated/) into
 #      ~/.claude/skills and ~/.cursor/skills via scripts/link-skills.sh.
-#   8. Commits and pushes to origin.
+#   9. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -133,6 +135,31 @@ sync_personal_skill() {
   echo "    + skills/personal/$skill_name"
 }
 
+# Sync every skill from a repo's skills/ subtree into a single container dir,
+# preserving upstream names. Wipes and recopies the whole container each run so
+# upstream additions and removals are reflected with no manifest bookkeeping.
+sync_container() {
+  local repo_url="$1" container="$2" subpath="${3:-skills}"
+  local target="$REPO_DIR/$container"
+
+  echo "==> Syncing '$container' skills from $repo_url"
+  local clone_dir="$TMP_DIR/$container"
+  git clone --depth 1 --quiet "$repo_url" "$clone_dir"
+
+  local src="$clone_dir/$subpath"
+  if [[ ! -d "$src" ]]; then
+    echo "    ! source path not found: $subpath (skipping)" >&2
+    return 0
+  fi
+
+  rm -rf "$target"
+  mkdir -p "$target"
+  cp -r "$src/." "$target/"
+  local count
+  count="$(find "$target" -name SKILL.md | wc -l | tr -d ' ')"
+  echo "    + $container/ ($count skills)"
+}
+
 cd "$REPO_DIR"
 
 ensure_remote upstream "https://github.com/mattpocock/skills.git"
@@ -147,6 +174,8 @@ sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
 sync_personal_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
+
+sync_container "https://github.com/EveryInc/compound-engineering-plugin.git" "compound-engineering" "skills"
 
 echo "==> Linking skills to ~/.claude/skills and ~/.cursor/skills..."
 bash "$REPO_DIR/scripts/link-skills.sh"

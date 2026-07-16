@@ -114,6 +114,11 @@ balancing]
 2. [Step 2: E.g., Initialize Terraform]
 3. [Step 3: E.g., Apply Terraform configuration]
 
-## 7. References
+## 7. Validation plan
+[Details of the steps to verify that the generated solution meets the workload's
+ requirements. Also include references to any validation scripts that were
+ generated.]
+
+## 8. References
 * [E.g., Horizontal scalability](https://docs.cloud.google.com/architecture/framework/reliability/horizontal-scalability)
 * [E.g., Regional managed instance groups](https://docs.cloud.google.com/compute/docs/instance-groups/regional-migs)

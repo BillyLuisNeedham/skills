@@ -76,6 +76,18 @@ gcloud container clusters create-auto <CLUSTER_NAME> \
 > **Day-0 Warning**: VPC, subnet, and IP ranges cannot be changed after cluster
 > creation.
 
+## VPC-Native Mode Benefits
+
+VPC-native clusters route traffic natively using GCP Alias IP ranges. Key
+benefits to cover:
+
+1.  **Scalability**: Traffic routes natively inside the VPC, bypassing the need
+    for custom routes and avoiding custom route limit bottlenecks.
+2.  **Direct VPC Integration**: Direct resource integration (e.g.
+    container-native load balancing).
+3.  **Avoiding IP Exhaustion**: Supports discontiguous IP ranges and optimizes
+    allocation, reducing the risk of exhausting subnet IP ranges.
+
 ## IP Planning
 
 | Resource      | Golden Path  | Notes                                      |

@@ -30,6 +30,7 @@ gcp-gcloud
 gcp-gemini-agents-api
 gcp-gemini-api
 gcp-gemini-interactions-api
+gcp-gemini-live-api
 gcp-gke-app-onboarding
 gcp-gke-backup-dr
 gcp-gke-basics
@@ -44,10 +45,10 @@ gcp-gke-multitenancy
 gcp-gke-networking
 gcp-gke-observability
 gcp-gke-reliability
-gcp-gke-scaling
 gcp-gke-security
 gcp-gke-storage
 gcp-gke-upgrades
+gcp-gke-workload-scaling
 gcp-google-ads-api-mcp-setup
 gcp-google-ads-api-quickstart
 gcp-google-agents-cli-onboarding
@@ -61,6 +62,7 @@ gcp-google-cloud-recipe-onboarding
 gcp-google-cloud-solution-agentic-ai-bidirectional-streaming
 gcp-google-cloud-solution-agentic-ai-borderless-data-lakehouse
 gcp-google-cloud-solution-agentic-ai-data-science-workflow
+gcp-google-cloud-solution-agentic-analytics-spark-knowledge-catalog
 gcp-google-cloud-solution-architecture
 gcp-google-cloud-solution-rag-enterprise-search-gke-sqldb
 gcp-google-cloud-waf-cost-optimization

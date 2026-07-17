@@ -107,7 +107,7 @@
 - https://docs.cloud.google.com/compute/docs/api/best-practices.md.txt
 - https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices/auditing.md.txt
 - https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices/credentials.md.txt
-- https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices/index.md.txt
+- https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices.md.txt
 - https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices/login-access.md.txt
 - https://docs.cloud.google.com/compute/docs/connect/ssh-best-practices/network-access.md.txt
 - https://docs.cloud.google.com/compute/docs/disks/snapshot-best-practices.md.txt
@@ -130,11 +130,11 @@
 
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/batch-platform-on-gke.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/enterprise-multitenancy.md.txt
-- https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/index.md.txt
+- https://docs.cloud.google.com/kubernetes-engine/docs/best-practices.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference/autoscaling-tpu.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference/autoscaling.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference/batch-inference.md.txt
-- https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference/index.md.txt
+- https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/machine-learning/inference/llm-optimization.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/networking.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/optimize-ai-utilization.md.txt
@@ -176,7 +176,6 @@
 ## <a id="network-connectivity"></a>Network Connectivity
 
 - https://docs.cloud.google.com/network-connectivity/docs/interconnect/concepts/best-practices.md.txt
-- https://docs.cloud.google.com/network-connectivity/docs/network-connectivity-center/ncc-partner/best-practices.md.txt
 - https://docs.cloud.google.com/network-connectivity/docs/router/concepts/best-practices.md.txt
 - https://docs.cloud.google.com/network-connectivity/docs/vpn/concepts/best-practices.md.txt
 
@@ -203,7 +202,7 @@
 
 - https://docs.cloud.google.com/docs/security/security-best-practices-catalog/agents-applications.md.txt
 - https://docs.cloud.google.com/docs/security/security-best-practices-catalog/data-management.md.txt
-- https://docs.cloud.google.com/docs/security/security-best-practices-catalog/index.md.txt
+- https://docs.cloud.google.com/docs/security/security-best-practices-catalog.md.txt
 - https://docs.cloud.google.com/docs/security/security-best-practices-catalog/infrastructure.md.txt
 - https://docs.cloud.google.com/docs/security/security-best-practices-catalog/recommended-iam-groups.md.txt
 - https://docs.cloud.google.com/docs/security/security-best-practices-catalog/secure-enterprise-foundations.md.txt
@@ -229,7 +228,7 @@
 
 - https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-general.md.txt
 - https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-mysql.md.txt
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-openshift.md.txt
+- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-openshift
 - https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-redis.md.txt
 - https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-sap.md.txt
 - https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-sql-server.md.txt

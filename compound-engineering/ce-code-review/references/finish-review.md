@@ -133,7 +133,7 @@ After the final artifact write returns, emit the final response immediately. The
 
 ### JSON output format (`mode:agent` only)
 
-Emit **one raw JSON object** as the primary response — a single bare JSON value, **no markdown code fence**. A leading ```` ```json ```` fence makes the response start with backticks and breaks naive `JSON.parse` consumers, so never wrap it. Also write `review.json` under `/tmp/compound-engineering/ce-code-review/<run-id>/` with the same payload.
+Emit **one raw JSON object** as the primary response — a single bare JSON value, **no markdown code fence**. A leading ```` ```json ```` fence makes the response start with backticks and breaks naive `JSON.parse` consumers, so never wrap it. Also write `review.json` under the resolved `<run-dir>` with the same payload.
 
 `mode:agent` does not apply fixes — the caller does — so there is no `applied_fixes` field; the handoff is `actionable_findings`. Applied work surfaces only in explicitly authorized local-apply markdown runs (Stage 5c/6).
 
@@ -164,7 +164,7 @@ Minimum shape:
   "residual_risks": [],
   "testing_gaps": [],
   "coverage": {},
-  "artifact_path": "/tmp/compound-engineering/ce-code-review/<run-id>/",
+  "artifact_path": "<resolved-run-dir>",
   "run_id": "<run-id>"
 }
 ```

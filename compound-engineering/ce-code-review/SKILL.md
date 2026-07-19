@@ -28,6 +28,10 @@ Follow these boundaries in order; references supply the detail but never change 
 
 Bundled helper contracts in the stage references are authoritative. Run the documented commands directly; do not inspect helper source, grep model mappings, dry-run adapters, or probe `--help` unless a documented command actually fails with an incompatibility.
 
+## Task Visibility
+
+For the multi-agent path, once the review scope is resolved, use the platform's task-tracking capability when available to show a short user-facing view derived from the execution spine. Track review outcomes, not individual personas, setup mechanics, or tool calls; add conditional work only when its gate fires, and update the view at meaningful transitions. If no task-tracking capability is available, continue with the normal progress and final report without simulating a task list in chat.
+
 ## Argument Parsing
 
 Parse the arguments you were invoked with for optional tokens. Strip each recognized token before interpreting the remainder as a PR number, GitHub URL, or branch name.
@@ -360,22 +364,13 @@ Locate the plan document so Stage 6 can verify requirements completeness. Check 
 
 If a plan is found, classify readiness before extraction (see "Plan Requirements Completeness" above): for a unified plan read the metadata/header first, and treat a requirements-only artifact as product intent only — it must not drive implementation-unit completeness findings. Then read its **Requirements** in this order — unified `Product Contract` -> `### Requirements`, then legacy top-level `## Requirements`, then legacy `## Requirements Trace` — and the R-IDs (R1, R2, etc.) listed there, plus **Implementation Units** (current numeric subsections such as `### U1.`, `### U2.`, or `### Unit 1:` under `## Implementation Units`; legacy bullet or checkbox unit entries under that section also count). For HTML unified plans the same section names and R-/U-IDs appear as visible headings/anchors — match on the section name, ignoring HTML wrapper tags. Store the extracted requirements list and `plan_source` for Stage 6. Do not block the review if no plan is found — requirements verification is additive, not required.
 
-When the discovered plan's Key Technical Decisions carry `session-settled:` annotations (classes `user-directed` / `user-approved`), extract each labeled KTD — the decision, its class, and the rejected alternative — for your own use in Stage 5 triage (step 6c). Settlement annotations are **orchestrator-only context**: exclude them from the Stage 2 intent summary and from every reviewer bundle, including the cross-model adversarial pass — the same shape as the per-reviewer profile-slice exclusion in Stage 2c. Reviewer independence is the point: lenses must stay free to re-derive the rejected alternative on the merits; the orchestrator triages settlement conflicts post-hoc.
+When the discovered plan's Key Technical Decisions carry `session-settled:` annotations (classes `user-directed` / `user-approved`), extract each labeled KTD — the decision, its class, and the rejected alternative — for your own use in Stage 5 triage (step 6c). Settlement annotations are **orchestrator-only context**: exclude them from the Stage 2 intent summary and from every reviewer bundle, including the cross-model adversarial pass. Reviewer independence is the point: lenses must stay free to re-derive the rejected alternative on the merits; the orchestrator triages settlement conflicts post-hoc.
 
-### Stage 2c: Resolve the shared project profile (cache)
+### Stage 2c: Keep grounding review-specific
 
-Resolve the question-agnostic project profile (stack, dependency surface + licenses, conventions, structure) from the shared cache once, so the orchestrator's reviewer selection and the non-standards reviewers (`correctness`, `testing`, `maintainability`) share one cheap stack/conventions orientation instead of each re-deriving it from the diff. Set `SKILL_DIR` to this skill's directory and run the helper (full protocol in `references/repo-profile-cache.md`):
+Use the project's active instructions already in context plus the current diff and source. Give each reviewer only the task-relevant context for its lens; the `project-standards` reviewer reads the actual standards sources. If a reviewer cannot scope the affected area from the diff and supplied context, allow one targeted probe.
 
-```bash
-SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
-python3 "$SKILL_DIR/scripts/repo-profile-cache.py" get
-```
-
-**Only resolve the cache when the working tree is the reviewed tree** — `local-aligned`, standalone, or `base:` scope (Stage 1). In `pr-remote` or `branch-remote` scope, **skip Stage 2c entirely**: the helper keys and derives from the local `HEAD`, which is *not* the reviewed ref, so its profile would describe the wrong tree (e.g. `main`'s stack while reviewing a PR that changes manifests); reviewers work from the fetched refs/diff as those modes already require.
-
-On `HIT`, load the profile JSON as the agnostic project orientation. On `MISS`, dispatch a generic subagent with `references/agents/repo-profiler.md` to derive the profile, write its JSON to a file, then persist with `python3 "$SKILL_DIR/scripts/repo-profile-cache.py" put <file>` (re-set `SKILL_DIR` in that call — shell vars don't persist between Bash invocations). On `NO-CACHE` (no git repo or no writable cache), skip the cache entirely — do not derive a profile and do not run `put`; reviewers fall back to deriving stack/conventions from the diff exactly as before. The cache is an optimization, never a correctness dependency; if anything about it fails, degrade to the no-profile path.
-
-When a profile is in hand, include a short stack/conventions orientation slice from it in the Stage 4 review context bundle passed to every reviewer **except** `project-standards` and `learnings-researcher`. This is orientation only — it never replaces a fresh read. The `project-standards-reviewer` still reads the actual root and subdirectory `AGENTS.md`/`CLAUDE.md` standards files fresh via the Stage 3b path list (the auditing exception — it audits compliance against real file contents, never against a cached digest), and `docs/solutions/` learnings stay fresh because `learnings-researcher` re-globs and reads them per run.
+In `pr-remote` / `branch-remote`, current source and any targeted probe must use `git show` against the supplied reviewed head ref, or the supplied diff hunks when no head ref is available; never inspect workspace paths.
 
 ### Stage 3: Select reviewers
 
@@ -437,8 +432,15 @@ Complete this stage **before reading persona prompt assets or entering Stage 4**
 Generate the review run ID now so both routes share one artifact directory:
 
 ```bash
-RUN_ID=$(date +%Y%m%d-%H%M%S)-$(head -c4 /dev/urandom | od -An -tx1 | tr -d ' ')
-mkdir -p "/tmp/compound-engineering/ce-code-review/$RUN_ID"
+SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
+if [ -L "$SCRATCH_ROOT" ]; then echo "unsafe scratch root symlink: $SCRATCH_ROOT" >&2; exit 1; fi;
+install -d -m 700 "$SCRATCH_ROOT" || exit 1;
+if [ -L "$SCRATCH_ROOT" ] || [ ! -O "$SCRATCH_ROOT" ]; then echo "scratch root is not owned by the current user: $SCRATCH_ROOT" >&2; exit 1; fi;
+chmod 700 "$SCRATCH_ROOT" || exit 1;
+RUN_ID=$(date +%Y%m%d-%H%M%S)-$(head -c4 /dev/urandom | od -An -tx1 | tr -d ' ');
+RUN_DIR="$SCRATCH_ROOT/ce-code-review/$RUN_ID";
+(umask 077; mkdir -p "$RUN_DIR") || exit 1; chmod 700 "$RUN_DIR" || exit 1;
+echo "$RUN_DIR";
 ```
 
 When adversarial was selected and scope is `local-aligned` or standalone, read `references/cross-model-review.md` from this skill's directory in full, attest the host, resolve and sanction one fixed route, and make its required egress announcement. Then start the detached peer job using the reference's exact invocation and persist its job ID, target, requested model/reasoning, and start epoch in working state.
@@ -446,6 +448,8 @@ When adversarial was selected and scope is `local-aligned` or standalone, read `
 - If the runner returns a job ID, the peer owns the adversarial lens for this run. Remove `adversarial-reviewer` from the local roster immediately. Do not read its local persona asset or dispatch it later, even if the peer eventually fails.
 - If no job starts, keep `adversarial-reviewer` in the local roster as the fallback and record the peer skip reason for Coverage.
 - In `pr-remote` / `branch-remote`, do not start the peer; keep the selected in-process adversarial reviewer because it can inspect the reviewed refs.
+
+When a job ID is returned and task tracking is active, add a distinct task that names the independent cross-model adversarial review. Keep it in progress while the detached job runs, then record its terminal outcome when the artifact is collected. Never create this task before a peer starts or leave it behind when the local adversarial fallback runs.
 
 Do not proceed until the final local roster is materialized. This is a routing boundary, not a preference: a started peer and the in-process adversarial reviewer must never both receive the same review brief.
 
@@ -472,7 +476,7 @@ After Stage 6, stop. Never push, open PRs, or file tickets from this skill. Bare
 After Stage 6 **in default mode**, emit a compact **Actionable Findings** summary for callers:
 
 - List each actionable finding (`gated_auto` or `manual` with `downstream-resolver`) with stable `#`, severity, file:line, title, `autofix_class`, whether `suggested_fix` is present, and `confidence`.
-- Include the run-artifact path when one was written: `/tmp/compound-engineering/ce-code-review/<run-id>/`
+- Include the resolved run-artifact path when one was written.
 - When the actionable queue is empty, state `Actionable findings: none.` explicitly.
 
 In `mode:agent` do **not** emit this markdown summary — the actionable findings are carried solely by the `actionable_findings` field of the JSON object. Emit nothing after the JSON object, so the response stays a single parseable JSON value.
@@ -490,7 +494,7 @@ Do not offer push/PR/create-branch next steps from this skill.
 
 #### Run artifacts
 
-Always write run artifacts under `/tmp/compound-engineering/ce-code-review/<run-id>/`:
+Always write run artifacts under the resolved `<run-dir>`:
 
 - synthesized findings
 - actionable findings list
@@ -524,7 +528,6 @@ Every reference lives in this skill's directory and loads **on demand at the sta
 
 | Reference | Load at | Purpose |
 |-----------|---------|---------|
-| `references/repo-profile-cache.md` | Stage 2c | Shared repo-profile cache protocol |
 | `references/persona-catalog.md` | Stage 3 | Full per-persona selection criteria and spawn gates |
 | `references/cross-model-review.md` | Stage 3d (only when the cross-model adversarial pass runs) | Host attestation + provider candidate resolution + peer-CLI shell-out |
 | `references/dispatch-reviewers.md` | Stage 4 | Inline fast pass, model tiers, persona dispatch contract, and peer collection |

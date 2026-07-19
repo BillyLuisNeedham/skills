@@ -69,7 +69,7 @@ skip() { log "$*"; exit 0; }   # non-blocking: announce reason, exit clean, no o
 # ONE editorial model/reasoning mapping per provider. Concrete IDs are the CURRENT
 # instance of the tier principle and the single maintenance point when families change.
 # Keep these in sync with ce-doc-review's script (parity-tested in CI).
-M_CODEX="gpt-5.6-sol"          # codex CLI            (-c model_reasoning_effort="high")
+M_CODEX="gpt-5.6-sol"          # codex CLI            (-c model_reasoning_effort="medium")
 M_CLAUDE="opus"                # claude CLI, Opus 4.8 (--effort high)
 M_GROK="grok-4.5"              # grok CLI             (--effort high)
 M_GROK_CURSOR="cursor-grok-4.5-high"  # fixed cursor-agent Grok route (current id)
@@ -77,7 +77,8 @@ M_COMPOSER="composer-2.5-fast" # cursor-agent composer (no high tier; -fast is t
 
 route_effort() {
   case "$1" in
-    codex|claude|grok-cli) printf 'high' ;;
+    codex) printf 'medium' ;;
+    claude|grok-cli) printf 'high' ;;
     grok-cursor) printf 'model-implied-high' ;;
     composer) printf 'fast' ;;
     cursor) printf 'unverified' ;;
@@ -182,7 +183,7 @@ extract_model_receipt() {   # <route>; reads the envelope in $PEERLOG, sets MODE
 }
 
 # --- adapter argv (single source of truth for route flags) -----------------
-# Emits the CLI + flags NUL-delimited. Read-only / no-prompt / high-reasoning.
+# Emits the CLI + flags NUL-delimited. Read-only / no-prompt (codex medium, others high).
 # Code-review isolation is IN-TREE (repo root), not empty-scratch tool-less:
 # peers may Read surrounding code. PEER_WORKDIR is the repo root; RAW_OUT lives
 # outside the repo (temp) and is published to RUN_DIR only after normalize.
@@ -192,7 +193,7 @@ adapter_argv() {
   case "$1" in
     codex)
       printf '%s\0' codex exec - -C "$PEER_WORKDIR" --skip-git-repo-check -s read-only --json \
-        -o "$RAW_OUT" -m "$(route_model codex)" -c 'model_reasoning_effort="high"' -c 'hide_agent_reasoning=false'
+        -o "$RAW_OUT" -m "$(route_model codex)" -c 'model_reasoning_effort="medium"' -c 'hide_agent_reasoning=false'
       ;;
     claude)
       # Read allowed for surrounding context; mutators / shell / subagents / MCP /
@@ -564,7 +565,7 @@ attempt_route() {
   : > "$PEERLOG"; : > "$PEERERR"; rm -f "$RAW_OUT"
   build_cmd "$route"
   case "$route" in
-    codex)                  note="$(route_model "$route") (effort high)" ;;
+    codex)                  note="$(route_model "$route") (effort medium)" ;;
     claude|grok-cli)        note="$(route_model "$route") (effort high)" ;;
     grok-cursor|composer)  note="$(route_model "$route")" ;;
     cursor)                note="auto (serving model unverified)" ;;
@@ -672,25 +673,53 @@ run_provider() {
     log "wrote $n finding(s) to $OUT (reviewer adversarial-$provider)"
   else
     log "provider $provider produced no usable schema-shaped output; skipping fold-in"
-    # Surface a bounded tail of the peer's raw output so the orchestrator can
+    # Surface bounded peer output so the orchestrator can
     # reason about WHY it was skipped (quota/usage-limit exhaustion vs an ordinary
     # empty review) and, in a repeated-pass session, deprioritize an exhausted
     # route. Harness-agnostic: the agent classifies from the text; this only makes
     # the evidence visible in out.log. Surface BOTH streams -- the error can be on
     # stdout (grok's 402) or stderr (claude/cursor auth/quota). Bash builtins only
-    # (the route sandbox has no tail/tr); both are small on a failed route.
+    # (the route sandbox has no tail/tr). Prefer structured error fields because
+    # a raw tail can discard the actionable message in a large CLI envelope.
     if [ -s "$PEERLOG" ]; then
-      _pt="$(< "$PEERLOG")"; _pt="${_pt//$'\n'/ }"
-      [ "${#_pt}" -gt 300 ] && _pt="${_pt: -300}"
+      _pt="$(bounded_failure_evidence "$PEERLOG")"
       log "  peer skip evidence: $_pt"
     fi
     if [ -s "$PEERERR" ]; then
-      _pe="$(< "$PEERERR")"; _pe="${_pe//$'\n'/ }"
-      [ "${#_pe}" -gt 300 ] && _pe="${_pe: -300}"
+      _pe="$(bounded_failure_evidence "$PEERERR")"
       log "  peer skip evidence (stderr): $_pe"
     fi
     rm -f "$OUT" "$RAW_OUT"
   fi
+}
+
+# Prefer structured CLI diagnostics over a raw tail, which can hide the useful
+# error near the beginning of a large JSON envelope.
+bounded_failure_evidence() {   # <logfile>
+  local path="$1" human ancillary evidence
+  human="$(jq -r '
+    [
+      (.result? | select(type == "string" and length > 0)),
+      (.message? | select(type == "string" and length > 0)),
+      (.error?.message? | select(type == "string" and length > 0))
+    ] | unique | join(" | ")
+  ' "$path" 2>/dev/null)"
+  ancillary="$(jq -r '
+    [
+      (if .api_error_status? != null then "api_error_status=\(.api_error_status)" else empty end),
+      (.terminal_reason? | select(type == "string" and length > 0) | "terminal_reason=" + .)
+    ] | unique | join(" | ")
+  ' "$path" 2>/dev/null)"
+  # Ancillary fields describe the exit but are not the diagnostic itself. If
+  # no recognized human-readable field exists, retain bounded raw output so a
+  # CLI's newer or provider-specific error field is still visible.
+  [ -n "$human" ] && evidence="$human" || evidence="$(cat "$path")"
+  [ -n "$ancillary" ] && evidence="${evidence:+$evidence | }$ancillary"
+  evidence="${evidence//$'\n'/ }"
+  if [ "${#evidence}" -gt 300 ]; then
+    evidence="${evidence:0:147} ... ${evidence: -147}"
+  fi
+  printf '%s' "$evidence"
 }
 
 # Discovery preserves caller order and MAX_PEERS, but live egress is already

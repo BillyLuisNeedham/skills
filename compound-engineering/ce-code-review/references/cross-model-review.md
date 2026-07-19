@@ -41,7 +41,7 @@ Preferred mappings run first. Only after an observed unavailable, obsolete, or i
 
 ## Step 2 — Provider model + reasoning tier (owned by the script)
 
-The peer runs on **one editorially selected model and reasoning tier per provider**. The concrete model IDs and route effort flags live in one mapping in `scripts/cross-model-adversarial-review.sh`; this reference does not duplicate them. Codex, Claude Opus, and native Grok currently use high; cursor-agent routes use their model-implied tier or ceiling. Users choose the peer target, not an arbitrary model/effort matrix. Never inherit a harness-configured default model. A lower tier is adopted only after a discriminating effectiveness eval, never from cost alone.
+The peer runs on **one editorially selected model and reasoning tier per provider**. The concrete model IDs and route effort flags live in one mapping in `scripts/cross-model-adversarial-review.sh`; this reference does not duplicate them. Claude Opus and native Grok currently use high, Codex uses medium; cursor-agent routes use their model-implied tier or ceiling. Users choose the peer target, not an arbitrary model/effort matrix. Never inherit a harness-configured default model. A lower tier is adopted only after a discriminating effectiveness eval, never from cost alone.
 
 The script always uses the adversarial persona brief; fold-in forces `reviewer` to `adversarial-<provider>`.
 
@@ -66,11 +66,11 @@ SKILL_DIR="<absolute path of the directory containing the ce-code-review SKILL.m
 CROSS_MODEL_HOST_HARNESS="<host-harness>" CROSS_MODEL_FIXED_ROUTE="<fixed-route>" python3 "$SKILL_DIR/scripts/peer-job-runner.py" start --skill ce-code-review --run-id "<run-id>" --label adversarial -- env CROSS_MODEL_HOST_HARNESS="<host-harness>" CROSS_MODEL_FIXED_ROUTE="<fixed-route>" bash "$SKILL_DIR/scripts/cross-model-adversarial-review.sh" "<host-serving-family>" "<target>" "<base-ref>" "<run-dir>"
 ```
 
-- `<run-id>` = the Stage 3d run id (the same one that forms `<run-dir>`); job state lives under `/tmp/compound-engineering/ce-code-review/<run-id>/jobs/<job-id>/`.
+- `<run-id>` = the Stage 3d run id (the same one that forms `<run-dir>`); job state lives under `<run-dir>/jobs/<job-id>/`.
 - `<host-serving-family>` is `codex`, `claude`, `grok`, `composer`, or `unknown`; `<host-harness>` is `codex`, `claude`, `grok`, `cursor`, or `unknown`.
 - `<target>` is one of `codex`, `claude`, `grok`, `cursor`, or `composer`; `<fixed-route>` is its already-sanctioned concrete route.
 - `<base-ref>` = the Stage 1 `BASE` (the diff base the peer reviews via `git diff <base-ref>`).
-- `<run-dir>` = the Stage 4 run dir (`/tmp/compound-engineering/ce-code-review/<run-id>/`). The script writes `adversarial-<provider>.json` there **only after** forcing `reviewer` to `adversarial-<provider>` and downgrading peer `safe_auto` → `gated_auto`.
+- `<run-dir>` = the absolute Stage 4 run dir. The script writes `adversarial-<provider>.json` there **only after** forcing `reviewer` to `adversarial-<provider>` and downgrading peer `safe_auto` → `gated_auto`.
 
 **Single-reap finish.** The runner detaches the worker into its own supervised session. Capture the epoch time right after `start` (`date +%s`) and do not poll while local reviewers are active. After local returns are collected, check status once. If still running and the shared 610s deadline leaves time, issue one bounded `wait` sized to the remaining deadline (cap the wait at 240s); do not start repeated short polling turns. Fold in the artifact when terminal. At the deadline, `reap <job-id>` and perform one final `wait --max-secs 10` because reap is asynchronous. The script self-bounds (idle timeout 180s; hard backstop 600s), so deadline reaping is exceptional. Done detection stays presence-keyed: the worker publishes `<run-dir>/adversarial-<provider>.json` only after normalization. The script reads the persona brief and schema from the skill dir and reviews the current work tree against `<base-ref>`.
 
@@ -95,7 +95,7 @@ If it is still running and time remains, use the documented single `wait`; do no
 - **Started but not `done`** — the final status read reports `failed`, `timeout`, or `died-without-result` (a job reaped at the 610s deadline records `timeout`, with the reap noted in its reason) → still non-blocking, but never silent: name the peer and its terminal state in Coverage (e.g. "cross-model adversarial peer: timeout"). Silent absence stays correct only for passes that never started or were skipped.
 - Empty `findings` → note "cross-model pass: no additional issues" in Coverage.
 - **Classify the skip reason before deleting.** Read `out.log` before cleanup, including bounded lines prefixed `peer skip evidence:`, and name observed quota, authentication, or capability failure. After the same quota or usage-limit evidence appears more than once in this session, do not retry that route automatically. A retry uses a newly resolved, disclosed, and sanctioned fixed route; never silently continue to another recipient.
-- After fold-in (or after deadline reaping), delete the consumed job directory (`/tmp/compound-engineering/ce-code-review/<run-id>/jobs/<job-id>/`) — its log and result are review content and must not outlive their use.
+- After fold-in (or after deadline reaping), delete the consumed job directory (`<run-dir>/jobs/<job-id>/`) — its log and result are review content and must not outlive their use.
 - A finding sharing a fingerprint with in-process `adversarial` promotes only when the artifact records `independence_verified: true`. Cursor-default artifacts default false; an unattested host skips automatic dispatch.
 
 ## Trust boundary (maintainers)

@@ -42,16 +42,22 @@ verified rather than guessing.
 
 Apply exactly one participation branch:
 
-- **Named peers:** exact and uncapped. Give the Section 3 privacy notice, then
-  run every named target without a second question. Explicit names override
+`oracle` is shorthand for the panel behavior, not a keyword gate. An explicit
+request to consult other models, gather independent peer opinions, pressure-test
+with named peers, or reconcile their disagreement enters the same protocol even
+when the request never says `oracle`. A request for ce-pov's take alone does not.
+
+- **Named peers:** exact and uncapped. Announce and run every named target.
+  Explicit names override
   `oracle` discovery and its cap. Never rewrite named `Cursor` to Composer or
   replace an explicitly named model with another model.
 - **Bare `oracle`:** select up to two reachable, attestably different-model
   targets using conversation preference, local configuration, active project
-  conventions, then the declared default order; ask before sharing project
-  content or granting repository access.
+  conventions, then the declared default order; announce the selection and run
+  it. Invoking `oracle` authorizes this ordinary read-only consultation against
+  the current project.
 - **Explicit unnamed cross-check:** bypass the correction-cost gate and use the
-  count rule below.
+  count rule below; announce the selected peers and run them.
 - **No explicit cross-check:** after ce-pov independently forms its POV, offer
   only when meaningful downstream work will build on the take before an error
   surfaces, or it feeds a shared, public, security, or data commitment.
@@ -59,8 +65,8 @@ Apply exactly one participation branch:
   offer.
 
 For the count rule: zero reachable means solo plus one availability line. One
-or more auto-selected peers means one concrete confirmation naming the
-reachable targets and the default selection, with subset and skip available.
+or more auto-selected peers means one concise progress line naming the selected
+targets before dispatch.
 Cursor-default counts automatically only when its serving family can be
 attested as different from the host; it remains eligible when explicitly named
 or configured as a preference.
@@ -72,14 +78,20 @@ Normalize the allowed read scope once as:
 - one repository-relative workspace root; and
 - optional ordered include and exclude path patterns.
 
-Pass that identical representation to every peer prompt, disclosure, and route
-adapter. The default is the repository root. A narrower user- or host-supplied
-scope is binding and is never broadened. Treat include and exclude path patterns
-as cooperative unless the concrete adapter turns them into filesystem controls.
-Never present prompt-only patterns, a working directory, or a read-only flag as
-a confidentiality boundary: claim technical enforcement only when the concrete
-adapter provides it. Peers may search and read within the declared scope but may
-not mutate the project or intentionally inspect outside it.
+Pass that identical representation to every peer prompt and route adapter. The
+default is the repository root. A narrower user- or host-supplied scope is
+binding and is never broadened. Peers launched on the same host inspect existing
+subject files and supporting evidence directly from this shared working tree;
+point them to those files instead of copying their contents into the payload.
+Pass material inline only when it exists solely in the conversation or is
+otherwise unavailable in the workspace.
+
+Treat include and exclude path patterns as cooperative unless the concrete
+adapter turns them into filesystem controls. Never present prompt-only patterns,
+a working directory, or a read-only flag as a confidentiality boundary, and
+never promise that secrets inside the readable scope are inaccessible. Peers may
+search and read within the declared scope but may not mutate the project or
+intentionally inspect outside it.
 
 Before initial dispatch, capture one **repository-scope identity**: the committed
 revision plus a digest of dirty and untracked content inside the normalized
@@ -88,11 +100,13 @@ dispatch and before final fold-in. If it changed, never reconcile or fold stale
 voices into the current project: disclose the change and either restart all
 voices on the new identity or return an incomplete panel result.
 
-Keep payloads, raw output, logs, and result artifacts in private scratch outside
-the repository under `/tmp/compound-engineering/ce-pov/<run-id>/`. Use mode
-`0600` for payload files.
+The caller passes this panel the resolved absolute `$SCRATCH_DIR` created in
+SKILL.md Phase 1. Keep payloads, raw output, logs, and result artifacts there;
+do not reconstruct the scratch root in this reference. Create each payload under
+`umask 077`, then `chmod 600 "$PAYLOAD_PATH"` before dispatch; do not rely on
+the ambient umask or a mode flag alone.
 
-## 3. Resolve one fixed route and obtain consent before sharing
+## 3. Resolve and announce one fixed route
 
 Routing is adaptable only inside hard boundaries. The requested target plus
 safety, authority, independence, read scope, and egress rules are durable;
@@ -109,64 +123,49 @@ For each peer:
    An explicit user model request cannot become another model.
 4. Resolve one concrete target, model choice, harness route, provider, and every
    intermediary. Confirm every actual recipient is in the egress allowlist.
-5. Give the privacy notice below and apply its consent rule before giving the
-   route content or repository access.
+5. Announce the selected target and route in ordinary language before dispatch.
+
+Binary presence proves only that a route is a candidate. Use an available
+non-egressing authentication or capability probe when the harness exposes one,
+and do not call a route usable until it returns a valid artifact. Classify a
+failed run from its structured diagnostics rather than guessing from a generic
+terminal state.
 
 The dispatched worker runs only the fixed route. It must return failure to the
 host rather than automatically hopping to another provider or intermediary. If
-a retry would add or change a recipient, resolve it at the host, disclose and
-sanction the new actual route, then start a new fixed-route job. A named peer
-that cannot run within these rules is reported, never silently replaced or
-dropped.
+a retry would add an unexpected recipient or intermediary, resolve it at the
+host, explain the change, and ask before starting a new fixed-route job. An
+active user, project, or organization instruction that separately gates external
+consultation also requires approval. Otherwise the explicit peer, cross-check,
+or `oracle` invocation is the authority to proceed. A named peer that cannot run
+within these rules is reported, never silently replaced or dropped.
 
-Before each fixed-route dispatch, give a short privacy notice in ordinary
-language:
-
-1. what becomes readable or is sent: the framed question, ce-pov's verified
-   project-floor summary, the normalized repository scope, and the supplied
-   document or approach material when applicable;
-2. every actual recipient by proper name, including any intermediary that will
-   receive access; do not collapse them into generic labels such as
-   "providers" or "companies";
-3. that peers remain read-only and cannot edit the project; and
-4. which scope and external-query restrictions are technically enforced versus
-   cooperative. Never imply that a cooperative include or exclude list reduces
-   the surface the recipient can technically read.
-
-If a reconcile round may run, add that the reconcile round additionally shares
-every surviving voice's position, reasoning, and bounded evidence summaries
-with the other participating recipients. Warn when the material can contain
-proprietary code or architecture facts. Do not expose probe results, CLI
-versions, model tiers, commit hashes, repository identity, internal route health
-diagnostics, job lifecycle, scratch paths, or other orchestration mechanics.
-This does not suppress the concise observed failure state required for a partial
-or unavailable panel result. Refer to the codebase as "this project" or "the
-repository" unless the user supplied a recognizable name; never promote a
-directory, worktree, checkout, branch, or path into the project name.
-
-Apply consent by how participation was chosen:
-
-- **Explicitly named peers:** after the privacy notice, proceed with those exact
-  recipients without a second question. Ask only if the resolved route adds a
-  recipient or intermediary the user's request did not name or clearly imply.
-- **Auto-selected peers:** ask before sending project content or granting
-  repository access. This includes bare `oracle` and explicit unnamed
-  cross-checks.
-- **Changed route:** ask before a retry or fallback that adds or changes any
-  recipient or intermediary.
-
-If consent is required but unavailable or declined, deliver the solo POV.
-External checks may use public subject-level terms only—never repository-derived
-fragments, private names, paths, or secrets.
+The pre-dispatch update should say who will inspect the subject and that the
+review is read-only. Do not recite scope mechanics, promise that repository
+secrets are inaccessible, or describe probe results, CLI versions, model tiers,
+commit hashes, repository identity, route health, job lifecycle, or scratch
+paths. Mention a cooperative scope restriction only when it materially changes
+the user's choice. Refer to the codebase as "this project" or "the repository"
+unless the user supplied a recognizable name.
 
 ## 4. Dispatch, wait, reap, and collect
 
 Prepare one complete canonical payload containing the framed question, subject
-shape, ce-pov's independently formed position, verified project-floor summary,
-normalized read scope, repository-scope identity, mode, and required document or
-approach material. Exclude credentials and raw secret-bearing content. Verify
-that the same complete payload fits every selected route; never truncate it per
-provider. A route that cannot accept it is unavailable under the ordinary
+shape, normalized read scope, repository-scope identity, mode, paths to subject
+material already in the workspace, and required conversational material that is
+not available there. Let peers inspect and ground against the shared working
+tree. Do not duplicate readable files or add a host-curated architecture summary
+merely to brief the peer.
+
+For an initial `independent` round, exclude ce-pov's position and every other
+voice's conclusion. The proposal, document, or approach set being judged is the
+subject and remains fully available; independence means withholding prior
+judgments about it, not withholding the artifact. For `skeptic` mode, include
+ce-pov's position because critiquing it is the task. Reconciliation payloads
+follow Section 5 and deliberately include already-formed positions.
+
+Verify that the same complete payload fits every selected route; never truncate
+it per provider. A route that cannot accept it is unavailable under the ordinary
 partial-panel degradation rule.
 
 Use `scripts/cross-model-pov.sh` from this skill's directory to run one resolved
@@ -213,6 +212,11 @@ lines that imply different reader actions (`proceed`, `revise-first`, or
 `reject`) or disagree on whether a risk is fatal. Wording, emphasis, confidence,
 or supporting detail with the same decision is concurrence.
 
+The default limit is the independent initial round plus at most two reconcile
+exchanges. A user-supplied pass or round limit overrides it: "one pass" or "one
+round" means no reconcile exchange, while a larger explicit limit replaces the
+default cap. Never reinterpret a smaller user limit as a suggestion.
+
 For each reconcile exchange:
 
 1. Revalidate repository-scope identity. Restart or return incomplete on change.
@@ -224,25 +228,33 @@ For each reconcile exchange:
    surviving peer—never route-specific truncation—along with the full original
    subject and every surviving voice's current position and reasoning, capped at
    five succinct source-attributed evidence bullets per voice.
-5. Re-resolve every fixed route under Section 3 and apply its consent rule, then
-   dispatch a fresh stateless round. A round using the same disclosed recipients
-   needs no second question; any changed recipient or intermediary does. A failed
-   peer is dropped for later rounds; do not reuse its older position as if it
-   participated.
+5. Re-resolve every fixed route under Section 3, then dispatch a fresh stateless
+   round. The same recipients need no question; an unexpected new recipient or
+   intermediary does. A failed peer is dropped for later rounds; do not reuse its
+   older position as if it participated.
 
 After fold-in, stop on the first matching enum:
 
 - **`confident`** — ce-pov has a reasoned POV after weighing every survivor;
 - **`no-movement`** — every surviving peer returned `held` and ce-pov is still
   not confident; or
-- **`cap-2`** — two reconcile exchanges completed after initial dissent and
-  ce-pov is still not confident.
+- **`limit-reached`** — the effective user-authorized finite limit completed
+  after initial dissent and ce-pov is still not confident.
 
 Convergence is ce-pov's reasoned confidence, not a vote. A three-way split still
 ends in a confident decision or the stalemate disclosure. Route `confident` to
-the **Confident** disclosure below. Route `no-movement` and `cap-2` to the
-**Stalemate** disclosure; those stops mean bounded reconciliation ended without
-confident convergence, never that ce-pov should infer a settled result.
+the **Confident** disclosure below. Route `no-movement` and `limit-reached` to
+the **Stalemate** disclosure; those stops mean bounded reconciliation ended
+without confident convergence, never that ce-pov should infer a settled result.
+
+The cap stops automatic dispatch; it is a checkpoint, not proof that another
+round would be useless. At the checkpoint, decide whether a bounded extension is
+likely to change the result. Recommend a specific number of additional exchanges
+only when ce-pov can name the unresolved decision-relevant question, the new
+evidence or framing the extension would introduce, and why it could move a
+position. Otherwise recommend stopping. Further rounds require user approval
+unless the user supplied the larger limit in advance; each approval establishes
+a new finite cap, never an open-ended loop.
 
 ## 6. Decide and disclose
 
@@ -255,15 +267,20 @@ note:
 - **Stalemate:** state ce-pov's current position, each surviving peer's position
   and movement, every dropped voice's last state, and whether the disagreement
   is an evidence gap or judgment difference. Recommend when there is a real
-  basis; otherwise say "Either is viable" with the material tradeoffs.
+  basis; otherwise say "Either is viable" with the material tradeoffs. At a cap,
+  add **Further rounds:** recommend a specific bounded extension with its new
+  evidence path, or recommend stopping because no additional exchange is likely
+  to change the result.
 - **Partial:** name surviving and dropped targets and the observed failure state.
 - **No survivor:** deliver the solo POV with "cross-model check unavailable or
   incomplete."
 
-For every peer, disclose the user-facing target, actual harness/intermediary,
-requested model, receipt-verified or unverified served model, and whether
-different-model independence was verified. Never attribute a position to a
-model that did not run.
+Retain target, route, requested model, served model, and independence receipts in
+the panel record, but keep the default chat note decision-relevant: name the
+peer, its position and movement, any observed failure, and an independence caveat
+when it affects credibility. Do not dump route or model diagnostics unless they
+materially change the conclusion or the user asks. Never attribute a position to
+a model that did not run.
 
 The panel itself never mutates. After delivery, apply SKILL.md Phase 4's
 four-part conjunction: the original prompt explicitly authorized the named

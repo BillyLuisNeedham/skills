@@ -31,7 +31,7 @@ The orchestrator (this skill) also inherits the session model; it handles intent
 
 #### Run ID
 
-Use the run ID already created at the Stage 3d routing boundary. Pass `{run_id}` to every persona sub-agent so they can write their full analysis to `/tmp/compound-engineering/ce-code-review/{run_id}/{reviewer_name}.json`.
+Use the run ID and absolute run dir already created at the Stage 3d routing boundary. Pass `{run_id}` and `{run_dir}` to every persona sub-agent so they can write their full analysis to `{run_dir}/{reviewer_name}.json`.
 
 **Large shared context — pass paths, not contents.** The diff and file list go to every reviewer and validator. When inlining them into each subagent prompt would be wasteful (many files / a big diff), write them once into the run dir (e.g. `full.diff`, `files.txt`) and pass those **paths** in the diff / changed-files slots instead of inline content — the subagent and validator templates instruct the child to Read a staged path. Inline a small diff directly.
 
@@ -63,11 +63,11 @@ For each selected reviewer, read the corresponding local prompt asset from `refe
 7. **For selected `project-standards` only:** the non-empty standards file path list from Stage 3b, wrapped in a `<standards-paths>` block appended to the review context
 8. **For `data-migration` only:** the resolved review base ref from Stage 1 (`BASE:` marker), wrapped in `<review-base>` inside the review context so schema drift checks never assume `main`
 
-Persona sub-agents are **read-only** with respect to the project: they review and return structured JSON. They do not edit project files or propose refactors. The one permitted write is saving their full analysis to the run-artifact path specified in the output contract (under `/tmp/compound-engineering/ce-code-review/<run-id>/`).
+Persona sub-agents are **read-only** with respect to the project: they review and return structured JSON. They do not edit project files or propose refactors. The one permitted write is saving their full analysis to the resolved run-artifact path specified in the output contract.
 
 Read-only here means **non-mutating**, not "no shell access." Reviewer sub-agents may use non-mutating inspection commands when needed to gather evidence or verify scope, including read-oriented `git` / `gh` usage such as `git diff`, `git show`, `git blame`, `git log`, and `gh pr view`. When a finding's claim depends on line history (`pre_existing`, intent, introduced-by-this-diff, or P0/P1 confidence that depends on authorship/age), reviewers are expected to attach one concise provenance evidence line from targeted blame/log on the cited line — additional to the quote-the-line gate, never a full-file dump, and omitted when the finding is justified from the diff alone. In **`pr-remote`** or **`branch-remote`** scope (see Stage 1), inspect changed files via `git show <remote-head-ref>:<path>` or diff hunks — do not Read/Grep workspace paths for files in scope; gather blame/log against that reviewed head ref. They must not edit project files, change branches, commit, push, create PRs, or otherwise mutate the checkout or repository state.
 
-Each persona sub-agent writes full JSON (all schema fields) to `/tmp/compound-engineering/ce-code-review/{run_id}/{reviewer_name}.json` and returns compact JSON with merge-tier fields only:
+Each persona sub-agent writes full JSON (all schema fields) to `{run_dir}/{reviewer_name}.json` and returns compact JSON with merge-tier fields only:
 
 ```json
 {

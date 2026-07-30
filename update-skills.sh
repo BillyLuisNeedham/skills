@@ -11,9 +11,11 @@
 #   5. Removes any previously-synced skill that no longer exists upstream.
 #   6. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   7. Links every skill in the repo (except deprecated/) into
-#      ~/.claude/skills and ~/.cursor/skills via scripts/link-skills.sh.
-#   8. Commits and pushes to origin.
+#   7. Links every skill in the repo (except deprecated/) into ~/.claude/skills,
+#      ~/.agents/skills and ~/.cursor/skills via scripts/link-skills.sh.
+#   8. Generates an OpenCode slash-command stub per skill via
+#      scripts/link-opencode-commands.sh (no-op if OpenCode isn't installed).
+#   9. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -148,8 +150,11 @@ sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
 sync_personal_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
 
-echo "==> Linking skills to ~/.claude/skills and ~/.cursor/skills..."
+echo "==> Linking skills to ~/.claude/skills, ~/.agents/skills and ~/.cursor/skills..."
 bash "$REPO_DIR/scripts/link-skills.sh"
+
+echo "==> Generating OpenCode slash commands..."
+bash "$REPO_DIR/scripts/link-opencode-commands.sh"
 
 echo "==> Committing and pushing fork..."
 git add -A

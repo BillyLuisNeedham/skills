@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sitrep"
+  short_description: "Build a visual sitrep of the work in flight"
+policy:
+  allow_implicit_invocation: false

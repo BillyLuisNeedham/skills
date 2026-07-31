@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sitrep (figure it out)"
+  short_description: "Build a sitrep from the session transcript"
+policy:
+  allow_implicit_invocation: false

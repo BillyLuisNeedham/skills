@@ -12,8 +12,12 @@ The record-based twin of `sitrep`. Same output — a self-contained HTML page sh
 ### 1. Locate the transcript
 
 ```bash
-ls -t "$HOME/.claude/projects/$(pwd | sed 's/[/.]/-/g')"/*.jsonl | head -1
+D="$HOME/.claude/projects/$(pwd | sed 's/[/.]/-/g')"; n=""
+for f in "$D"/*.jsonl; do [ -f "$f" ] && { [ -z "$n" ] || [ "$f" -nt "$n" ]; } && n="$f"; done
+echo "$n"
 ```
+
+Shell builtins only, so it survives `ls` being aliased to `eza` and works the same on macOS, where `find -printf` is unavailable.
 
 Sessions are stored as one JSONL file per session, named for the session UUID, appended live as the conversation runs — so the newest file at that path is this conversation. If several sessions are open on this repo, prefer the file whose basename matches the session UUID in your scratchpad path.
 

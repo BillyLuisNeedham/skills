@@ -182,7 +182,7 @@ def main():
 def save_html(result: dict[str, Any], html_path: str) -> None:
     """Render the result as a standalone HTML report and write to ``html_path``."""
     try:
-        from agentplatform._genai import _evals_visualization
+        from google.cloud.aiplatform.agentplatform._genai import _evals_visualization
     except ImportError as e:
         print(
             "ERROR: --save-html requires the agentplatform SDK to be installed"

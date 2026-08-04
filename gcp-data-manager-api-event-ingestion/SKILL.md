@@ -51,7 +51,7 @@ metadata:
 
 ### Step 3: Retrieve Migration Guides
 
-> [!CRITICAL]
+> [!IMPORTANT]
 > If refactoring code to upgrade from another Google API, ALWAYS
 > extract the full contents of the relevant field mapping guide.
 
@@ -95,7 +95,11 @@ Implement the ingestion logic using the following checkpoints:
     option on the `IngestEventsRequest` to allow developers to validate schemas
     without actually uploading data.
 -   [ ] **Send Request**: Execute `ingest_events` and record the returned
-    request ID for logging/troubleshooting.
+    `request_id` for later diagnostics.
+-   [ ] **Check for Ingestion Warnings**: If any non-required field had a
+    validation failure, the response from `ingest_events` will also
+    include `field_warnings`, a list of `FieldWarning` objects detailing the
+    issues.
 -   [ ] **Retrieve Request Status**: Check the status of the ingestion request
     using diagnostics. Since request processing is asynchronous, a
     successful ingestion response (HTTP 200 OK returning a `request_id`) only
@@ -148,12 +152,12 @@ Implement the ingestion logic using the following checkpoints:
 
 ## Error Handling & Troubleshooting
 
-### Inspecting Error Payloads
+### Inspecting Error Payloads & Ingestion Warnings
 
 > [!IMPORTANT]
 > Refer to [Understand API Errors](https://developers.google.com/data-manager/api/devguides/concepts/understand-errors.md.txt)
-> for a detailed guide on how to understand the structure of errors returned by
-> the API.
+> for a detailed guide on how to understand the structure of errors and warnings
+> returned by the API.
 
 ### Retrieving Request Status (Diagnostics)
 

@@ -1,5 +1,7 @@
 ---
 name: google-cloud-solution-agentic-ai-borderless-data-lakehouse
+metadata:
+  category: BigDataAndAnalytics
 description: >-
   Guides agents to discover requirements and design a governed,
   secure borderless open data lakehouse with agentic AI integration. Use when

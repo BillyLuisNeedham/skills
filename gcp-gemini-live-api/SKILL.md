@@ -1,7 +1,9 @@
 ---
-name: liveapi-service
+name: gemini-live-api
+metadata:
+  category: AiAndMachineLearning
 description: >-
-  Generates a LiveAPI client service class in the user's chosen programming
+  Generates a Gemini LiveAPI client service class in the user's chosen programming
   language. Use when the user wants to build, scaffold, or integrate a client
   that connects to the Gemini Enterprise LiveAPI websocket endpoint, handles
   session setup/resumption, bearer token refresh, and sending/receiving

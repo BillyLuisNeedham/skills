@@ -1,18 +1,16 @@
 # LQL syntax reference and guidelines
 
-## Table of Contents
+## Table of contents
 
-- [Boolean operators](#boolean-operators) (L17-L23)
-- [Comparison operators and matching patterns](#comparison-operators-and-matching-patterns) (L24-L33)
-- [Null values and missing fields](#null-values-and-missing-fields) (L34-L44)
-- [Escaping, quotes and case sensitivity](#escaping-quotes-and-case-sensitivity) (L45-L54)
-- [Built-in SEARCH function](#built-in-search-function) (L55-L84)
-- [Regular expressions](#regular-expressions) (L85-L94)
-- [Timestamps and ranges](#timestamps-and-ranges) (L95-L99)
-- [Additional built-in functions](#additional-built-in-functions) (L100-L118)
-- [Comments](#comments) (L119-L123)
-
----
+- [Boolean operators](#boolean-operators) (L15-L20)
+- [Comparison operators and matching patterns](#comparison-operators-and-matching-patterns) (L22-L30)
+- [Null values and missing fields](#null-values-and-missing-fields) (L32-L41)
+- [Escaping, quotes and case sensitivity](#escaping-quotes-and-case-sensitivity) (L43-L51)
+- [Built-in SEARCH function](#built-in-search-function) (L53-L83)
+- [Regular expressions](#regular-expressions) (L85-L93)
+- [Timestamps and ranges](#timestamps-and-ranges) (L95-L98)
+- [Additional built-in functions](#additional-built-in-functions) (L100-L117)
+- [Comments](#comments) (L119-L122)
 
 ## Boolean operators
 

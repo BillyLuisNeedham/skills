@@ -1,7 +1,9 @@
-# Spanner LQL Queries
+# Spanner LQL queries
 
+## Example queries
 
-## Cloud Spanner logs for a specific Spanner instance
+### Cloud Spanner logs for a specific Spanner instance
+
 **Variables to replace:** `<SPANNER_INSTANCE>`
 
 ```lql

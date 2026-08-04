@@ -1,14 +1,13 @@
 ---
 name: cloud-monitoring-metric-selection
+metadata:
+  category: CloudObservabilityAndMonitoring
 description: >-
   Retrieve, query, and identify relevant Google Cloud Monitoring metric
   descriptors for a GCP service or resource (such as Compute Engine, Spanner,
   BigQuery, Cloud Run, Cloud SQL, Pub/Sub, Cloud Storage, etc.). Use when asked
   to find, list, search, or discover GCP metric types, names, kind/value
   schemas, or descriptors.
-allowed-tools:
-  - list_metric_descriptors
-  - search_web
 ---
 
 # Metric Selection (Service Query & Local Keyword Filtering)
@@ -168,9 +167,9 @@ the user's intent.
 You MUST report the selected metrics in clean Markdown tables, grouped by
 service (i.e., one table per service prefix). The table MUST include the
 following columns: "Metric Type", "Display Name", "Description", "Metric Kind",
-"Value Type", and "Monitored Resource Types". Map the fields from the Google
-Cloud Monitoring `list_metric_descriptors` tool call response objects directly
-to the table columns:
+"Value Type", "Unit", and "Monitored Resource Types". Map the fields from the
+Google Cloud Monitoring `list_metric_descriptors` tool call response objects
+directly to the table columns:
 
 *   **Metric Type**: Map to the `type` field (e.g.,
     `spanner.googleapis.com/instance/cpu/utilization`).
@@ -180,14 +179,15 @@ to the table columns:
     `CUMULATIVE`).
 *   **Value Type**: Map to the `valueType` field (e.g., `INT64`, `DOUBLE`,
     `DISTRIBUTION`, `BOOL`).
+*   **Unit**: Map to the `unit` field (e.g., `1`, `By`, `s`, `ms`).
 *   **Monitored Resource Types**: Map to the `monitoredResourceTypes` list field
     (e.g., `["spanner_instance"]`).
 
 *Example Output Table:*
 
-Metric Type                                       | Display Name             | Description                                 | Metric Kind | Value Type | Monitored Resource Types
-:------------------------------------------------ | :----------------------- | :------------------------------------------ | :---------- | :--------- | :-----------------------
-`spanner.googleapis.com/instance/cpu/utilization` | Instance CPU Utilization | Fraction of allocated CPU currently in use. | GAUGE       | DOUBLE     | `["spanner_instance"]`
+Metric Type                                       | Display Name             | Description                                 | Metric Kind | Value Type | Unit | Monitored Resource Types
+:------------------------------------------------ | :----------------------- | :------------------------------------------ | :---------- | :--------- | :--- | :-----------------------
+`spanner.googleapis.com/instance/cpu/utilization` | Instance CPU Utilization | Fraction of allocated CPU currently in use. | GAUGE       | DOUBLE     | 1    | `["spanner_instance"]`
 
 ## Reference Documentation & Links
 

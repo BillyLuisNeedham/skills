@@ -1,7 +1,9 @@
-# Managed Service for Apache Spark LQL Queries
+# Managed Service for Apache Spark LQL queries
 
+## Example queries
 
-## Dataproc Apache Hadoop logs
+### Dataproc Apache Hadoop logs
+
 **Variables to replace:** None
 
 ```lql

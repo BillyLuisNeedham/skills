@@ -1,8 +1,9 @@
-# API Enable & Disable LQL Queries
+# API enable and disable LQL queries
 
+## Example queries
 
-## Audit API enable logs
-Finds events where a Google Cloud Service API was enabled.
+### Google Cloud Service API enablement audit logs
+
 **Variables to replace:** None
 
 ```lql
@@ -10,7 +11,8 @@ resource.type="audited_resource" AND
 protoPayload.methodName="google.api.serviceusage.v1.ServiceUsage.EnableService"
 ```
 
-## Audit API disable logs
+### Google Cloud Service API disablement audit logs
+
 **Variables to replace:** None
 
 ```lql
@@ -18,7 +20,8 @@ resource.type="audited_resource" AND
 protoPayload.methodName="google.api.serviceusage.v1.ServiceUsage.DisableService"
 ```
 
-## Logging API disabled
+### Logging API disabled
+
 **Variables to replace:** None
 
 ```lql

@@ -1,7 +1,9 @@
-# Cloud Tasks LQL Queries
+# Cloud Tasks LQL queries
 
+## Example queries
 
-## Cloud Tasks queue logs
+### Cloud Tasks queue logs
+
 **Variables to replace:** `<QUEUE_ID>`
 
 ```lql

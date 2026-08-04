@@ -1,5 +1,7 @@
 ---
 name: google-cloud-solution-agentic-analytics-spark-knowledge-catalog
+metadata:
+  category: BigDataAndAnalytics
 description: >-
   Discovers requirements and generates guidance to design and deploy a governed,
   secure agentic-analytics solution for data that's distributed across Google

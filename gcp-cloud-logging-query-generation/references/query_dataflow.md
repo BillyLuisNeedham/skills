@@ -1,9 +1,9 @@
-# Dataflow LQL Queries
+# Dataflow LQL queries
 
+## Example queries
 
+### Warnings or errors from Dataflow workers
 
-## Worker warnings and errors
-Finds warnings or errors from Dataflow workers.
 **Variables to replace:** None
 
 ```lql

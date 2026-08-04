@@ -71,7 +71,7 @@ recommendations:
   - Select Google Cloud regions that are geographically close to the external
     CSP's regions to minimize latency and improve data transfer performance.
   - For more information about performance efficiency in Google Cloud, see
-    https://docs.cloud.google.com/architecture/framework/perspectives/ai-ml/performance-efficiency.md.txt
+    https://docs.cloud.google.com/architecture/framework/perspectives/ai-ml/performance-optimization.md.txt
 - **Sustainability**:
   - To maximize compute efficiency and reduce energy consumption, use Managed
     Service for Apache Spark with Lightning Engine to handle massive joins and

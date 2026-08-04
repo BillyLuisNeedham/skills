@@ -1,42 +1,49 @@
-# Security (Audit logging) LQL Queries
+# Security (audit logging) LQL queries
 
+## Example queries
 
-## Audit logs—all
+### Audit logs—all
+
 **Variables to replace:** None
 
 ```lql
 logName:"cloudaudit.googleapis.com"
 ```
 
-## Audit logs—Access Transparency (AXT)
+### Audit logs—Access Transparency (AXT)
+
 **Variables to replace:** None
 
 ```lql
 log_id("cloudaudit.googleapis.com/access_transparency")
 ```
 
-## Audit logs—Admin Activity
+### Audit logs—Admin Activity
+
 **Variables to replace:** None
 
 ```lql
 log_id("cloudaudit.googleapis.com/activity")
 ```
 
-## Audit logs—Data Access
+### Audit logs—Data Access
+
 **Variables to replace:** None
 
 ```lql
 log_id("cloudaudit.googleapis.com/data_access")
 ```
 
-## Audit logs—System Event
+### Audit logs—System Event
+
 **Variables to replace:** None
 
 ```lql
 log_id("cloudaudit.googleapis.com/system_event")
 ```
 
-## VPC Service Controls access level attached
+### VPC Service Controls access level attached
+
 **Variables to replace:** `<ACCESS_LEVEL>`
 
 ```lql
@@ -47,7 +54,8 @@ protoPayload.methodName="google.identity.accesscontextmanager.v1.AccessContextMa
 protoPayload.request.servicePerimeter.spec.accessLevels:"<ACCESS_LEVEL>"
 ```
 
-## VPC Service Controls policy updated or deleted
+### VPC Service Controls policy updated or deleted
+
 **Variables to replace:** None
 
 ```lql

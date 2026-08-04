@@ -32,7 +32,7 @@ aligned with the following core principles:
 -  **Implement zero trust**: Use a _never trust, always verify_ approach, where
    access to resources is granted based on continuous verification of trust.
    Google Cloud supports this principle through products like Chrome Enterprise
-   Premium and Identity-Aware Proxy (IAP). Grounding document:
+   Premium, Identity-Aware Proxy (IAP) and IAM Recommender. Grounding document:
    https://docs.cloud.google.com/architecture/framework/security/implement-zero-trust.md.txt
 
 -  **Implement shift-left security**: Implement security controls early in the
@@ -84,6 +84,7 @@ relevant to security:
     Google Cloud resources.
   - **Identity-Aware Proxy (IAP)**: Secure access to applications without a VPN.
   - **Chrome Enterprise Premium**: Endpoint security and context-aware access.
+  - **IAM Recommender**: Provide policy intelligence.
 
 - **Network security**
 
@@ -94,6 +95,7 @@ relevant to security:
     network traffic.
   - **Shared VPC**: Centralized network management across projects.
   - **Cloud Interconnect and IPsec VPN**: Secure, private connectivity.
+  -**Private Service Connect**: Provide private access to managed services
 
 - **Data security**
 

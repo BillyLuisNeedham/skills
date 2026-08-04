@@ -1,7 +1,7 @@
 """Evaluate a MaaS model using Agent Platform Evaluation."""
 
 import argparse
-from agentplatform import Client
+from google.cloud.aiplatform.agentplatform import Client
 import pandas as pd
 
 

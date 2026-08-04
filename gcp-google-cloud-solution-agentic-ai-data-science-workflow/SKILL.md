@@ -1,5 +1,7 @@
 ---
 name: google-cloud-solution-agentic-ai-data-science-workflow
+metadata:
+  category: AiAndMachineLearning
 description: >-
   Designs a tailored multi-product agentic data science
   architecture on Google Cloud that incorporates opinionated best practices. Use

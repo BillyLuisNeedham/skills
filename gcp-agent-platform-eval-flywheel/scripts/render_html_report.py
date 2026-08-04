@@ -25,7 +25,7 @@ import sys
 
 def render_evaluation_html(result_json_str: str) -> str:
     """Render an EvaluationResult JSON string as standalone HTML."""
-    from agentplatform._genai import _evals_visualization
+    from google.cloud.aiplatform.agentplatform._genai import _evals_visualization
 
     html = _evals_visualization.get_evaluation_html(result_json_str)
     if not html:
@@ -38,7 +38,7 @@ def render_evaluation_html(result_json_str: str) -> str:
 
 def render_loss_analysis_html(response_json_str: str) -> str:
     """Render a loss-clusters response JSON string as standalone HTML."""
-    from agentplatform._genai import _evals_visualization
+    from google.cloud.aiplatform.agentplatform._genai import _evals_visualization
 
     html = _evals_visualization.get_loss_analysis_html(response_json_str)
     if not html:

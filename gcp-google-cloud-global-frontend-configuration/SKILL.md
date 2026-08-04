@@ -3,12 +3,12 @@ name: google-cloud-global-frontend-configuration
 metadata:
   category: Networking
 description: |
-  Guides agents through a structured 6-step discovery process to design and deploy Google Cloud global external Application Load Balancers with Cloud CDN, Cloud Armor, and Service Extensions, mapping workload requirements to opinionated best-practice configurations.
+  Guides agents through a 6-step discovery process to design and deploy Google Cloud global external Application Load Balancers with Cloud CDN, Cloud Armor, and Service Extensions, mapping workload requirements to best-practice configurations.
   Use when:
   - Designing, configuring, or deploying a Google Cloud global external Application Load Balancer, Cloud CDN, Cloud Armor WAF, or Service Extensions.
-  - Discovering existing Google Cloud resources (Cloud Storage buckets, Compute Engine MIGs, GKE, Cloud Run) to use as load balancer backends.
-  - Generating production-grade Terraform HCL or gcloud CLI scripts for global external Application Load Balancer configurations.
-  - Actuating deployments via Infrastructure Manager or bash scripts, including performing IAM pre-checks.
+  - Discovering existing Google Cloud resources (Cloud Storage, MIGs, GKE, Cloud Run) to use as backends.
+  - Generating production-grade Terraform HCL or gcloud CLI scripts for global external Application Load Balancers.
+  - Actuating deployments via Infrastructure Manager or bash scripts, including IAM pre-checks.
   - Detecting, analyzing, or reconciling configuration drift on deployed global external Application Load Balancers.
   Don't use for:
   - Non-Google Cloud load balancing or security configurations.

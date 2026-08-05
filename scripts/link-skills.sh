@@ -66,10 +66,12 @@ prune_stale() {
     local name resolved
     name="$(basename "$target")"
     if [[ -L "$target" ]]; then
-      # -m, not -f: when a whole container dir is removed from the repo, -f
-      # fails on the missing intermediate component and returns nothing, so the
-      # orphan link never matches the cases below and survives forever.
-      resolved="$(readlink -m "$target" 2>/dev/null || true)"
+      # Plain readlink, not -f/-m: we link with absolute repo paths, so the
+      # stored value is already what we want to match, and reading it does not
+      # require the target to still exist. -f returns nothing once the target is
+      # gone, and -m is GNU-only (it fails outright on macOS) — either way
+      # `resolved` ends up empty and orphan links survive forever.
+      resolved="$(readlink "$target" 2>/dev/null || true)"
       case "$resolved" in
         "$REPO"/skills/deprecated/*|"$REPO"/skills/*/deprecated/*)
           rm "$target"

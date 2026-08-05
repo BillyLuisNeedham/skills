@@ -1,7 +1,5 @@
 ---
 name: google-cloud-storage-basics
-metadata:
-  category: Storage
 description: >-
   Stores, retrieves, and manages data as objects in Cloud Storage (Google
   Cloud Storage, or GCS) buckets. Use when you need to interact with Cloud
@@ -16,6 +14,18 @@ description: >-
   XML APIs, client libraries, Terraform, and Cloud Storage MCP servers. Don't
   use for block storage (Persistent Disk), data warehousing/analytics
   (BigQuery), or databases (Cloud SQL, Spanner, Bigtable, Firestore).
+license: Apache-2.0
+metadata:
+    version: v1
+    publisher: google
+    tags:
+      - gcs
+      - storage
+      - cloud-storage
+      - buckets
+      - objects
+    category: Storage
+    support_tier: primary
 ---
 
 # Google Cloud Storage Basics

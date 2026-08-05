@@ -106,10 +106,10 @@ When the user asks to reserve or connect to a device:
 3.  **Reserve Device**:
 
     **Rule**: **Explicit User Confirmation Required**. Reserving a device incurs
-    billing charges and create cloud resources. The agent MUST ALWAYS warn the
-    user explicitly about the potential extra billing costs. You MUST STOP and
-    ask for explicit approval before proceeding with any session creation
-    commands.
+    billing charges and creates cloud resources. The agent MUST ALWAYS warn the
+    user explicitly about the billing costs that will be incurred on the active
+    Google Cloud project (e.g., `${PROJECT_ID}`). You MUST STOP and ask for
+    explicit approval before proceeding with any session creation commands.
 
     Then, run the API request with `model_id` and `version_id` to reserve the
     device. Always rely on the exact curl command and instructions provided in
@@ -188,10 +188,11 @@ When the user asks to stop, cleanup, or release the device:
 When the user asks to change the expiration time of an active device session:
 
 **Rule**: **Explicit User Confirmation Required**. Extending a device session
-incurs additional billing charges and create cloud resources. The agent MUST
-ALWAYS warn the user explicitly about the potential extra billing costs. You
-MUST STOP and ask for explicit approval before proceeding with any session
-extension commands.
+incurs additional billing charges and creates cloud resources. The agent MUST
+ALWAYS warn the user explicitly about the extra billing costs that will be
+incurred on the active Google Cloud project (e.g., `${PROJECT_ID}`). You MUST
+STOP and ask for explicit approval before proceeding with any session extension
+commands.
 
 1.  **Extract Parameters**:
 

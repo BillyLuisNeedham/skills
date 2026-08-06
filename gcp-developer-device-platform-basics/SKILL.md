@@ -47,7 +47,13 @@ to install it on the current platform (Linux, macOS, Windows, etc.).
 
 > [!NOTE] Cloud Testing API is needed for Device Streaming API during Preview.
 
-3.  **Setup Environment Variables**: Set up the required project variable and
+3.  **Enable gcloud beta component**:
+
+    ```bash
+    gcloud components install beta
+    ```
+
+4.  **Setup Environment Variables**: Set up the required project variable and
     access token:
 
     ```bash
@@ -55,7 +61,7 @@ to install it on the current platform (Linux, macOS, Windows, etc.).
     export ACCESS_TOKEN=$(gcloud auth application-default print-access-token 2>/dev/null)
     ```
 
-4.  **Python Environment**: For instructions on setting up the python virtual
+5.  **Python Environment**: For instructions on setting up the python virtual
     environment, see [start_adb_forwarder.md].
 
 ## Listing Available Devices
@@ -67,7 +73,7 @@ you can list the available devices:
     models:
 
     ```bash
-    gcloud alpha device-run devices list
+    gcloud beta device-run devices list
     ```
 
     Use the `ID` column to find the value for the `CATALOG_ID` parameter to
@@ -234,7 +240,7 @@ instructions provided in [list_sessions.md].
 *   [update_session_expiration.md]
 *   [list_sessions.md]
 
-[gcloud device-run CLI]: https://docs.cloud.google.com/sdk/gcloud/reference/alpha/device-run
+[gcloud device-run CLI]: https://docs.cloud.google.com/sdk/gcloud/reference/beta/device-run
 [Device Streaming API]: https://docs.cloud.google.com/device-streaming/docs/reference/rest.md.txt
 [describe_device.md]: references/describe_device.md
 [reserve_device.md]: references/reserve_device.md

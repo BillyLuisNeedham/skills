@@ -1,7 +1,7 @@
 # Describe Device
 
 To see detailed information about a specific device in DDP, send a GET request
-to the API using the CATALOG_ID from `gcloud alpha device-run devices list`:
+to the API using the CATALOG_ID from `gcloud beta device-run devices list`:
 
 ```bash
 curl \

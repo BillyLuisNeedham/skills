@@ -1,0 +1,5 @@
+interface:
+  display_name: "My Wayfinder"
+  short_description: "Wayfinder, opening each session with a sitrep"
+policy:
+  allow_implicit_invocation: false

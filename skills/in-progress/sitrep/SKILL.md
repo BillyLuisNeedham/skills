@@ -1,7 +1,6 @@
 ---
 name: sitrep
-description: Dispatch a subagent to build a visual sitrep of the work in flight and open it in the browser.
-disable-model-invocation: true
+description: Dispatch a subagent to build a visual sitrep of the work in flight — mission, position, next move — as a self-contained HTML page opened in the browser. Use when the user asks where we are, wants a sitrep or situation report, or when another skill opens a session with one.
 argument-hint: "What the sitrep should focus on, or nothing for the whole picture"
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: my-grilling
-description: Billy's personal grilling — the upstream grilling flow, but asked in rounds and tuned for voice-typed replies.
-disable-model-invocation: true
+description: Billy's personal grilling — the upstream grilling flow, but asked in rounds and tuned for voice-typed replies. Invoked by the `/my-grill-me` and `/my-grill-with-docs` wrappers, not reached on its own.
 ---
 
 Interview me relentlessly about every aspect of this until we reach a shared understanding. Walk down each branch of the decision tree, resolving dependencies between decisions. For each question, provide your recommended answer.

@@ -69,7 +69,7 @@ class AdbForwarder:
     self.access_token = access_token
     self.endpoint = endpoint
     self.requests_queue: asyncio.Queue[devicestreaming_v1.AdbMessage | None] = (
-        asyncio.Queue()
+        asyncio.Queue(maxsize=128)
     )
     self.active_writer: asyncio.StreamWriter | None = None
     self.features = "cmd,stat,shell_v2"

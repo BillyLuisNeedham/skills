@@ -233,6 +233,12 @@ resolve duplicates, and validate configs:
     *   `scan_duplicates.py` exiting with code 1: Parse the JSON
         output for duplicate resource targets. Perform in-place upgrade edits,
         then re-check until it passes with 0.
+    *   **Avoid Redundant Discovery Calls**: If `gather_agent_info.py`
+        successfully returns the Trace or Log table names (or writes them to
+        variables file), do NOT redundantly call
+        `list_trace_scope_table_names.py` or `list_log_scope_table_names.py`.
+        These scripts are run internally by `gather_agent_info.py` and are
+        provided as external Fallbacks only.
     *   **Script Execution Failures & Self-Correction**: If the execution of
         utility scripts (such as `gather_agent_info.py`, `check_telemetry.py`,
         `create_online_monitor.py`, `analyze_traffic.py`,

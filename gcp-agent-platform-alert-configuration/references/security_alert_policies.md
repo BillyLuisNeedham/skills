@@ -178,8 +178,7 @@ Where:
 
 ## Tooling Scripts
 
-1.  **list_log_scope_table_names**: Use this script to retrieve the associated
-    Log scope observability SQL table name of the target GCP project.
+1.  **list_log_scope_table_names (Fallback)**: Use this script ONLY if `gather_agent_info.py` failed to retrieve the associated Log scope observability SQL table name.
     *   Command: `python3 scripts/list_log_scope_table_names.py
         --project_id={gcp_project}`
 

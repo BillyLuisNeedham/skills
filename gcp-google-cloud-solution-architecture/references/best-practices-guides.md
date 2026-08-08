@@ -2,31 +2,35 @@
 
 | Product | Line hints |
 |---------|------------|
-| [AI Hypercomputer](#ai-hypercomputer) | Lines 31-34 |
-| [AlloyDB](#alloydb) | Lines 35-41 |
-| [Backup and Disaster Recovery (DR) Service](#backup-and-disaster-recovery-dr-service) | Lines 42-49 |
-| [BigQuery](#bigquery) | Lines 50-64 |
-| [Cloud Armor](#cloud-armor) | Lines 65-68 |
-| [Cloud Load Balancing](#cloud-load-balancing) | Lines 69-72 |
-| [Cloud Run](#cloud-run) | Lines 73-80 |
-| [Cloud Service Mesh](#cloud-service-mesh) | Lines 81-90 |
-| [Cloud SQL](#cloud-sql) | Lines 91-98 |
-| [Cloud Storage](#cloud-storage) | Lines 99-104 |
-| [Compute Engine](#compute-engine) | Lines 105-121 |
-| [Gemini Enterprise Agent Platform](#gemini-enterprise-agent-platform) | Lines 122-128 |
-| [Google Kubernetes Engine (GKE)](#google-kubernetes-engine-gke) | Lines 129-146 |
-| [Identity and Access Management (IAM)](#identity-and-access-management-iam) | Lines 147-156 |
-| [Managed Service for Apache Spark](#managed-service-for-apache-spark) | Lines 157-161 |
-| [Memorystore](#memorystore) | Lines 162-170 |
-| [Migration](#migration) | Lines 171-175 |
-| [Network Connectivity](#network-connectivity) | Lines 176-182 |
-| [Observability in Google Cloud](#observability-in-google-cloud) | Lines 183-191 |
-| [Pub/Sub](#pub-sub) | Lines 192-197 |
-| [Security Command Center](#security-command-center) | Lines 198-201 |
-| [Security](#security) | Lines 202-211 |
-| [Spanner](#spanner) | Lines 212-223 |
-| [Vertex AI](#vertex-ai) | Lines 224-227 |
-| [Workload Manager](#workload-manager) | Lines 228-236 |
+| [Best practices covering multiple products](#multiple-products) | Lines 31-34 |
+| [AI Hypercomputer](#ai-hypercomputer) | Lines 35-38 |
+| [AlloyDB](#alloydb) | Lines 39-45 |
+| [Backup and Disaster Recovery (DR) Service](#backup-and-disaster-recovery-dr-service) | Lines 46-53 |
+| [BigQuery](#bigquery) | Lines 54-68 |
+| [Cloud Armor](#cloud-armor) | Lines 69-72 |
+| [Cloud Load Balancing](#cloud-load-balancing) | Lines 73-76 |
+| [Cloud Run](#cloud-run) | Lines 77-84 |
+| [Cloud Service Mesh](#cloud-service-mesh) | Lines 85-94 |
+| [Cloud SQL](#cloud-sql) | Lines 95-102 |
+| [Cloud Storage](#cloud-storage) | Lines 103-108 |
+| [Compute Engine](#compute-engine) | Lines 109-125 |
+| [Gemini Enterprise Agent Platform](#gemini-enterprise-agent-platform) | Lines 126-132 |
+| [Google Kubernetes Engine (GKE)](#google-kubernetes-engine-gke) | Lines 133-150 |
+| [Identity and Access Management (IAM)](#identity-and-access-management-iam) | Lines 151-160 |
+| [Managed Service for Apache Spark](#managed-service-for-apache-spark) | Lines 161-165 |
+| [Memorystore](#memorystore) | Lines 166-174 |
+| [Migration](#migration) | Lines 175-179 |
+| [Network Connectivity](#network-connectivity) | Lines 180-185 |
+| [Observability in Google Cloud](#observability-in-google-cloud) | Lines 186-194 |
+| [Pub/Sub](#pub-sub) | Lines 195-200 |
+| [Security Command Center](#security-command-center) | Lines 201-204 |
+| [Security](#security) | Lines 205-214 |
+| [Spanner](#spanner) | Lines 215-226 |
+| [Vertex AI](#vertex-ai) | Lines 227-230 |
+
+## <a id="multiple-products"></a>Best practices covering multiple products
+
+- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-general.md.txt
 
 ## <a id="ai-hypercomputer"></a>AI Hypercomputer
 
@@ -223,12 +227,3 @@
 ## <a id="vertex-ai"></a>Vertex AI
 
 - https://docs.cloud.google.com/vertex-ai/docs/featurestore/best-practices.md.txt
-
-## <a id="workload-manager"></a>Workload Manager
-
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-general.md.txt
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-mysql.md.txt
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-openshift
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-redis.md.txt
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-sap.md.txt
-- https://docs.cloud.google.com/workload-manager/docs/reference/best-practices-sql-server.md.txt

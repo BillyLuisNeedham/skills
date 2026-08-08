@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 
-from google.cloud.aiplatform.agentplatform import Client
+from agentplatform import Client
 import pandas as pd
 import requests
 

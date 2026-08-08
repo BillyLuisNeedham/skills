@@ -21,12 +21,23 @@ and filters them locally inside the agent's context using keyword matching.
 *   **Always Query Live APIs**: You MUST always retrieve the most up-to-date
     metric descriptors dynamically by calling the `list_metric_descriptors` MCP
     tool.
+*   **Mandatory Project ID and Resource Parameter Clarification**: BEFORE
+    calling any API tools (such as `list_metric_descriptors`), you MUST ensure
+    the GCP Project ID is provided in the prompt, URI, or environment context.
+    If the Project ID cannot be resolved, you MUST ask the user to clarify or
+    provide it BEFORE executing API queries. Do NOT run API queries against
+    unconfirmed default or placeholder project names (such as `mock-project`,
+    `my-project-id`, `unused`, or `YOUR_PROJECT_ID`).
+*   **Fallback Reporting**: If API calls fail and fallback sources (such as
+    public docs) are used, you MUST state the error, the fallback source, and
+    the risks of non-live data (such as potential staleness, missing custom
+    metrics, or schema mismatches).
 
 ## Workflow
 
 ### Step 1: Verify & Auto-Configure MCP
 
-1.  Check if any tool matching `list_metric_descriptors` (e.g.
+1.  Check if any tool matching `list_metric_descriptors` (such as
     `google-cloud-monitoring:list_metric_descriptors`,
     `mcp_google-cloud-monitoring_list_metric_descriptors`, or a similar pattern)
     is available in your active toolset.
@@ -62,12 +73,16 @@ and filters them locally inside the agent's context using keyword matching.
 
 ### Step 2: Analyze Request & Extract Keywords
 
-1.  Identify the target GCP service prefix (e.g. `compute`, `spanner`,
-    `bigquery`, `storage`) and the project ID from the resource URI.
-2.  Extract target metric concepts from the user's prompt (e.g., "CPU",
-    "memory", "bytes scanned", "latency", "connections").
-3.  Map these concepts to standard Google Cloud Monitoring metric substrings
-    (e.g., `cpu`, `mem`, `scanned_bytes`, `latenc`, `connections`).
+1.  **Resolve Project ID and Identifiers**: Check for the GCP Project ID and
+    resource identifiers in the prompt, resource URIs, or environment context.
+    According to the CRITICAL RULES above, do NOT use placeholder project names.
+
+2.  **Identify Service Prefix**: Map target GCP services to their standard
+    prefix (such as `compute`, `spanner`, `bigquery`, `storage`).
+
+3.  **Extract Metric Concepts**: Extract metric keywords from user prompt (such
+    as "CPU", "memory", "bytes scanned", "latency", "connections") and map to
+    search substrings.
 
 *Example Query Analysis:*
 
@@ -95,7 +110,7 @@ retrieved before filtering.
 prefix style:
 
 1.  **Standard Google Cloud Services**:
-    `starts_with("<service_prefix>.googleapis.com/")` (e.g.,
+    `starts_with("<service_prefix>.googleapis.com/")` (such as
     `bigquery.googleapis.com/`, `redis.googleapis.com/`).
 2.  **Ops Agent (Guest OS)**: `starts_with("agent.googleapis.com/")` (for guest
     OS memory/disk metrics).
@@ -136,10 +151,10 @@ Aggregate all descriptors returned from Step 3, and filter them locally inside
 your LLM context:
 
 1.  **Keyword Filtering**: Filter the list by matching your target metric
-    keywords (e.g. "cpu", "latency") against the `type`, `displayName`, and
+    keywords (such as "cpu", "latency") against the `type`, `displayName`, and
     `description` fields of the descriptors.
 2.  **Resource Alignment**: Check if the metric contains labels matching the
-    target resource granularity (e.g., checking for a `database` label if
+    target resource granularity (such as checking for a `database` label if
     targeting a database resource). Do not attempt to dynamically match resource
     type strings directly, as Google Cloud Monitoring resource mappings (like
     Spanner databases mapping to `spanner_instance`) can be counter-intuitive.
@@ -152,12 +167,11 @@ strategies:
 *   **Case A: API Syntax Error**: Examine the error message, correct the filter
     syntax, and retry.
 *   **Case B: Timeout / Rate Limits**: Retry the call once with a smaller page
-    size (e.g., `pageSize: 20`).
+    size (such as `pageSize: 20`).
 *   **Case C: Unrecoverable Failure / Empty List**:
     1.  Verify if the target service is enabled in the project.
     2.  Search Google Cloud public documentation to verify standard metrics for
         the service.
-    3.  Notify the user of the failure and ask for clarification.
 
 ### Step 5: Output Selected Metrics
 
@@ -165,23 +179,23 @@ For each service domain, return only the 5-15 key metrics directly relevant to
 the user's intent.
 
 You MUST report the selected metrics in clean Markdown tables, grouped by
-service (i.e., one table per service prefix). The table MUST include the
+service (that is, one table per service prefix). The table MUST include the
 following columns: "Metric Type", "Display Name", "Description", "Metric Kind",
 "Value Type", "Unit", and "Monitored Resource Types". Map the fields from the
 Google Cloud Monitoring `list_metric_descriptors` tool call response objects
 directly to the table columns:
 
-*   **Metric Type**: Map to the `type` field (e.g.,
+*   **Metric Type**: Map to the `type` field (for example,
     `spanner.googleapis.com/instance/cpu/utilization`).
 *   **Display Name**: Map to the `displayName` field.
 *   **Description**: Map to the `description` field.
-*   **Metric Kind**: Map to the `metricKind` field (e.g., `GAUGE`, `DELTA`,
-    `CUMULATIVE`).
-*   **Value Type**: Map to the `valueType` field (e.g., `INT64`, `DOUBLE`,
-    `DISTRIBUTION`, `BOOL`).
-*   **Unit**: Map to the `unit` field (e.g., `1`, `By`, `s`, `ms`).
+*   **Metric Kind**: Map to the `metricKind` field (for example, `GAUGE`,
+    `DELTA`, `CUMULATIVE`).
+*   **Value Type**: Map to the `valueType` field (for example, `INT64`,
+    `DOUBLE`, `DISTRIBUTION`, `BOOL`).
+*   **Unit**: Map to the `unit` field (for example, `1`, `By`, `s`, `ms`).
 *   **Monitored Resource Types**: Map to the `monitoredResourceTypes` list field
-    (e.g., `["spanner_instance"]`).
+    (for example, `["spanner_instance"]`).
 
 *Example Output Table:*
 

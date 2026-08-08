@@ -44,7 +44,7 @@ to the following safety tiers based on the action requested:
         immediately to inspect data, validate schemas, parse traces, or compare
         evaluation results.
 2.  **Tier M: Read-only with Compute Costs (`client.evals.run_inference`,
-    `client.evals.evaluate`, `client.evals.generate_user_scenarios`,
+    `client.evals.evaluate`, `client.evals.generate_conversation_scenarios`,
     `client.evals.generate_loss_clusters`)**
     *   **Rule**: These operations invoke LLMs or remote evaluation services
         that consume compute resources and incur costs. This requires
@@ -60,7 +60,7 @@ provides, forcing a redundant install. Probe, and install only what is missing:
 
 ```bash
 python3 -c "import vertexai, google.genai, pandas, requests" \
-  || pip install 'google-cloud-aiplatform[evaluation]>=1.154.0' 'google-genai>=1.0.0'
+  || pip install 'google-cloud-aiplatform[evaluation]>=1.163.0' 'google-genai>=1.0.0'
 ```
 
 The version specifiers must stay quoted: unquoted, bash reads `>=1.154.0` as a
@@ -68,6 +68,26 @@ redirect and silently writes an empty file instead of constraining the install.
 
 Need `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION`. Check env vars first;
 if missing, ask the user. Newer Gemini models often need `location="global"`.
+
+### Correct SDK entrypoints
+
+```python
+import agentplatform
+client = agentplatform.Client(project=PROJECT, location=LOCATION)
+
+client.evals.run_inference(model=..., src=...)
+client.evals.evaluate(dataset=..., metrics=...)
+client.evals.generate_conversation_scenarios(...)
+```
+
+Two imports that look plausible and are not:
+
+-   `from agentplatform.types import evals` -- `ModuleNotFoundError`. `types` is
+    a module, not a package; use `from agentplatform import types`.
+-   `from vertexai.evaluation import PointwiseMetric, EvalTask` -- the
+    superseded SDK. Its classes take different arguments (`PointwiseMetric` has
+    no `system_instruction`), so code written against it fails with `TypeError`
+    rather than an import error. Use `agentplatform` throughout.
 
 ## The Quality Flywheel
 
@@ -101,9 +121,19 @@ matches the data the user already has:
 
     ```python
     from agentplatform import types
+    from google.genai import types as genai_types
+
+    # prompt/reference/response values are Content, not str. UserContent and
+    # ModelContent wrap a plain string and set the right role.
     dataset = types.EvaluationDataset(eval_cases=[
-        types.EvalCase(prompt="What is 2+2?", response="4", reference="4"),
-        # For multi-turn agent traces, set agent_data instead of prompt/response.
+        types.EvalCase(
+            prompt=genai_types.UserContent("What is 2+2?"),
+            responses=[types.ResponseCandidate(
+                response=genai_types.ModelContent("4"))],
+            reference=types.ResponseCandidate(
+                response=genai_types.ModelContent("4")),
+        ),
+        # For multi-turn agent traces, set agent_data instead of prompt/responses.
     ])
     ```
 
@@ -131,9 +161,13 @@ matches the data the user already has:
     per-metric requirements table).
 
 -   **Cold start (no data at all):** synthesize scenarios server-side with
-    `client.evals.generate_user_scenarios(...)` and a
-    `UserScenarioGenerationConfig` (`user_scenario_count`,
-    `simulation_instruction`, `environment_data`). Stage 2 plays them out.
+    `client.evals.generate_conversation_scenarios(agent=..., config=...)` -- the
+    parameter is `agent` or `agent_info`, not `agents`, and `config` is
+    required. The config class is `types.evals.UserScenarioGenerationConfig`,
+    not `types.UserScenarioGenerationConfig`. Set its `user_scenario_count`
+    (1-100): it defaults to None, the client accepts that, and the server
+    rejects the call with `400 INVALID_ARGUMENT`. `count` is a separate field
+    and does not substitute for it. Stage 2 plays the scenarios out.
 
 For ADK session dumps, use `scripts/parse_adk_traces.py` instead of writing the
 conversion by hand.
@@ -203,7 +237,9 @@ Safety policy compliance                          | `safety`
 -   **Predefined:** `types.RubricMetric.<NAME>` — server-side AutoRater, no
     judge model needed.
 -   **Custom LLM-as-a-judge:** `types.LLMMetric` with `prompt_template` or
-    `types.MetricPromptBuilder` for structured rubrics.
+    `types.MetricPromptBuilder` for structured rubrics. Always set
+    `judge_model`; it defaults to `None` and every case then fails with `400
+    INVALID_ARGUMENT: Error parsing JSON`.
 -   **Custom code:** `types.CodeExecutionMetric` with a `custom_function` string
     containing `def evaluate(instance: dict)` for remote sandboxed execution; or
     `types.Metric` with `custom_function=<callable>` for local execution.
@@ -221,7 +257,8 @@ out_dir = Path("artifacts/grade_results")
 out_dir.mkdir(parents=True, exist_ok=True)
 ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-result_json = result.model_dump_json()
+# fallback=str, or a DataFrame-backed dataset raises PydanticSerializationError.
+result_json = result.model_dump_json(fallback=str)
 (out_dir / f"results_{ts}.json").write_text(result_json)
 
 html = _evals_visualization.get_evaluation_html(result_json)
@@ -357,17 +394,26 @@ import pandas as pd
 # Initialize client
 client = agentplatform.Client(project="PROJECT_ID", location="LOCATION")
 
-# --- SINGLE-TURN EVAL (EvalCase list) ---
-dataset = types.EvaluationDataset(eval_cases=[
-    types.EvalCase(prompt="Query here", response="Model response here"),
-])
-
-# --- SINGLE-TURN EVAL (pandas DataFrame) ---
+# --- SINGLE-TURN EVAL (pandas DataFrame) -- RECOMMENDED ---
+# The converter wraps plain strings for you.
 df = pd.DataFrame({
     "prompt":   ["Q1", "Q2"],
     "response": ["A1", "A2"],
 })
 dataset = types.EvaluationDataset(eval_dataset_df=df)
+
+# --- SINGLE-TURN EVAL (direct EvalCase) ---
+# Verbose and easy to get wrong; see references/dataset_schema.md for the
+# exact types before using this form.
+dataset = types.EvaluationDataset(eval_cases=[
+    types.EvalCase(
+        prompt=genai_types.UserContent("Query here"),
+        responses=[types.ResponseCandidate(
+            response=genai_types.ModelContent("Model response here"))],
+        reference=types.ResponseCandidate(
+            response=genai_types.ModelContent("Ground truth here")),
+    ),
+])
 
 # --- MULTI-TURN AGENT EVAL ---
 agent_data = types.evals.AgentData(

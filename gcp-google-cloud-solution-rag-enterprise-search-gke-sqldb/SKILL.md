@@ -1,7 +1,7 @@
 ---
 name: google-cloud-solution-rag-enterprise-search-gke-sqldb
 metadata:
-  category: AiAndMachineLearning
+  category: MultiProductSolutions
 description: >-
   Discovers requirements, and generates architectural, design, and deployment
   guidance for a retrieval-augmented generation (RAG)-capable enterprise search

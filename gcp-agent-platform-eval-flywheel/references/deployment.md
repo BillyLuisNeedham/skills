@@ -38,10 +38,10 @@ only what is missing:
 
 ```bash
 python3 -c "import vertexai, google.genai, requests" \
-  || pip install 'google-cloud-aiplatform[evaluation]>=1.154.0' 'google-genai>=1.0.0' requests
+  || pip install 'google-cloud-aiplatform[evaluation]>=1.163.0' 'google-genai>=1.0.0' requests
 ```
 
-Keep the version specifiers quoted: unquoted, bash reads `>=1.154.0` as a
+Keep the version specifiers quoted: unquoted, bash reads `>=1.163.0` as a
 redirect and silently writes an empty file instead of constraining the install.
 
 The scripts also shell out to `gcloud` and `gsutil`, so the user must have the
@@ -118,7 +118,7 @@ for confirmation first.
 > Both scripts use LLM-as-a-judge metrics. Tell the user up-front: **this can
 > take ~30 minutes per 50 samples**.
 
-If the scripts' imports (`google.cloud.aiplatform.agentplatform`) fail in the
+If the scripts' imports (`agentplatform`) fail in the
 local environment, do **not** loop on `pip install` — fail fast and tell the
 user to install the deps from the Setup section above.
 

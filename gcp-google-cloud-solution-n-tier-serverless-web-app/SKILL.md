@@ -1,7 +1,7 @@
 ---
 name: google-cloud-solution-n-tier-serverless-web-app
 metadata:
-  category: Serverless
+  category: MultiProductSolutions
 description: >-
   Guides agents to interactively discover customer requirements for a Secure n-tier serverless web application and generate a tailored cloud multi-product solution that incorporates opinionated best practices and architecture guidance. Use when users need agentic assistance with designing and creating a multi-product solution in the cloud for Secure n-tier serverless web application. Don't use when designing VM or GKE-based architectures or when not using Google Cloud.
 ---

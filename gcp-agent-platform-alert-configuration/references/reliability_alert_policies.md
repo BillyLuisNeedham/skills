@@ -522,8 +522,7 @@ Where:
 
 ## Tooling Scripts
 
-*   **list_trace_scope_table_names**: Use this script to retrieve the associated
-    Trace scope observability SQL table name of the target GCP project.
+*   **list_trace_scope_table_names (Fallback)**: Use this script ONLY if `gather_agent_info.py` failed to retrieve the associated Trace scope observability SQL table name.
     *   Command: `python3 scripts/list_trace_scope_table_names.py
         --project_id={gcp_project}`
 

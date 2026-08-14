@@ -18,11 +18,16 @@ A `wayfinder` unit — a child **Issue** of a `wayfinder:map` holding a *questio
 **Triage role**:
 A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-afk`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
 
+**Harness**:
+The agent CLI that runs an **Issue**'s orchestrator in a `my-issue-runner` queue — `claude`, `opencode`, or `cursor` (the `agent` binary). The default lives in `~/.issue-runner`; a per-Issue override lives in the runner's `assign_for` function.
+_Avoid_: CLI, tool, engine (the engine is the bash above the CONFIG marker; it is harness-neutral)
+
 ## Relationships
 
 - An **Issue tracker** holds many **Issues**
 - An **Issue** carries one **Triage role** at a time
 - A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
+- An **Issue** in a `my-issue-runner` queue runs on one **Harness**
 
 ## Flagged ambiguities
 

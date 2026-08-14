@@ -1,6 +1,9 @@
 """Unit tests for assemble_widget_proto.py."""
 
 import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from absl.testing import absltest
 import assemble_widget_proto  # type: ignore[missing-import]
 
@@ -32,14 +35,11 @@ class AssembleWidgetProtoTest(absltest.TestCase):
     self.assertIn("target_axis: Y1", proto_text)
     self.assertNotIn("legend_template:", proto_text)
 
-  def test_resolve_output_path_auto(self):
+  def test_get_auto_output_path(self):
     tmp_dir = self.create_tempdir().full_path
-    path1 = assemble_widget_proto.resolve_output_path("auto", tmp_dir)
-    self.assertEqual(path1, os.path.join(tmp_dir, "chart.textproto"))
-    with open(path1, "w", encoding="utf-8") as f:
-      f.write("test")
-    path2 = assemble_widget_proto.resolve_output_path("auto", tmp_dir)
-    self.assertEqual(path2, os.path.join(tmp_dir, "chart_2.textproto"))
+    path = assemble_widget_proto.get_auto_output_path(tmp_dir)
+    self.assertTrue(os.path.basename(path).startswith("chart_"))
+    self.assertTrue(path.endswith(".textproto"))
 
 
 if __name__ == "__main__":

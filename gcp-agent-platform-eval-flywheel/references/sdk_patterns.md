@@ -229,6 +229,9 @@ win_rates = calculate_win_rates(result_a, result_b)
 ```python
 result = client.evals.evaluate(dataset=dataset, metrics=metrics)
 
+# Interactive HTML report (recommended)
+result.show()
+
 # Summary level
 for summary in result.summary_metrics:
     print(f"{summary.metric_name}: mean={summary.mean_score}, pass_rate={summary.pass_rate}")
@@ -245,6 +248,75 @@ for case in result.eval_case_results:
                 for v in metric_result.rubric_verdicts:
                     print(f"    rubric {v.evaluated_rubric.rubric_id}: "
                           f"{'PASS' if v.verdict else 'FAIL'} - {v.reasoning}")
+```
+
+## Pattern 8: Managed Agent Evaluation (Gemini Agents API)
+
+Evaluate agents built with the
+[Managed Agents API](https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/managed-agents).
+This pattern covers the full workflow: generate scenarios, run inference, and
+evaluate — all using the agent's resource name.
+
+```python
+import agentplatform
+from agentplatform import types
+
+client = agentplatform.Client(project="PROJECT_ID", location="global")
+
+AGENT_RESOURCE = "projects/PROJECT_ID/locations/global/agents/AGENT_ID"
+
+# Step 1: Generate conversation scenarios from the agent's configuration.
+scenarios = client.evals.generate_conversation_scenarios(
+    agent=AGENT_RESOURCE,
+    config={
+        "user_scenario_count": 5,
+        "simulation_instruction": "Create agent scenarios",
+    },
+)
+scenarios.show()
+
+# Step 2: Run inference — execute the agent against each scenario.
+inference_results = client.evals.run_inference(
+    agent=AGENT_RESOURCE,
+    src=scenarios,
+    config={"user_simulator_config": {"max_turn": 3}},
+)
+inference_results.show()
+
+# Step 3: Evaluate the conversation traces.
+result = client.evals.evaluate(
+    dataset=inference_results,
+    metrics=[types.RubricMetric.MULTI_TURN_TASK_SUCCESS],
+    agent=AGENT_RESOURCE,
+)
+result.show()
+```
+
+### Evaluate existing interactions
+
+You can also evaluate interactions already recorded via the Interactions API,
+without re-running inference.
+
+```python
+interactions_dataset = types.EvaluationDataset(
+    eval_cases=[
+        types.EvalCase(
+            interactions_data_source=types.InteractionsDataSource(
+                interaction="projects/PROJECT_ID/locations/global/interactions/INTERACTION_ID",
+                gemini_agent_config=types.GeminiAgentConfig(
+                    gemini_agent=AGENT_RESOURCE,
+                ),
+            ),
+        ),
+    ]
+)
+
+result = client.evals.evaluate(
+    dataset=interactions_dataset,
+    metrics=[types.RubricMetric.MULTI_TURN_TASK_SUCCESS],
+    agent=AGENT_RESOURCE,
+)
+result.show()
 ```
 
 ## Error Handling

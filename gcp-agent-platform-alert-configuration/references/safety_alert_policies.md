@@ -83,7 +83,7 @@ Where:
 #### Telemetry query
 
 Use this script to configure the alert policy. Replace each variable enclosed
-in curly braces (e.g., `{placeholder}`) with the corresponding values provided
+in curly braces (for example, `{placeholder}`) with the corresponding values provided
 below:
 
 ```sql

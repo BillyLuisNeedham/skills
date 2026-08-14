@@ -20,6 +20,7 @@ gcp-cloud-logging-configuration-basics
 gcp-cloud-logging-cross-project-configuration
 gcp-cloud-logging-query-generation
 gcp-cloud-monitoring-chart-generation
+gcp-cloud-monitoring-list-time-series-request
 gcp-cloud-monitoring-metric-selection
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
@@ -28,6 +29,8 @@ gcp-datalineage-summary
 gcp-data-manager-api-audience-ingestion
 gcp-data-manager-api-event-ingestion
 gcp-data-manager-api-setup
+gcp-design
+gcp-design-deploy
 gcp-detection-engineering-coverage-evaluation
 gcp-developer-device-platform-basics
 gcp-firebase-basics
@@ -71,6 +74,7 @@ gcp-google-ads-api-quickstart
 gcp-google-agents-cli-onboarding
 gcp-google-analytics-admin-api-basics
 gcp-google-analytics-data-api-basics
+gcp-google-cloud-filestore-autoscale
 gcp-google-cloud-global-frontend-configuration
 gcp-google-cloud-networking-observability
 gcp-google-cloud-recipe-auth
@@ -98,7 +102,10 @@ gcp-google-mobile-ads-banner
 gcp-google-mobile-ads-get-started
 gcp-google-mobile-ads-interstitial
 gcp-google-mobile-ads-rewarded
-gcp-ima-sdk-basics
+gcp-ima-dai-sdk
+gcp-ima-sdk-client-side
+gcp-infra-deployment-debugging
+gcp-managed-airflow-dag-authoring
 gcp-managed-airflow-migrations
 gcp-spanner-basics
 gcp-workload-manager-basics

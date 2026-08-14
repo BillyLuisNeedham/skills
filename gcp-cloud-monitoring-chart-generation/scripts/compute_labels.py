@@ -133,10 +133,13 @@ def compute_widget_title(
   return full_title
 
 
-def compute_axis_units(
+def normalize_ucum_unit(
     raw_unit: str | None, has_rate_aligner: bool = False
 ) -> str:
-  """Sanitizes raw UCUM/MetricDescriptor units into standard display formats."""
+  """Normalizes raw UCUM/MetricDescriptor units (e.g.
+
+  converting 10^2.% to %, or resolving rate).
+  """
   if not raw_unit or raw_unit == "{not_a_unit}":
     return ""
 
@@ -150,6 +153,16 @@ def compute_axis_units(
   unit = re.sub(r"([^\.\/\{\}]+)(\{[^\{\}]+\})", r"\1", unit)
   unit = re.sub(r"\{[^\{\}]+\}", "1", unit)
 
+  if unit == "10^2.%":
+    unit = "%"
+  return unit
+
+
+def compute_axis_units(
+    raw_unit: str | None, has_rate_aligner: bool = False
+) -> str:
+  """Sanitizes raw UCUM/MetricDescriptor units into standard display formats."""
+  unit = normalize_ucum_unit(raw_unit, has_rate_aligner)
   return CANONICAL_UNIT_DISPLAY_MAP.get(unit, unit)
 
 
@@ -240,6 +253,35 @@ def extract_promql_features(promql_query: str) -> dict[str, Any]:
   }
 
 
+def extract_filter_features(
+    filter_str: str, per_series_aligner: str
+) -> dict[str, Any]:
+  """Extracts characteristics from a ListTimeSeries filter string."""
+  filters: dict[str, str] = {}
+  if not filter_str:
+    return {
+        "has_rate": False,
+        "filters": {},
+        "metric_type": "",
+        "resource_type": "",
+    }
+  for match in re.finditer(
+      r'([\w\.]+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\')', filter_str
+  ):
+    k = match.group(1)
+    v = match.group(2) if match.group(2) is not None else match.group(3)
+    filters[k] = v
+  metric_type = filters.pop("metric.type", "")
+  resource_type = filters.pop("resource.type", "")
+  has_rate = per_series_aligner == "ALIGN_RATE"
+  return {
+      "metric_type": metric_type,
+      "resource_type": resource_type,
+      "filters": filters,
+      "has_rate": has_rate,
+  }
+
+
 def main() -> None:
   parser = argparse.ArgumentParser(
       description="Stage 1 baseline candidate label generator for Server-Driven UI (SDUI) charts."
@@ -278,7 +320,22 @@ def main() -> None:
       help="Raw metric unit (for example: 'By', 's', '%%').",
   )
   parser.add_argument(
-      "--promql_query", "-q", default="", help="Mandatory PromQL expression."
+      "--promql_query", "-q", default="", help="PromQL expression."
+  )
+  parser.add_argument(
+      "--filter_string", "-f", default="", help="ListTimeSeries filter string."
+  )
+  parser.add_argument(
+      "--per_series_aligner",
+      "-a",
+      default="",
+      help="ListTimeSeries perSeriesAligner.",
+  )
+  parser.add_argument(
+      "--cross_series_reducer",
+      "-c",
+      default="",
+      help="ListTimeSeries crossSeriesReducer.",
   )
   parser.add_argument(
       "--group_by",
@@ -293,30 +350,51 @@ def main() -> None:
   promql_info = (
       extract_promql_features(args.promql_query) if args.promql_query else {}
   )
+  filter_info = (
+      extract_filter_features(args.filter_string, args.per_series_aligner)
+      if args.filter_string
+      else {}
+  )
+
+  metric_type = args.metric_type or filter_info.get("metric_type", "")
+  res_type = args.resource_type or filter_info.get("resource_type", "")
 
   metric_name = args.metric_display_name or (
-      args.metric_type.split("/")[-1] if args.metric_type else "Metric Query"
+      metric_type.split("/")[-1] if metric_type else "Metric Query"
   )
   group_bys = (
       args.group_by
       if args.group_by is not None
       else promql_info.get("group_by_fields", [])
   )
-  filters = promql_info.get("filters", {})
-  agg = promql_info.get("aggregation", None)
-  has_rate = promql_info.get("has_rate", False)
+
+  filters = {**filter_info.get("filters", {}), **promql_info.get("filters", {})}
+
+  agg = promql_info.get("aggregation", None) or (
+      args.cross_series_reducer or args.per_series_aligner or None
+  )
+  if agg and agg.startswith("REDUCE_"):
+    agg = agg[len("REDUCE_") :]
+  elif agg and agg.startswith("ALIGN_"):
+    agg = agg[len("ALIGN_") :]
+
+  has_rate = promql_info.get("has_rate", False) or filter_info.get(
+      "has_rate", False
+  )
 
   title_candidate = compute_widget_title(
       metric_display_name=metric_name,
-      resource_type=args.resource_type,
+      resource_type=res_type,
       filters=filters,
       group_by_fields=group_bys,
       aggregation_string=agg,
   )
 
-  unit_override = compute_axis_units(
+  unit_override = normalize_ucum_unit(
       args.metric_unit, has_rate_aligner=has_rate
   )
+  if args.per_series_aligner == "ALIGN_PERCENT_CHANGE":
+    unit_override = "%"
   axis_label_candidate = compute_axis_label(
       metric_display_names=[metric_name],
       raw_units=[args.metric_unit],

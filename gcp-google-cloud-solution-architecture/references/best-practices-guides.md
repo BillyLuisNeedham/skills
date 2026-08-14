@@ -15,18 +15,18 @@
 | [Cloud Storage](#cloud-storage) | Lines 103-108 |
 | [Compute Engine](#compute-engine) | Lines 109-125 |
 | [Gemini Enterprise Agent Platform](#gemini-enterprise-agent-platform) | Lines 126-132 |
-| [Google Kubernetes Engine (GKE)](#google-kubernetes-engine-gke) | Lines 133-150 |
-| [Identity and Access Management (IAM)](#identity-and-access-management-iam) | Lines 151-160 |
-| [Managed Service for Apache Spark](#managed-service-for-apache-spark) | Lines 161-165 |
-| [Memorystore](#memorystore) | Lines 166-174 |
-| [Migration](#migration) | Lines 175-179 |
-| [Network Connectivity](#network-connectivity) | Lines 180-185 |
-| [Observability in Google Cloud](#observability-in-google-cloud) | Lines 186-194 |
-| [Pub/Sub](#pub-sub) | Lines 195-200 |
-| [Security Command Center](#security-command-center) | Lines 201-204 |
-| [Security](#security) | Lines 205-214 |
-| [Spanner](#spanner) | Lines 215-226 |
-| [Vertex AI](#vertex-ai) | Lines 227-230 |
+| [Google Kubernetes Engine (GKE)](#google-kubernetes-engine-gke) | Lines 133-152 |
+| [Identity and Access Management (IAM)](#identity-and-access-management-iam) | Lines 153-162 |
+| [Managed Service for Apache Spark](#managed-service-for-apache-spark) | Lines 163-167 |
+| [Memorystore](#memorystore) | Lines 168-176 |
+| [Migration](#migration) | Lines 177-181 |
+| [Network Connectivity](#network-connectivity) | Lines 182-187 |
+| [Observability in Google Cloud](#observability-in-google-cloud) | Lines 188-196 |
+| [Pub/Sub](#pub-sub) | Lines 197-202 |
+| [Security Command Center](#security-command-center) | Lines 203-206 |
+| [Security](#security) | Lines 207-216 |
+| [Spanner](#spanner) | Lines 217-228 |
+| [Vertex AI](#vertex-ai) | Lines 229-232 |
 
 ## <a id="multiple-products"></a>Best practices covering multiple products
 
@@ -147,6 +147,8 @@
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/scalability.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/upgrading-clusters.md.txt
 - https://docs.cloud.google.com/kubernetes-engine/docs/concepts/best-practices-continuous-integration-delivery-kubernetes.md.txt
+- https://docs.cloud.google.com/kubernetes-engine/security/ai-security-best-practices.md.txt
+- https://docs.cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster.md.txt
 
 ## <a id="identity-and-access-management-iam"></a>Identity and Access Management (IAM)
 

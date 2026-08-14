@@ -169,6 +169,16 @@ matches the data the user already has:
     rejects the call with `400 INVALID_ARGUMENT`. `count` is a separate field
     and does not substitute for it. Stage 2 plays the scenarios out.
 
+-   **Managed Agents (Gemini Agents API):** evaluate agents created with the
+    [Managed Agents API](https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/managed-agents).
+    Use `generate_conversation_scenarios` to create test scenarios from the
+    agent's configuration, `run_inference` to execute the agent, and `evaluate`
+    to score the traces. These functions now accept managed agents and
+    interaction ids as input. You can also evaluate existing interactions
+    recorded via the Interactions API using `InteractionsDataSource`. See
+    [references/sdk_patterns.md](references/sdk_patterns.md) Pattern 8 for the
+    full code pattern.
+
 For ADK session dumps, use `scripts/parse_adk_traces.py` instead of writing the
 conversion by hand.
 
@@ -193,12 +203,21 @@ client.evals.run_inference(
 
 # DataFrame also works as src= — no EvalCase wrapping needed.
 client.evals.run_inference(model="gemini-2.5-flash", src=df)
+
+# Managed Agent — pass an agent resource name.
+AGENT_RESOURCE = f"projects/{PROJECT_ID}/locations/global/agents/{AGENT_ID}"
+client.evals.run_inference(
+    agent=AGENT_RESOURCE,
+    src=scenarios,
+    config={"user_simulator_config": {"max_turn": 3}},
+)
 ```
 
 ### 3. Grade (always run)
 
 ```python
 result = client.evals.evaluate(dataset=dataset, metrics=[...])
+result.show()  # Interactive HTML report with scores, rubrics, and traces.
 ```
 
 **Pick metrics by what you want to measure.** Full catalog in

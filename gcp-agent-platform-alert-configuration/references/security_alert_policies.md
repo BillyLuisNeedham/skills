@@ -51,8 +51,8 @@ Where:
 If the GCP project does not have a linked BQ dataset to the Log bucket, you MUST
 EXPLICITLY ask the user for confirmation before proceeding to create one. If the
 user does not approve, you MUST skip creating security alert policies.
-Otherwise, you can create a linked logging dataset by running the following
-command:
+Otherwise, you can create a linked Cloud Logging dataset by running the
+following command:
 
 ```bash
 gcloud logging links create $LINK_ID \
@@ -86,7 +86,7 @@ Where:
 #### Telemetry query
 
 Use this script to configure the alert policy. Replace each variable enclosed
-in curly braces (e.g., `{placeholder}`) with the corresponding values
+in curly braces (for example, `{placeholder}`) with the corresponding values
 provided below:
 
 ```sql

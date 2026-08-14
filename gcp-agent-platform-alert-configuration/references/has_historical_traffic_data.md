@@ -33,7 +33,7 @@ Use these instructions if the agent has historical metrics data available:
         -   If the `--live` command fails with `CredentialsMissingError` (exit
             code 1), report the error and instruct the user to run `gcloud auth
             application-default login` on their terminal.
-        -   For other unexpected failures, analyze the error message (e.g.,
+        -   For other unexpected failures, analyze the error message (such as
             connection timeouts, invalid permissions, or missing resources).
             Attempt to dynamically correct parameters (such as verifying or
             correcting the region, project ID, or metric type) and retry
@@ -41,30 +41,30 @@ Use these instructions if the agent has historical metrics data available:
 
 -   Map the traffic pattern profile classified by the script to the
     corresponding policy:
-    -   **Steady**: Maps to **Long-Window Z-Score Baseline (1-week lookback)**
+    -   **Steady / Consistent**: Maps to **Long-Window Z-Score Baseline (1-week lookback)**
         (safe since the script verified we have at least 14 days of history).
-    -   **Seasonal**: Maps to **Seasonal Decomposition** (average 1w and 1d).
-    -   **Bursty**: Maps to **Moving Averages** (1h baseline).
+    -   **Seasonal / Cyclical**: Maps to **Seasonal Decomposition** (average 1w and 1d).
+    -   **Bursty / Inconsistent**: Maps to **Moving Averages** (1h baseline).
 
 #### Decision Mapping Reference:
 
 | Variance Ratio   | Autocorrelation | Traffic        | Assigned Latency       |
 : (std_dev / mean) : (1-week lag)    : Classification : Algorithm & baseline   :
 | :--------------- | :-------------- | :------------- | :--------------------- |
-| `≤ 2.0`          | `≤ 0.75`        | **Steady**     | Long-Window Z-Score    |
+| `≤ 2.0`          | `≤ 0.75`        | **Steady / Consistent** | Long-Window Z-Score    |
 :                  :                 :                : (1-week lookback)      :
-| `≤ 2.0`          | `> 0.75`        | **Seasonal**   | Seasonal Decomposition |
+| `≤ 2.0`          | `> 0.75`        | **Seasonal / Cyclical** | Seasonal Decomposition |
 :                  :                 :                : (1w & 1d avg)          :
-| `> 2.0`          | Any / Not       | **Bursty**     | Moving Averages        |
+| `> 2.0`          | Any / Not       | **Bursty / Inconsistent** | Moving Averages        |
 :                  : Applicable      :                : (1-hour window)        :
 
 *Example classifications:*
 
--   *Steady*: Low variance data (e.g. steady QPS) with little or no weekly
+-   *Steady / Consistent*: Low variance data (such as steady QPS) with little or no weekly
     cyclical pattern.
--   *Seasonal*: Clear daily/weekly repeating patterns with high weekly
-    correlation (e.g. daily peak traffic).
--   *Bursty*: Highly volatile data with rapid spikes and quiet periods (e.g.
+-   *Seasonal / Cyclical*: Clear daily/weekly repeating patterns with high weekly
+    correlation (such as daily peak traffic).
+-   *Bursty / Inconsistent*: Highly volatile data with rapid spikes and quiet periods (such as
     batch job workloads).
 
 -   **Fallback for Insufficient Data / No Traffic**:
@@ -86,7 +86,7 @@ Use these instructions if the agent has historical metrics data available:
 
 Clearly communicate the findings and selection at the start of your response:
 
-1.  Explain the classified profile (Seasonal, Steady, or Bursty) output by the
+1.  Explain the classified profile (Seasonal / Cyclical, Steady / Consistent, or Bursty / Inconsistent) output by the
     metrics analysis script (citing indicators like standard deviation,
     autocorrelation, or zero-ratio from the script output). If falling back to
     user inquiry due to zero metrics or insufficient data, explain that.
@@ -101,6 +101,6 @@ Clearly communicate the findings and selection at the start of your response:
 ## Gotchas and Behavioral Corrections
 
 *   **Sparse Traffic Guidance**: If zero_ratio > 0.95 (even if profile is
-    "Steady"), warn the user that Z-score alerts may be unstable. Recommend
+    "Steady / Consistent"), warn the user that Z-score alerts may be unstable. Recommend
     using Short-Window Z-Score or Static Thresholds instead of Long-Window
     Z-Score.

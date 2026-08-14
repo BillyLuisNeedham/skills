@@ -65,9 +65,8 @@ CAUSE THE APPLICATION TO CRASH.
     -   [ ] Run `gradle build -x test` to confirm a successful clean build.
         Resolve any GMA SDK related compile errors.
 
-#### Troubleshooting
+### Links
 
-**ONLY** if you exhaust your internal knowledge and not able to complete the
-workflow steps, read
-https://developers.google.com/admob/android/next-gen/interstitial.md.txt and try
-again.
+Additional documentation:
+
+-   https://developers.google.com/admob/android/next-gen/interstitial.md.txt

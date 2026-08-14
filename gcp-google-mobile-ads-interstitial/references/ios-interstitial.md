@@ -28,8 +28,8 @@ names.
         user to build the project in Xcode and manually verify there are no
         compile errors.
 
-#### Troubleshooting
+### Links
 
-**ONLY** if you exhaust your internal knowledge and not able to complete the
-workflow steps, read
-https://developers.google.com/admob/ios/interstitial.md.txt and try again.
+Additional documentation:
+
+-   https://developers.google.com/admob/ios/interstitial.md.txt

@@ -104,8 +104,8 @@ def parse_table_name_from_bucket_view(view_path: str | None) -> str | None:
       view_path: The full resource path of the log bucket view.
 
   Returns:
-      The derived table name for use in Log Analytics queries, or None if
-      parsing fails.
+      The derived table name for use in Observability Analytics queries, or None
+      if parsing fails.
   """
   if not view_path:
     return None

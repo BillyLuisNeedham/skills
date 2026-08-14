@@ -1,7 +1,7 @@
 # No Historical Traffic Data Available
 
 Use these instructions if there is no historical metrics data available for the
-agent (e.g., brand new agent):
+agent (for example, brand new agent):
 
 ## 1. Ask the User for the Metric Pattern and Handle Defaults
 
@@ -10,7 +10,7 @@ agent (e.g., brand new agent):
     you MUST explicitly ask the user directly in your response what pattern they
     expect for their agent.
 -   **Direct Question Format**: You MUST write a direct question in your
-    response (e.g., "What traffic/usage pattern do you expect for your agent?")
+    response (for example, "What traffic/usage pattern do you expect for your agent?")
     and explicitly present the following three options for customization:
     -   **Steady/Consistent**: Maps the alert policy to **Short-Window Z-Score
         Baseline (1-hour lookback)**.
@@ -22,7 +22,7 @@ agent (e.g., brand new agent):
     maps to Short-Window Z-Score Baseline), and that you will use this default
     if they do not specify one.
 -   **Handling Automated or Immediate Setup Requests**: If the user's prompt
-    asks you to configure or write the alerting policies immediately (e.g., "Set
+    asks you to configure or write the alerting policies immediately (for example, "Set
     up its alerting policies in 'monitoring/alerts.tf'"), or if you are running
     in an automated/non-interactive script, you MUST NOT pause to wait for their
     response. Instead, ask the question in your response, state that you are
@@ -52,8 +52,8 @@ the immediate actions taken at the start of your response:
 
 1.  Explain that since the agent has no historical data, you cannot
     automatically analyze the traffic pattern.
-2.  Ask the user directly what traffic pattern they expect (Steady, Seasonal, or
-    Bursty), detailing the mapping differences and the 1-week blind spot risk if
+2.  Ask the user directly what traffic pattern they expect (Steady / Consistent, Seasonal / Cyclical, or
+    Bursty / Inconsistent), detailing the mapping differences and the 1-week blind spot risk if
     they choose Seasonal.
 3.  Inform the user that the default is **Steady / Consistent** (Short-Window
     Z-Score algorithm for Latency) and you will proceed with this default if

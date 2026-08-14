@@ -1,5 +1,9 @@
 """Unit test for validate_chart.py."""
 
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from absl.testing import absltest
 import validate_chart  # type: ignore[missing-import]
 
@@ -71,7 +75,25 @@ xy_chart {
 }
 """
     widget = validate_chart.parse_and_validate_widget(textproto)
-    with self.assertRaises(AssertionError):
+    with self.assertRaises(ValueError):
+      validate_chart.validate_widget(widget=widget)
+
+  def test_validate_widget_dual_query_fails(self):
+    textproto = """
+title: "Invalid Dual Query Chart"
+xy_chart {
+  data_sets {
+    time_series_query {
+      prometheus_query: "query"
+      time_series_filter {
+        filter: "metric.type=\\"foo\\""
+      }
+    }
+  }
+}
+"""
+    widget = validate_chart.parse_and_validate_widget(textproto)
+    with self.assertRaisesRegex(ValueError, "cannot contain BOTH"):
       validate_chart.validate_widget(widget=widget)
 
   def test_main_validate_from_stdin(self):

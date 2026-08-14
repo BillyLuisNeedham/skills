@@ -1,5 +1,9 @@
 """Unit tests for compute_labels.py."""
 
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from absl.testing import absltest
 import compute_labels  # type: ignore[missing-import]
 
@@ -175,6 +179,22 @@ class ComputeLabelsTest(absltest.TestCase):
     self.assertEqual(
         title, "Disk Read Bytes for us-east1-d by device_name [RATE]"
     )
+
+  def test_extract_filter_features(self):
+    filter_str = (
+        'metric.type="compute.googleapis.com/instance/cpu/utilization"'
+        ' resource.type="gce_instance" zone="us-central1-a"'
+    )
+    features = compute_labels.extract_filter_features(
+        filter_str, per_series_aligner="ALIGN_RATE"
+    )
+    self.assertEqual(
+        features["metric_type"],
+        "compute.googleapis.com/instance/cpu/utilization",
+    )
+    self.assertEqual(features["resource_type"], "gce_instance")
+    self.assertEqual(features["filters"], {"zone": "us-central1-a"})
+    self.assertTrue(features["has_rate"])
 
 
 if __name__ == "__main__":

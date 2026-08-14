@@ -4,7 +4,46 @@ import argparse
 import json
 import os
 import sys
+import uuid
 
+VALID_ALIGNERS = {
+    "ALIGN_NONE",
+    "ALIGN_DELTA",
+    "ALIGN_RATE",
+    "ALIGN_INTERPOLATE",
+    "ALIGN_NEXT_OLDER",
+    "ALIGN_MIN",
+    "ALIGN_MAX",
+    "ALIGN_MEAN",
+    "ALIGN_COUNT",
+    "ALIGN_SUM",
+    "ALIGN_STDDEV",
+    "ALIGN_COUNT_TRUE",
+    "ALIGN_COUNT_FALSE",
+    "ALIGN_FRACTION_TRUE",
+    "ALIGN_PERCENTILE_99",
+    "ALIGN_PERCENTILE_95",
+    "ALIGN_PERCENTILE_50",
+    "ALIGN_PERCENTILE_05",
+    "ALIGN_PERCENT_CHANGE",
+}
+
+VALID_REDUCERS = {
+    "REDUCE_NONE",
+    "REDUCE_MEAN",
+    "REDUCE_MIN",
+    "REDUCE_MAX",
+    "REDUCE_SUM",
+    "REDUCE_STDDEV",
+    "REDUCE_COUNT",
+    "REDUCE_COUNT_TRUE",
+    "REDUCE_COUNT_FALSE",
+    "REDUCE_FRACTION_TRUE",
+    "REDUCE_PERCENTILE_99",
+    "REDUCE_PERCENTILE_95",
+    "REDUCE_PERCENTILE_50",
+    "REDUCE_PERCENTILE_05",
+}
 
 def format_proto_string(val: str) -> str:
   """Escapes and quotes a string for protobuf text format."""
@@ -12,9 +51,29 @@ def format_proto_string(val: str) -> str:
   return f'"{escaped}"'
 
 
+def parse_duration_seconds(duration_str: str) -> int:
+  """Robustly parses a time duration string into seconds."""
+  if not duration_str:
+    raise ValueError("Empty duration_str provided to parse_duration_seconds")
+  duration_str = str(duration_str).strip()
+  try:
+    if duration_str.endswith("s"):
+      return int(float(duration_str.rstrip("s")))
+    if duration_str.endswith("m"):
+      return int(float(duration_str.rstrip("m")) * 60)
+    if duration_str.endswith("h"):
+      return int(float(duration_str.rstrip("h")) * 3600)
+    if duration_str.endswith("d"):
+      return int(float(duration_str.rstrip("d")) * 86400)
+    return int(float(duration_str))
+  except ValueError:
+    raise ValueError(f"Unsupported duration format: {duration_str}")
+
+
 def assemble_widget_textproto(
     title: str,
     promql_query: str,
+    lts_filter: dict | None = None,
     plot_type: str = "LINE",
     y_axis_label: str = "",
     unit_override: str = "",
@@ -38,8 +97,43 @@ def assemble_widget_textproto(
       "    }",
       "    data_sets {",
       "      time_series_query {",
-      f"        prometheus_query: {format_proto_string(clean_promql)}",
   ]
+  if lts_filter:
+    lines.extend([
+        "        time_series_filter {",
+        (
+            "          filter:"
+            f" {format_proto_string(lts_filter.get('filter', ''))}"
+        ),
+    ])
+    agg = lts_filter.get("aggregation", {})
+    if agg:
+      lines.append("          aggregation {")
+      if "alignmentPeriod" in agg:
+        secs = parse_duration_seconds(agg["alignmentPeriod"])
+        lines.extend([
+            "            alignment_period {",
+            f"              seconds: {secs}",
+            "            }",
+        ])
+      if "perSeriesAligner" in agg:
+        aligner = agg["perSeriesAligner"]
+        if aligner not in VALID_ALIGNERS:
+          raise ValueError(f"Invalid perSeriesAligner: {aligner}")
+        lines.append(f"            per_series_aligner: {aligner}")
+      if "crossSeriesReducer" in agg:
+        reducer = agg["crossSeriesReducer"]
+        if reducer not in VALID_REDUCERS:
+          raise ValueError(f"Invalid crossSeriesReducer: {reducer}")
+        lines.append(f"            cross_series_reducer: {reducer}")
+      for gb in agg.get("groupByFields", []):
+        lines.append(f"            group_by_fields: {format_proto_string(gb)}")
+      lines.append("          }")
+    lines.append("        }")
+  else:
+    lines.append(
+        f"        prometheus_query: {format_proto_string(clean_promql)}"
+    )
 
   if unit_override and unit_override.strip():
     lines.append(
@@ -68,7 +162,7 @@ def assemble_widget_textproto(
 
 
 def get_auto_output_path(work_dir: str) -> str:
-  """Automatically assigns deterministic sequential filenames (chart.textproto, chart_2.textproto)."""
+  """Safely generates a random, parallel-robust filename to avoid race conditions."""
   # Adjust for Google3 environments where the agent may run from the CitC client root
   # rather than the google3/ directory. This check is safely bypassed in public (GitHub)
   # environments because the google3/ directory will not exist. Internally, the workspace
@@ -77,21 +171,25 @@ def get_auto_output_path(work_dir: str) -> str:
   if not work_dir.endswith("google3") and os.path.basename(work_dir) != "google3":
     if os.path.exists(os.path.join(work_dir, "google3")):
       work_dir = os.path.join(work_dir, "google3")
-  idx = 1
+
   while True:
-    filename = "chart.textproto" if idx == 1 else f"chart_{idx}.textproto"
-    candidate = os.path.join(work_dir, filename)
+    random_id = uuid.uuid4().hex[:8]
+    candidate = os.path.join(work_dir, f"chart_{random_id}.textproto")
     if not os.path.exists(candidate):
       return candidate
-    idx += 1
-
 
 def main() -> None:
   parser = argparse.ArgumentParser(
       description="Stage 3 Server-Driven UI (SDUI) widget textproto assembler."
   )
   parser.add_argument(
-      "--promql_query", "-q", required=True, help="PromQL query expression."
+      "--promql_query", "-q", default="", help="PromQL query expression."
+  )
+  parser.add_argument(
+      "--lts_request_json",
+      "-l",
+      default="",
+      help="ListTimeSeries request JSON.",
   )
   parser.add_argument("--title", "-t", default="", help="Widget chart title.")
   parser.add_argument(
@@ -140,14 +238,35 @@ def main() -> None:
   if not title:
     title = "Monitoring Chart"
 
-  proto_text = assemble_widget_textproto(
-      title=title,
-      promql_query=args.promql_query,
-      plot_type=plot_type,
-      y_axis_label=y_axis_label,
-      unit_override=unit_override,
-      scale=args.scale,
-  )
+  lts_filter = None
+  if args.lts_request_json:
+    try:
+      lts_filter = json.loads(args.lts_request_json)
+    except Exception as e:
+      print(f"ERROR: Failed to parse LTS JSON payload: {e}", file=sys.stderr)
+      sys.exit(1)
+
+    if not lts_filter.get("filter"):
+      print(
+          "ERROR: Provided LTS JSON payload is missing the mandatory 'filter'"
+          " key.",
+          file=sys.stderr,
+      )
+      sys.exit(1)
+
+  try:
+    proto_text = assemble_widget_textproto(
+        title=title,
+        promql_query=args.promql_query,
+        lts_filter=lts_filter,
+        plot_type=plot_type,
+        y_axis_label=y_axis_label,
+        unit_override=unit_override,
+        scale=args.scale,
+    )
+  except ValueError as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    sys.exit(1)
 
   print(proto_text)
   work_dir = os.environ.get("BUILD_WORKING_DIRECTORY", os.getcwd())
@@ -156,7 +275,6 @@ def main() -> None:
   with open(output_path, "w", encoding="utf-8") as f:
     f.write(proto_text)
   print(f"Wrote widget textproto to: {output_path}", file=sys.stderr)
-
 
 if __name__ == "__main__":
   main()

@@ -73,31 +73,31 @@ Alerting policies for agents MUST map to the correct algorithms
 to ensure statistical stability and prevent alert noise or blind spots based on
 data classes:
 
-*   **Latency**: Follows workload traffic pattern (Steady -> Z-Score; Seasonal
-    -> Seasonal Decomposition; Bursty -> Moving Averages).
+*   **Latency**: Follows workload traffic pattern (Steady / Consistent -> Z-Score; Seasonal / Cyclical
+    -> Seasonal Decomposition; Bursty / Inconsistent -> Moving Averages).
 *   **Error Rate**: ALWAYS use **Multi-Window Multi-Burn Rate SLOs** (or
     ratio-based static thresholds). Error rate is naturally sparse (`0`). If
     standard deviation is `0`, Z-scores are mathematically unstable
     (division-by-zero), causing false alerts.
 
-To resolve the workload traffic pattern (Seasonal, Steady, or Bursty), follow
+To resolve the workload traffic pattern (Seasonal / Cyclical, Steady / Consistent, or Bursty / Inconsistent), follow
 the instructions corresponding to the availability of historical metrics data:
 
-*   **Case 1: No historical metrics data available (e.g., brand new agent)**:
+*   **Case 1: No historical metrics data available (for example, brand new agent)**:
     You MUST read and follow:
-    [no_historical_traffic_data.md](references/no_historical_traffic_data.md)
-*   **Case 2: Historical metrics data available (e.g., active agent with
+    [no_historical_traffic_data.md](no_historical_traffic_data.md)
+*   **Case 2: Historical metrics data available (for example, active agent with
     traffic)**: You MUST read and follow:
-    [has_historical_traffic_data.md](references/has_historical_traffic_data.md)
+    [has_historical_traffic_data.md](has_historical_traffic_data.md)
 
 ## Critical Rules
 
 *   **Brand New Agents (No Traffic History)**: When setting up alerts for a
     brand new agent, you MUST explicitly ask the user what traffic pattern they
-    expect (Steady, Seasonal, or Bursty) in your response. If immediate setup is
+    expect (Steady / Consistent, Seasonal / Cyclical, or Bursty / Inconsistent) in your response. If immediate setup is
     requested, ask the question but proceed using the default Steady/Consistent
     (Short-Window Z-Score) pattern. Follow
-    [no_historical_traffic_data.md](references/no_historical_traffic_data.md).
+    [no_historical_traffic_data.md](no_historical_traffic_data.md).
 *   **Query Types for Reliability (No MQL or Threshold Filters)**:
     *   For latency and container SLO error rate metrics, you MUST use
         `condition_prometheus_query_language` with PromQL.
@@ -111,15 +111,15 @@ the instructions corresponding to the availability of historical metrics data:
     downstream degradation or quota exhausting before it affects user
     experience.
 *   **For Metrics using PromQL**: ALWAYS use grouping aggregations. Group by
-    `gen_ai_agent_name` (e.g., `by (gen_ai_agent_name)`). Avoid filtering to a
+    `gen_ai_agent_name` (for example, `by (gen_ai_agent_name)`). Avoid filtering to a
     single ID/Name unless requested. Metrics are emitted via OpenTelemetry.
 
 ### Telemetry Metrics
 
 All raw telemetry metrics for the Agent Platform container runtime are
 cumulative **counters** monitored via PromQL. Downstream model calls are tracked
-via Open Telemetry Trace Spans exported to Log Analytics and monitored via SQL
-queries.
+via Open Telemetry Trace Spans exported to Observability Analytics and monitored
+via SQL queries.
 
 Signal                    | Source / Raw Metric                                                                                      | Type        | Description
 :------------------------ | :------------------------------------------------------------------------------------------------------- | :---------- | :----------
@@ -381,7 +381,7 @@ Where:
 
 When configuring a SQL-based alerting condition (`condition_sql`) in Google
 Cloud Monitoring for an agent, use the following template to query trace spans
-exported to Log Analytics:
+exported to Observability Analytics:
 
 ```sql
 SELECT
@@ -454,7 +454,7 @@ Where:
 
 When configuring a SQL-based alerting condition (`condition_sql`) in Google
 Cloud Monitoring for an agent to monitor tool call error rates, use the
-following template to query trace spans exported to Log Analytics:
+following template to query trace spans exported to Observability Analytics:
 
 ```sql
 SELECT
@@ -536,17 +536,19 @@ Where:
     3.  **Aggregate failures**: Group by agent or tool name, the ratio of failed
         requests (status code `2` indicating ERROR) to total requests.
     4.  **Use `HAVING` clause** to filter out healthy tools/models.
-    5.  **Pinning (Optional)**: Use `ENDS_WITH(JSON_VALUE(resource.attributes,
-        '$."cloud.resource_id"'), 'AGENT_IDENTIFIER')` with string identifier
-        (e.g., `'support-bot'`), not numeric, unless instructed.
+    5.  **Pinning (Only if explicitly requested)**: Use
+        `ENDS_WITH(JSON_VALUE(resource.attributes, '$."cloud.resource_id"'),
+        'AGENT_IDENTIFIER')` with string identifier (for example, `'support-bot'`), not
+        numeric, unless instructed. This should be avoided by default in favor
+        of dynamic grouping as described in the main skill instructions.
 *   **Duration Buffers (Transient Glitches)**: To avoid alerts firing on
     transient spikes, use duration/retest window buffers appropriately:
     *   **Reliability Metrics (PromQL / Cloud Monitoring)**:
-        *   For short-lookback alerts querying data under 25 hours (e.g.,
+        *   For short-lookback alerts querying data under 25 hours (such as
             Short-Window Z-Score, Moving Averages, Fast Burn SLO), ALWAYS use a
             `duration = "300s"` (5 minutes) buffer to filter out transient cold
             start/deployment spikes.
-        *   For long-lookback alerts querying data longer than 25 hours (e.g.,
+        *   For long-lookback alerts querying data longer than 25 hours (such as
             Long-Window Z-Score, Seasonal Decomposition, Slow Burn SLO),
             duration/retest windows are disabled by the platform. You must **not
             set a duration** (omit it entirely).
@@ -557,9 +559,9 @@ Where:
     persistent slow errors. Recommend a hard static threshold alert in parallel
     for strict SLA enforcement.
 *   **Seasonal Decomposition Double Alerting**: The agent MUST ONLY configure
-    seasonal decomposition alert policies to track spikes (e.g., latency spikes)
-    OR drops AND MUST NOT use dual-direction checks (like absolute deviation).
-    Explain this limitation to the user: comparing to a historical offset (e.g.,
+    seasonal decomposition alert policies to track spikes (for example, latency spikes)
+    OR drops AND MUST NOT use dual-direction evaluations (like absolute deviation).
+    Explain this limitation to the user: comparing to a historical offset (for example,
     `offset 1w`) the alert policy triggers twice if tracking both directions
     (once for the anomaly, and once 1 week later when the anomaly becomes the
     baseline). To prevent this, the generated policy MUST only track either

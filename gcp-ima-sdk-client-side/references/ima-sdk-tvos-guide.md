@@ -3,9 +3,10 @@
 The Google IMA SDK for tvOS is highly consistent with the iOS SDK, sharing the
 same API and integration flow.
 
-**Before proceeding, you must read the [Google IMA SDK iOS Integration Guide](references/ima-sdk-ios-guide.md)
-for the complete step-by-step lifecycle flow (Initialization -> Ad Request -> Ad
-Load -> Playback -> Cleanup).**
+**Before proceeding, you must read the
+[Google IMA SDK iOS Integration Guide](ima-sdk-ios-guide.md) for the complete
+step-by-step lifecycle flow (Initialization -> Ad Request -> Ad Load -> Playback
+-> Cleanup).**
 
 This document outlines the critical differences and tvOS-specific requirements
 you must implement.
@@ -43,19 +44,20 @@ To handle the Siri Remote, you must manage focus:
 To prevent user interactions from interfering with ad playback (e.g.,
 fast-forwarding through an ad):
 
-*   **Disable Custom Gestures:** You **must** disable your application's custom
-    remote control gesture recognizers (such as play/pause, swiping, or menu
-    button overrides) when the ad starts (on `LOADED` or `STARTED` events).
-*   **Restore Gestures:** Re-enable these gestures only after the ad completes
-    (on `CONTENT_RESUME_REQUESTED`) or fails.
+*   **Disable Custom Gestures:** You **must** disable your app's custom remote
+    control gesture recognizers (such as play/pause, swiping, or menu button
+    overrides) when the ad starts (on `LOADED` or `STARTED` events).
+*   **Restore Gestures:** Re-enable your app's gestures only after the ad
+    completes or a fatal error, using the `adsManagerDidRequestContentResume`
+    delegate method.
 
 --------------------------------------------------------------------------------
 
 ## Code implementation differences
 
-Refer to the [iOS Guide](references/ima-sdk-ios-guide.md) for the main
-`AdsManager` and `PlayerViewController` implementation. Adjust the tvOS
-implementation as follows:
+Refer to the [iOS Guide](ima-sdk-ios-guide.md) for the main `AdsManager` and
+`PlayerViewController` implementation. Adjust the tvOS implementation as
+follows:
 
 ### Ad UI setup (safe area)
 
@@ -128,7 +130,7 @@ class YourViewController: UIViewController, IMAAdsManagerDelegate {
             isAdPlaying = true
             setNeedsFocusUpdate()
 
-        case .COMPLETED, .SKIPPED, .ALL_ADS_COMPLETED:
+        case .COMPLETE, .SKIPPED, .ALL_ADS_COMPLETED:
             // Update state and reclaim focus back to the app
             isAdPlaying = false
             setNeedsFocusUpdate()

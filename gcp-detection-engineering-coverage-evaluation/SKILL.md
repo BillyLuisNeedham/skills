@@ -24,12 +24,17 @@ Copy this checklist and track progress for each iteration:
 -   [ ] Step 1: Extract raw text content from a source (for example, blog URL or
     raw text input).
 -   [ ] Step 2: Generate Threat Detection Opportunities (TDOs).
--   [ ] Step 3: Loop through ALL TDOs to generate synthetic events.
--   [ ] Step 4: Loop through ALL UDM events to evaluate rule coverage.
--   [ ] Step 5: For identified rules, check enablement and alerting status.
--   [ ] Step 6: Generate new rules for identified gaps.
+-   [ ] Step 3: In parallel, call generate synthetic events for all TDOs.
+-   [ ] Step 4: After ALL synthetic events are generated across all TDOs, call
+    evaluate_rule_coverage_long_running in parallel for each TDO, then loop
+    get_operation with a 60-second schedule timer until done is true for all
+    operations.
+-   [ ] Step 5: For identified rules, fetch and provide details.
+-   [ ] Step 6: Generate new rules ONLY for TDOs confirmed to have zero matching
+    rules in Step 4.
 -   [ ] Step 7: Provide a structured summary of findings and gaps.
--   [ ] Step 8: Ask the user to approve adding newly generated rules to their SecOps environment and create them.
+-   [ ] Step 8: Ask the user to approve adding newly generated rules to their
+    SecOps environment and create them.
 
 ## Detailed Steps
 
@@ -78,7 +83,12 @@ Copy this checklist and track progress for each iteration:
 
 For **every** TDO:
 
--   Call `generate_synthetic_events` using the TDO.
+-   Call `generate_synthetic_events` passing the TDO via the
+    `threatDetectionOpportunity` parameter.
+
+    -   The response contains `syntheticEvents`, where each event item includes
+        `rawLog`, `udm`, and `udmJson`. The `udmJson` field contains the
+        pre-formatted UDM JSON string that will be used for coverage evaluation.
 
 -   **Summary of Step:** Report the total number of synthetic UDM events
     generated for this TDO. Briefly describe the *types* of attacker behaviors
@@ -90,34 +100,103 @@ For **every** TDO:
 
 ### 4. Evaluate Rule Coverage (For ALL UDM Events)
 
-For **every** UDM event generated for a TDO:
+After ALL synthetic logs are generated for ALL TDOs across all
+`generate_synthetic_events` calls in Step 3:
 
--   Call `evaluate_rule_coverage` by providing the UDM event in valid JSON
-    format. Provide only the UDM event as a single, valid JSON object. You MUST
-    Provide each UDM event as a standard stringified JSON object within the
-    udmsJson list. Do not apply an additional layer of escaping to the JSON
-    string. Provide a standard JSON stringification with no extra backslashes.
+-   In parallel, call `evaluate_rule_coverage_long_running` **separately for
+    each TDO** (make one distinct parallel call per TDO; do NOT combine all TDOs
+    into one call).
 
--   **Summary of Step:** Report which `rule_id`s matched for this event, if any.
+    -   For each call corresponding to a specific TDO, pass the
+        `threatDetectionOpportunityEvents` parameter as a one-element list
+        containing an object with:
+        -   `threatDetectionOpportunityId`: The ID from the TDO object returned
+            by `generate_threat_detection_opportunity`.
+        -   `udmsJson`: A list of synthetic UDM event JSON strings generated for
+            that TDO.
+    -   For `udmsJson`, pass the list of `udmJson` strings extracted from the
+        `syntheticEvents` array returned by `generate_synthetic_events` in
+        Step 3. Do not attempt to manually convert or reformat `rawLog` or `udm`
+        objects into UDM JSON, and do not apply additional escaping or
+        backslashes.
+
+-   **Instructions for Polling with `get_operation`:**
+
+    -   Each call to `evaluate_rule_coverage_long_running` returns a
+        `google.longrunning.Operation` object containing an operation `name`
+        (e.g., `projects/.../operations/dea-12345`) and `done: false`. Because
+        you called `evaluate_rule_coverage_long_running` once for each TDO, you
+        will receive multiple operation names to track.
+    -   **Polling Strategy:** Use the `schedule` tool to set a 60-second (1
+        minute) one-shot timer (`DurationSeconds="60"`,
+        `TimerCondition="never"`, `Prompt="Poll get_operation status for all
+        pending operations"`) and stop calling tools for the turn. Upon
+        receiving the wakeup event, call `get_operation` for each ongoing
+        operation. Repeat every 1 minute until `done` is `true` for **ALL**
+        operations.
+        -   **Exception:** If the `schedule` tool is not available, check
+            `get_operation(name=...)` for each ongoing operation every 1 minute
+            using available delay tools, or poll across conversation turns. Do
+            NOT invoke `get_operation` in a continuous, immediate loop without
+            pauses.
+    -   When `done` is `true` for an operation, its `result.response` field will
+        contain an `EvaluateRuleCoverageLongRunningResponse` object.
+    -   `EvaluateRuleCoverageLongRunningResponse` contains `coverageResults`: a
+        list of `EvaluatedRuleCoverageResult` objects (each having
+        `matchedRule`, `feedbackId`, and `threatDetectionOpportunityId`).
+    -   Collect and inspect `coverageResults` across all completed responses to
+        determine which rules matched which TDOs. If `coverageResults` is empty
+        for a TDO, there is a coverage gap and you should call `generate_rules`
+        next.
+    -   **Strict Gate Requirement:** No downstream steps (Step 5 or Step 6) may
+        be initiated until `get_operation` returns `done: true` for **ALL**
+        coverage evaluation operations and all
+        `EvaluateRuleCoverageLongRunningResponse` payloads across all TDOs are
+        retrieved. Reason: Generating rules before coverage evaluation is
+        complete can lead to duplicate rules being created for threats that are
+        already covered by existing rules.
+
+-   **Summary of Step:** Report which rule IDs matched for this event, if any.
     If no rules matched, clearly state "No rules matched." Provide counts of
-    events evaluated. Don't output the full coverage evaluation JSON.
+    events evaluated. Do not output the full coverage evaluation JSON.
 
--   **Next Step:** The identified matched rules will be audited for their
-    enablement and alerting status.
+-   **Next Step:** The identified matched rules will be fetched and summarized
 
-### 5. Audit Rule Status
+### 5. Fetch Rule Summary
 
-For every distinct `rule_id` identified:
+For every distinct rule ID identified:
 
--   Call `get_rule` to check the rule configuration with CONFIG_ONLY view.
+-   Call `get_rule` to check the rule details.
 
--   **Summary of Step:** For each `rule_id`, state its enablement status (for
-    example, "Enabled", "Disabled") and alerting status (for example, "Alerting
-    Enabled", "Alerting Disabled").
+    -   **Default Value Handling:** Because Protobuf JSON serialization omits
+        boolean fields when they are set to `false`, if `alertingEnabled` is not
+        present in the response payload, assume that alerting is turned off
+        (`alertingEnabled: false`). Do not infer alerting status from other
+        parameters.
+    -   **Required Field Extraction:** Extract and record the following fields
+        from the `get_rule` response for each matched rule:
+        -   `ruleId` (the rule ID)
+        -   `displayName` (rule display name)
+        -   `owner` (rule owner or author)
+        -   `type` (rule type)
+        -   `alertingEnabled` (alerting status)
+
+-   **Summary of Step:** For each rule ID, report its rule display name, rule
+    owner, rule type, and whether alerting is enabled (`alertingEnabled: true`
+    or `false`) so these values are available for the **Coverage Eval** output
+    summary.
 
 -   **Next Step:** Review coverage gaps and potentially generate new rules.
 
 ### 6. Gap Mitigation
+
+**CRITICAL GATING RULE:** Do NOT invoke `generate_rules` until Step 4 is fully
+completed (`get_operation` returned `done: true` for ALL operations) AND the
+verified `coverageResults` confirm that no existing rules matched a given TDO.
+Calling `generate_rules` before operation completion for all TDOs is strictly
+prohibited. Reason: Generating rules before coverage evaluation is complete can
+lead to duplicate rules being created for threats that are already covered by
+existing rules.
 
 If gaps are found:
 
@@ -143,11 +222,11 @@ If gaps are found:
 ### 8. Rule Creation
 
 -   If new rules were generated in Step 6, present them to the user and ask if
-    they would like to create these rules in their SecOps environment. Allow
-    the user to approve or reject each rule. For each approved rule, use the
-    user's configured SecOps MCP server and the SecOps tool `create_rule` to add
-    the rule to their SecOps environment. Pass the YARA-L rule text string via
-    the `rule` parameter of the `create_rule` tool.
+    they would like to create these rules in their SecOps environment. Allow the
+    user to approve or reject each rule. For each approved rule, use the user's
+    configured SecOps MCP server and the SecOps tool `create_rule` to add the
+    rule to their SecOps environment. Pass the YARA-L rule text string via the
+    `rule` parameter of the `create_rule` tool.
 
 -   **Summary of Step:** Report which rules were approved and successfully
     created in the SecOps environment.
@@ -161,11 +240,12 @@ Provide a summary for each TDO processed:
 
 **TDO:** {tdo summary}
 
-**Coverage Eval:** [{rule_id, enablement status, alerting status}, ...]
+**Coverage Eval:** [{rule id, rule display name, rule owner, rule type, rule
+alerting enabled}, ...]
 
 **Missing Coverage:** [{summary, generated rule}] // Only if gaps exist
 
-**Errors:** [{if any any errors encountered, specify the tool}]
+**Errors:** [{if any errors encountered, specify the tool}]
 
 --------------------------------------------------------------------------------
 
@@ -173,9 +253,14 @@ Provide a summary for each TDO processed:
 
 -   **generate_threat_detection_opportunity**: Initial tool for threat analysis.
 -   **generate_synthetic_events**: Generates logs simulating the TDO.
--   **evaluate_rule_coverage**: Checks if existing rules detect the synthetic
-    UDMs.
--   **get_rule**: Use to check `alerting_enabled` and `enabled` status of SIEM
-    rules.
+-   **evaluate_rule_coverage_long_running**: Evaluates whether existing rules
+    detect the synthetic UDMs for a specific TDO via a long-running operation.
+    Must be called in parallel separately for each TDO after all synthetic
+    events across all TDOs have been generated.
+-   **get_operation**: Used to poll all long-running operations (like coverage
+    evaluation) until `done` is `true` for each operation.
+-   **get_rule**: Use to get details of the rule that detected the events. If
+    `alertingEnabled` is absent in the response, assume alerting is turned off
+    (`alertingEnabled: false`).
 -   **generate_rules**: Codifies detection logic for gaps.
 -   **create_rule**: Deploys the rule in the SecOps environment.

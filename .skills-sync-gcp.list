@@ -24,11 +24,11 @@ gcp-cloud-monitoring-list-time-series-request
 gcp-cloud-monitoring-metric-selection
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
-gcp-datalineage-bigquery-asset-impact-analysis
-gcp-datalineage-summary
 gcp-data-manager-api-audience-ingestion
 gcp-data-manager-api-event-ingestion
 gcp-data-manager-api-setup
+gcp-datalineage-bigquery-asset-impact-analysis
+gcp-datalineage-summary
 gcp-design
 gcp-design-deploy
 gcp-detection-engineering-coverage-evaluation

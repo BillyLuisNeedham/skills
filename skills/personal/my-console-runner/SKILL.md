@@ -157,13 +157,21 @@ One action, in order:
 4. Start the server detached so it outlives this session, from the engine repo:
 
    ```
-   setsid nohup bun run engine/server.ts --pool "<pool>" --port <port> \
+   nohup bun run engine/server.ts --pool "<pool>" --port <port> \
      >> "<pool>/runs/server.log" 2>&1 &
    echo $! > "<pool>/runs/server.pid"
    ```
 
 5. Probe `http://localhost:<port>/api/state` until it answers with a snapshot. Then open the
-   browser: `xdg-open http://localhost:<port>`.
+   browser with the platform's opener:
+
+   ```
+   if [ "$(uname)" = "Darwin" ]; then
+     open "http://localhost:<port>"
+   else
+     xdg-open "http://localhost:<port>"
+   fi
+   ```
 
 Report the URL, the log path and the pid path. To stop the server later, kill the pid in
 `runs/server.pid`.

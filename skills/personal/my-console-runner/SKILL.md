@@ -1,6 +1,6 @@
 ---
 name: my-console-runner
-description: Point the Console at an existing ticket pool. Detects the pool's facts, interviews for the same six answers my-issue-runner asks, writes console.json and AGENT.md into the pool directory, then starts the Console server bound to that pool and opens the browser. Use when Issues already exist and you want to drive them from the Console instead of the terminal runner.
+description: Point the Console at an existing ticket pool. Detects the pool's facts, interviews for my-issue-runner's six answers plus the pool port, writes console.json and AGENT.md into the pool directory, then starts the Console server bound to that pool and opens the browser. Use when Issues already exist and you want to drive them from the Console instead of the terminal runner.
 ---
 
 Issues already exist. This skill connects them to the Console.
@@ -51,7 +51,7 @@ changes into a commit that says it is the work of an Issue.
 
 ## 2. Ask
 
-Six questions, each with your recommendation attached:
+Seven questions, each with your recommendation attached:
 
 1. Which skill or skills drive each Issue, and whether that differs per Issue
 2. The default harness and model. If `~/.issue-runner` already exists, read it, confirm it, and
@@ -61,6 +61,11 @@ Six questions, each with your recommendation attached:
 4. The subagent roster, and a model for each
 5. Whether a reviewer exists, and what authority it has
 6. What counts as a checkpoint on this job specifically
+7. Which port the pool should pin. Probe 8787 at setup time; recommend it when it is free,
+   otherwise the next free port, or the pool's current pin on a re-interview. A concrete answer
+   becomes the `port` key in `console.json` and must bind exactly at launch or the engine
+   refuses loudly naming the port. `auto` (or next free) writes no key, so the engine hunts
+   8787-or-next-free at boot.
 
 Recommend the orchestrator's own model for every subagent unless there is a reason to go smaller.
 Delegating a skill to a cheaper model moves the substance of an Issue onto that model, which is
@@ -70,7 +75,7 @@ If a reviewer is wanted, recommend it check acceptance criteria only and never c
 that a failure buy the orchestrator one fix attempt before the Issue becomes a checkpoint carrying
 the disagreement in its brief. That bounds a weaker model's power to strand good work.
 
-The merge resolver is config, not a seventh question. Recommend the default harness for it, say
+The merge resolver is config, not a question. Recommend the default harness for it, say
 that an explicit `none` opts out so every conflict comes straight to the human, and write whatever
 is agreed as the `resolver` key.
 
@@ -103,7 +108,7 @@ stop for it.
 
 ## 4. Generate
 
-Write `console.json` into the pool directory. All six answers land here as data:
+Write `console.json` into the pool directory. All seven answers land here as data:
 
 ```json
 {
@@ -114,6 +119,7 @@ Write `console.json` into the pool directory. All six answers land here as data:
   "roster": "- deepseek (DeepSeek V4 Flash via opencode go): general-purpose subagent...",
   "agents": "{\"deepseek\": {\"description\": \"general-purpose subagent\", \"model\": \"...\"}}",
   "resolver": "opencode",
+  "port": 8787,
   "reviewer": "a reviewer checks acceptance criteria only; a failure buys one fix attempt",
   "checkpoint": "a device, an external write, an undecided decision, or a material guess"
 }
@@ -128,6 +134,9 @@ Write `console.json` into the pool directory. All six answers land here as data:
 - `resolver` is the merge resolver harness, or `none`. The engine falls back to the
   `~/.issue-runner` default when the key is absent, but write it explicitly so the pool's config
   says what it does.
+- `port` records the port answer when it is a concrete number. Omit it for `auto`, so the engine
+  hunts 8787-or-next-free at boot. A pinned port must bind exactly at launch or the engine
+  refuses loudly naming the port.
 - `reviewer` and `checkpoint` record answers 5 and 6. The engine does not read them; the agents
   do, through `AGENT.md`. Write both places from the one answer.
 
@@ -151,30 +160,52 @@ One action, in order:
 
 1. Build the Console if it is not built: `~/repos/learning/ai-agent-graphs/ui/dist/` must exist.
    If it does not, run `bun install` and `bun run build` in `~/repos/learning/ai-agent-graphs/ui/`.
-2. Pick a port: 8787, or the next free one if it is taken.
-3. If the pool's `runs/server.pid` names a live process, a server is already bound to this pool:
-   skip to opening the browser. One pool, one server.
-4. Start the server detached so it outlives this session, from the engine repo:
+2. Start the server detached so it outlives this session, from the engine repo. The engine
+   resolves the port itself: the `--port` flag wins, then the `console.json` pin, then
+   8787-or-next-free. Do not write `runs/server.pid`; that file is the engine's pool lock.
+   Run the launch as one command so the boot verdict is readable before the shell returns:
 
    ```
-   nohup bun run engine/server.ts --pool "<pool>" --port <port> \
+   mkdir -p "<pool>/runs"
+   : > "<pool>/runs/server.log"
+   nohup bun run engine/server.ts --pool "<pool>" \
      >> "<pool>/runs/server.log" 2>&1 &
-   echo $! > "<pool>/runs/server.pid"
+   spawned=$!
+   port=""
+   for _ in $(seq 1 40); do
+     if ! kill -0 "$spawned" 2>/dev/null; then
+       echo "The engine refused or failed at boot; its message:"
+       tail -n 5 "<pool>/runs/server.log"
+       exit 1
+     fi
+     port=$(sed -n 's/.*pool server on http:\/\/localhost:\([0-9]*\).*/\1/p' \
+       "<pool>/runs/server.log" | tail -n 1)
+     [ -n "$port" ] && break
+     sleep 0.25
+   done
    ```
 
-5. Probe `http://localhost:<port>/api/state` until it answers with a snapshot. Then open the
+   The log is truncated first so a boot line is always fresh: a relaunch must never read a
+   previous server's line and mistake it for a new boot.
+
+   A live pool is refused at boot with a message naming the live pid, its fleet-registry port
+   when known, and the pool directory. Surface that message verbatim and stop: open the running
+   console or kill the pid it names. One pool, one server, and the engine's lock is the truth.
+   An empty `$port` after the loop means the server is up but the pool is slow to boot; read
+   `runs/server.log` and report what it says.
+3. Probe `http://localhost:$port/api/state` until it answers with a snapshot. Then open the
    browser with the platform's opener:
 
    ```
    if [ "$(uname)" = "Darwin" ]; then
-     open "http://localhost:<port>"
+     open "http://localhost:$port"
    else
-     xdg-open "http://localhost:<port>"
+     xdg-open "http://localhost:$port"
    fi
    ```
 
-Report the URL, the log path and the pid path. To stop the server later, kill the pid in
-`runs/server.pid`.
+Report the URL and the log path. To stop the server later, kill the pid in `runs/server.pid`;
+the engine writes it when it claims the pool.
 
 Then stop. The run from here is the human's: tickets spawn real harnesses, checkpoints arrive as
 interrupts, and the first launch of a pool is theirs to watch.
@@ -183,6 +214,12 @@ interrupts, and the first launch of a pool is theirs to watch.
 
 Leave these alone rather than rediscovering them:
 
+- The pool lock: one server per pool, enforced at boot. `runs/server.pid` is the engine's file;
+  it claims it, refuses a live pool with a message naming the pid, the fleet-registry port when
+  known, and the pool directory, and clears it on a failed bind. The skill never reads or writes
+  it.
+- The port pin: `console.json`'s `port` key pins the pool's URL. A pinned port binds exactly at
+  launch or boot fails loudly naming the port; an unpinned pool hunts 8787-or-next-free at boot.
 - The spawn kernel is ported from `run.sh`: non-interactive invocation with stdin closed, the
   fullest auto-approve permission mode per harness, the prompt glued from driver skill, AGENT.md,
   chain and roster. opencode gets the driver through `--command`; cursor's launch line comes from
@@ -207,16 +244,16 @@ For the human. Written in Simplified Technical English.
 ### What you get
 
 Two files in your pool directory. `console.json` holds your interview answers as data: the default
-harness and model, per-ticket overrides, the subagent roster, the merge resolver, the reviewer and
-what counts as a checkpoint. `AGENT.md` tells each agent what the job is. The Console server reads
-both when it starts.
+harness and model, per-ticket overrides, the subagent roster, the merge resolver, the pool port,
+the reviewer and what counts as a checkpoint. `AGENT.md` tells each agent what the job is. The
+Console server reads both when it starts.
 
 To change the default harness or model for every pool, edit `~/.issue-runner`. To change them for
 one pool, edit that pool's `console.json`. To change one ticket, edit its entry under `assign`.
 
 ### How to start
 
-Point the skill at a pool: `/my-console-runner <path-to-pool>`. It checks the pool, asks six
+Point the skill at a pool: `/my-console-runner <path-to-pool>`. It checks the pool, asks seven
 questions, writes the two files, starts the server and opens your browser. Run it again on a
 configured pool to relaunch without the questions.
 

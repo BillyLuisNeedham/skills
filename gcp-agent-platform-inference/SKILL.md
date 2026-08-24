@@ -5,11 +5,13 @@ metadata:
 description: >-
   Connects to and performs inference with Google Cloud Agent Platform GenAI
   models, including First-Party Gemini models and Third-Party OpenMaaS models
-  (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for calling
-  Gemini or OpenMaaS models, authenticate with GenAI SDK, OpenAI SDK, or legacy
-  Agent Platform SDK, configure base URLs and global/regional endpoints, or troubleshoot
-  429 Resource Exhausted (DSQ), 400 User Validation, or 404 Not Found errors.
-  Don't use for deploying models to endpoints or for running model evaluations.
+  (Llama, DeepSeek, Qwen, etc.). Use when asked to perform inference, ask a
+  model a question, run a test prompt, execute chat completions, or generate
+  code for calling Gemini or OpenMaaS models, authenticate with GenAI SDK,
+  OpenAI SDK, or legacy Agent Platform SDK, configure base URLs and
+  global/regional endpoints, or troubleshoot 429 Resource Exhausted (DSQ), 400
+  User Validation, or 404 Not Found errors. Don't use for deploying models to
+  endpoints or for running model evaluations.
 ---
 
 # Agent Platform GenAI Inference Skill
@@ -36,19 +38,38 @@ read-only; other safety tiers are omitted):
     `client.embeddings.create`)**
     *   Requires **interactive confirmation** with 'Yes'/ 'No' options before
         executing model inference on behalf of the user, to prevent unexpected
-        cost or quota consumption. The confirmation prompt must clearly explain
-        the proposed inference execution and its key parameters (e.g., target
-        model ID, SDK choice, input prompt). Natural-language paraphrases
-        without specifying the parameters are NOT sufficient.
+        cost or quota consumption.
+    *   **Required Fields in Confirmation Card**: The confirmation prompt must
+        clearly explain the proposed inference execution and explicitly list all
+        of the following parameters:
+        *   **Project ID**: The Google Cloud project ID or number (e.g.
+            `123456789012`, `my-project`).
+        *   **Region / Location**: The target region (e.g. `us-central1`,
+            `global`).
+        *   **Model ID**: The exact model ID (e.g. `gemini-2.5-flash`,
+            `deepseek-ai/deepseek-v3.2-maas`).
+        *   **SDK**: The SDK choice (e.g. `Google GenAI SDK (google-genai)`,
+            `OpenAI SDK`).
+        *   **Input Prompt** (or **Input Image** / **Input Media**): The prompt
+            text or media URI.
+        *   Any additional generation parameters (e.g. `max_output_tokens`,
+            `response_schema`) if specified.
+        Natural-language paraphrases without explicitly listing these
+        parameters are NOT sufficient.
     *   **Same-turn restriction**: Do not execute the inference scripts or
         commands in the same turn as presenting the confirmation prompt. Stop
         and wait for the user's reply; only execute after explicit 'Yes' /
         approval.
-    *   **Gold Standard Example**: > I will perform model inference with the
-        following parameters. Please > confirm this information before I
-        proceed: > * **Model ID**: `deepseek-ai/deepseek-v3.2-maas` > * **SDK**:
-        OpenAI SDK (via Vertex AI Endpoint) > * **Input Prompt**: "Explain the
-        concept of quantum computing..." > Do you confirm? [Yes/No]
+    *   **Gold Standard Example**:
+        > I will perform model inference with the following parameters. Please
+        > confirm this information before I proceed:
+        > * **Project ID**: `my-project`
+        > * **Region**: `us-central1`
+        > * **Model ID**: `gemini-2.5-pro`
+        > * **SDK**: Google GenAI SDK (`google-genai`)
+        > * **Input Prompt**: "Summarize the plot of Hamlet in 3 sentences"
+        >
+        > Do you confirm? [Yes/No]
 
 ## Phase 0: Environment Setup
 
@@ -82,9 +103,9 @@ environment is correctly initialized by following these steps:
       || pip install -r scripts/requirements.txt
     ```
 
-    The pins in `scripts/requirements.txt` are a fallback for an environment
-    that does not already provide these SDKs; do not apply them on top of a
-    working environment.
+    `scripts/requirements.txt` is a fallback for an environment that does not
+    already provide these SDKs; do not install it on top of a working
+    environment.
 
 4.  **Verify Setup (Optional)**: Run all sample scripts at once to verify the
     environment is working end-to-end:
@@ -110,32 +131,84 @@ environment is correctly initialized by following these steps:
 > \[gemini-models-docs]:
 > https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate
 >
->
-> ## Workflow Decision Tree
 
-1.  **Model Family Identification**: Has the user specified whether they want to
-    call a **Gemini** (First-Party) model or an **OpenMaaS** (Third-Party, e.g.
-    Llama, DeepSeek, Qwen) model?
+## Parameter Grounding & Clarification Protocol (CRITICAL)
 
-    *   **No** -> Ask the user which model family they want to use. If they
-        provide a specific model name, infer the family from the name.
+Before preparing code or presenting a Tier R confirmation card, you MUST ensure
+all necessary parameters are grounded:
+
+1.  **Missing Model ID, Model Family, or SDK (CRITICAL)**:
+    *   If the user has **NOT** specified which model or model family to use
+        (e.g., "run a test prompt", "ask a generative AI model to...", "ask
+        DeepSeek a question" without model version), or has not specified the
+        SDK preference:
+    *   **NEVER** guess, volunteer, or default to a model (such as
+        `gemini-2.5-flash`, `gemini-2.5-pro`, or `deepseek-v3.2-maas`).
+        Proposing a defaulted model in a confirmation card without asking
+        violates parameter grounding.
+    *   **YOU MUST STOP AND ASK THE USER**: "Which model (or model family,
+        such as Gemini, Llama, DeepSeek, or Qwen) and SDK preference (such as
+        Google GenAI SDK or OpenAI SDK) would you like to use?" and ask for the
+        target region and project ID if not specified.
+    *   Only after the user specifies the model (and any missing SDK preference)
+        should you proceed to prepare the execution and present the Tier R
+        confirmation prompt.
+
+2.  **Missing Project ID or Region**:
+    *   If the user's project ID or region is not specified in the prompt or
+        conversation context, **ASK** the user for the project ID and region
+        (e.g. "Which project ID and region would you like to use?"). Do not
+        silently assume a project or region.
+    *   **OpenMaaS Locations**: OpenMaaS publisher models are hosted on `global`
+        (e.g. `deepseek-ai/deepseek-v3.2-maas`,
+        `meta/llama-3.3-70b-instruct-maas`) or regional endpoints such as
+        `us-central1` (e.g. `deepseek-ai/deepseek-r1-0528-maas`).
+        When configuring inference for OpenMaaS models, use the appropriate
+        endpoint:
+
+        *   Global: `https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/global/endpoints/openapi`
+        *   Regional: `https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi`
+
+        and explicitly reflect the region in the confirmation card and final
+        response.
+
+3.  **SDK Choice**:
+    *   If the user specifies a model but does not specify an SDK, use the
+        preferred SDK for that model family (GenAI SDK `google-genai` for
+        Gemini, OpenAI SDK `openai` for OpenMaaS).
+
+4.  **Sandbox Execution via Python (CRITICAL)**:
+    *   When executing model inference in the sandbox via `run_command`,
+        **ALWAYS** run Python code using the official SDKs (e.g., writing and
+        running a Python script with `google-genai`, `openai`, or `vertexai`).
+        Do not use raw curl commands for final inference execution.
+
+## Workflow Decision Tree
+
+1.  **Model Specified?**
+    *   **No** (user omitted model name/family) -> **Ask the user** which model
+        or model family, target region, and SDK preference they want to use.
+    *   **Underspecified** (e.g., user said "DeepSeek" or "Llama" without
+        version) -> **Ask the user** which specific model version they prefer
+        (e.g., `deepseek-ai/deepseek-r1-0528-maas`,
+        `deepseek-ai/deepseek-v3.2-maas`, `meta/llama-3.3-70b-instruct-maas`).
     *   **Yes** -> Proceed to Step 2.
 
-2.  **SDK Choice**: Which SDK does the user want to use?
-
-    *   **Gemini + GenAI SDK** (preferred for Gemini) -> Proceed to [1. Gemini
-        Models].
-    *   **Gemini + legacy Vertex AI SDK** -> Proceed to [1. Gemini Models].
-    *   **OpenMaaS + OpenAI SDK** (preferred for OpenMaaS) -> Proceed to [2.
-        OpenMaaS Models].
-    *   **OpenMaaS + GenAI SDK** -> Proceed to [2. OpenMaaS Models].
-    *   **Unsure** -> Default to the preferred SDK for the chosen family.
+2.  **Model Family & SDK Selection**:
+    *   **Gemini** (e.g., `gemini-2.5-pro`, `gemini-2.5-flash`) -> Preferred:
+        **GenAI SDK** (`google-genai`). Proceed to [1. Gemini Models].
+    *   **OpenMaaS** (e.g., `deepseek-ai/*`, `meta/llama-*`, `qwen/*`) ->
+        Preferred: **OpenAI SDK** (`openai`). Proceed to [2. OpenMaaS Models].
+    *   **Custom Endpoint** (numeric endpoint ID
+        `projects/.../endpoints/<id>`) -> Proceed to [4. Custom Endpoints].
 
 3.  **Troubleshooting**: Is the user reporting an error (429 Resource Exhausted,
-    400 User Validation, 404 Not Found, etc.)?
-
-    *   **Yes** -> Proceed to [3. Troubleshooting & Common Error Codes].
-    *   **No** -> Proceed with the SDK choice from Step 2.
+    400 User Validation, 404 Not Found, empty response due to token limits,
+    etc.)?
+    *   **Yes** -> Proceed to [5. Troubleshooting & Common Error Codes].
+    *   **No** -> Present Tier R confirmation prompt with all required fields
+        (Project ID, Region, Model ID, SDK, Input Prompt), wait for user
+        confirmation, then execute via Python SDK.
 
 ## 0.5 Region Availability Check for Publisher Endpoints (Gemini + LoRA base)
 
@@ -277,13 +350,12 @@ You **MUST** use a Google Cloud OAuth access token as the API key for the OpenAI
 SDK.
 
 ```python
-import google.auth
-from google.auth.transport.requests import Request
+import subprocess
 
 def get_gcp_access_token():
-    creds, _ = google.auth.default()
-    creds.refresh(Request())
-    return creds.token
+    return subprocess.check_output(
+        ["gcloud", "auth", "print-access-token"]
+    ).decode("utf-8").strip()
 ```
 
 > [!NOTE] Google Cloud access tokens typically expire after 1 hour. The
@@ -432,6 +504,28 @@ ID).
 > If you have a Llama / Gemma / etc. model deployed via Model Garden
 > "Deploy" (NOT the MaaS publisher product), follow this section — not
 > section 3.
+
+> [!IMPORTANT]
+>
+> **Active Endpoint Discovery & Single Source of Truth**:
+>
+> *   To check if a model or tuned Gemini adapter is deployed and ready for
+>     inference, run:
+>
+>     `gcloud ai endpoints list --project=<PROJECT_ID> --region=<REGION> --format=json`.
+>
+> *   **`gcloud ai endpoints list` is the ONLY authoritative source of active
+>     serving endpoints.**
+> *   Do NOT rely on historical `job.tunedModel.endpoint` identifiers from past
+>     `gcloud ai tuning-jobs list` records — those record where an endpoint was
+>     initially created during tuning, but if the endpoint was subsequently
+>     deleted, undeployed, or expired, it is no longer active.
+> *   If `gcloud ai endpoints list` returns empty `[]` or the requested tuned
+>     model is not deployed on any listed endpoint, report directly to the user
+>     that no active endpoint was found in that region and halt. **NEVER**
+>     hallucinate that historical/deleted endpoints are ready, and **NEVER**
+>     silently substitute the base model without explicit user instruction and a
+>     fresh Tier R confirmation prompt.
 
 > [!IMPORTANT]
 >
@@ -589,10 +683,13 @@ dedicated_dns = endpoint.gca_resource.dedicated_endpoint_dns  # empty if shared
 host = dedicated_dns if dedicated_dns else f"{REGION}-aiplatform.googleapis.com"
 base_url = f"https://{host}/v1/{endpoint_resource_name}"
 
-creds, _ = google.auth.default()
-creds.refresh(Request())
+import subprocess
 
-client = openai.OpenAI(base_url=base_url, api_key=creds.token)
+token = subprocess.check_output(
+    ["gcloud", "auth", "print-access-token"]
+).decode("utf-8").strip()
+
+client = openai.OpenAI(base_url=base_url, api_key=token)
 response = client.chat.completions.create(
     model="",  # endpoint determines the served model
     messages=[{"role": "user", "content": "Hello! Introduce yourself briefly."}],

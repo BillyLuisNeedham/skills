@@ -62,8 +62,11 @@ When handling a cost-related question:
         pods drive up billing regardless of whether the pod actively uses those
         CPU cycles or memory.
     -   **Standard Pricing**: Billed on provisioned node pool VMs (`e2`, `n4`,
-        `c3`, etc.) plus a cluster management fee ($0.10/hour). Idle nodes or
-        multiple low-utilization dev clusters drive excess infrastructure costs.
+        `c3`, etc.). Idle nodes or multiple low-utilization dev clusters drive
+        excess infrastructure costs.
+    -   **Cluster Management Fee**: ~$0.10/hour per cluster applies to BOTH
+        Standard and Autopilot modes. The free tier waives it for one eligible
+        cluster per billing account.
 -   **Credits & Discounts Impact**: When analyzing `cost` versus
     `cost_before_credits`, note that Committed Use Discounts (CUDs) and Spot VMs
     appear as credits or reduced rate charges in the billing export.
@@ -82,17 +85,23 @@ and pod resource consumption vs. requests:
 # View billing budgets for an account (requires Cost Management API)
 gcloud billing budgets list --billing-account={billing_account} --quiet
 
-# Verify/Enable GKE cost allocation on a cluster for namespace-level billing tracking
-gcloud container clusters update {cluster_name} \
-    --enable-cost-allocation \
-    --region {region}
-
 # View live node resource utilization across the cluster
 kubectl top nodes
 
 # View pod resource usage across namespaces (compare against requested limits to diagnose waste)
 kubectl top pods --all-namespaces --containers
 ```
+
+> **Warning — cluster mutation, not read-only:** Enabling GKE cost allocation
+> modifies the cluster. Get explicit user confirmation before running it, and
+> note that namespace/workload labels populate in the billing export only from
+> enablement onward (no historical backfill).
+>
+> ```bash
+> gcloud container clusters update {cluster_name} \
+>     --enable-cost-allocation \
+>     --region {region}
+> ```
 
 ## Applying Cost Optimizations
 
@@ -101,71 +110,13 @@ recommendation mode, adjusting CPU/memory to `P95 * 1.2`, configuring Spot VMs
 via `nodeSelector` or `ComputeClass`, enforcing `ResourceQuotas`, or selecting
 machine types and CUDs), use the **`gke-cost-optimization`** skill.
 
-## Example BigQuery Queries
+## BigQuery Query Templates
 
-Use these queries as templates to answer questions. All parameters (dataset,
-table, project, cluster, etc.) must be replaced with user values.
-
-### Cost of a Single Workload in a Single Cluster
-
-```sql
-bq query --nouse_legacy_sql '
-SELECT
-  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
-  SUM(cost) AS cost_before_credits
-FROM {billing_export_table} AS bqe
-WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
-  AND project.id = "{project_id}"
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-location" AND l.value = "{region}")
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name" AND l.value = "{cluster_name}")
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-namespace" AND l.value = "{namespace}")
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-workload-type" AND l.value = "{workload_type}")
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-workload-name" AND l.value = "{workload_name}")
-;
-'
-```
-
-### Cost of Each Workload in Each Cluster
-
-```sql
-bq query --nouse_legacy_sql '
-SELECT
-  project.id AS project_id,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-location" LIMIT 1) AS cluster_location,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name" LIMIT 1) AS cluster_name,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-namespace" LIMIT 1) AS k8s_namespace,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-type" LIMIT 1) AS k8s_workload_type,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-name" LIMIT 1) AS k8s_workload_name,
-  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
-  SUM(cost) AS cost_before_credits
-FROM {billing_export_table} AS bqe
-WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name")
-GROUP BY 1, 2, 3, 4, 5, 6
-ORDER BY 7 DESC
-LIMIT 10
-;
-'
-```
-
-### Cost Breakdown by Namespace in a Cluster
-
-```sql
-bq query --nouse_legacy_sql '
-SELECT
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-namespace" LIMIT 1) AS k8s_namespace,
-  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS net_cost,
-  SUM(cost) AS gross_cost
-FROM {billing_export_table} AS bqe
-WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
-  AND project.id = "{project_id}"
-  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name" AND l.value = "{cluster_name}")
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 10
-;
-'
-```
+Ready-to-adapt `bq query` templates — single workload cost, per-workload
+per-cluster breakdown, per-namespace breakdown — with the placeholder policy
+and defaults (30 days, `LIMIT 10`, `ORDER BY cost DESC`) are in
+[references/billing-queries.md](references/billing-queries.md). All parameters
+(dataset, table, project, cluster, etc.) must be replaced with user values.
 
 Note: Checking that the `goog-k8s-cluster-name` label exists scopes the total
 billing data specifically to GKE costs.

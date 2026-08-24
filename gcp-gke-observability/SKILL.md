@@ -15,8 +15,8 @@ This reference covers monitoring, logging, and metrics configuration for GKE.
 The golden path enables comprehensive observability including control-plane
 metrics.
 
-> **MCP Tools:** `gke:get_cluster`, `gke:list_k8s_events`, `gke:get_k8s_logs`,
-> `gke:get_k8s_cluster_info`, `gke:describe_k8s_resource`. **CLI-only:** `gcloud
+> **MCP Tools:** `get_cluster`, `list_k8s_events`, `get_k8s_logs`,
+> `get_k8s_cluster_info`, `describe_k8s_resource`. **CLI-only:** `gcloud
 > container clusters update --monitoring=...`, `gcloud logging read`
 
 ## Golden Path Observability Defaults
@@ -35,22 +35,51 @@ Setting                                             | Golden Path Value         
 The golden path adds three control-plane monitoring components not present in
 default clusters:
 
-| Component            | What It Monitors                                      |
-| -------------------- | ----------------------------------------------------- |
-| `APISERVER`          | API server request latency, error rates, admission    |
-:                      : webhook performance                                   :
-| `SCHEDULER`          | Scheduling latency, pending pods, scheduling failures |
-| `CONTROLLER_MANAGER` | Controller work queue depth, reconciliation latency   |
+| Component            | What It Monitors                                                       |
+| -------------------- | ---------------------------------------------------------------------- |
+| `APISERVER`          | API server request latency, error rates, admission webhook performance |
+| `SCHEDULER`          | Scheduling latency, pending pods, scheduling failures                  |
+| `CONTROLLER_MANAGER` | Controller work queue depth, reconciliation latency                    |
 
 These are critical for diagnosing cluster-level issues (slow API responses,
 scheduling delays, stuck controllers).
 
 ## Enabling Full Monitoring
 
+**Say this whenever you hand over a `--monitoring` command:**
+
+1.  **Control-plane metrics are NOT enabled by default.** State this outright in
+    your answer — do not leave it implied by the fact that you are supplying an
+    enable command. `API_SERVER`, `SCHEDULER`, and `CONTROLLER_MANAGER` are off
+    on every new cluster and collect nothing until explicitly turned on, and the
+    same is true of `DCGM`, `CADVISOR`, `KUBELET`, and kube-state (`POD`,
+    `DEPLOYMENT`, `STATEFULSET`, `DAEMONSET`, `HPA`, `STORAGE`, `JOBSET`).
+    `SYSTEM` is the only package on by default. A user asking "why are there no
+    API server metrics" has almost always simply never enabled them.
+2.  **The flag replaces, it does not append.** The set supplied to `--monitoring`
+    overrides the previous setting entirely, so omitting a component silently
+    turns it off. Always pass the full desired list, and always include `SYSTEM`
+    — it cannot be disabled while monitoring is on, and never on Autopilot.
+3.  **These metrics bill per sample ingested** via Managed Service for
+    Prometheus. Enabling the full suite on a large cluster is a real cost
+    increase; mention it rather than presenting the list as free.
+
+> **The gcloud flag and the API field use different spellings for the same
+> components.** Do not copy names between them:
+>
+> Component        | `gcloud --monitoring=` | `monitoringConfig` API enum
+> ---------------- | ---------------------- | ---------------------------
+> System           | `SYSTEM`               | `SYSTEM_COMPONENTS`
+> API server       | `API_SERVER`           | `APISERVER`
+> Controller mgr   | `CONTROLLER_MANAGER`   | `CONTROLLER_MANAGER`
+>
+> The remaining components share a spelling. Using an API enum in the CLI flag
+> (or the reverse) fails the command — this is a common and confusing error.
+
 ```bash
 # Enable golden path monitoring suite
 gcloud container clusters update <CLUSTER_NAME> --region <REGION> \
-  --monitoring=SYSTEM,API_SERVER,SCHEDULER,CONTROLLER_MANAGER,STORAGE,POD,DEPLOYMENT,STATEFULSET,DAEMONSET,HPA,CADVISOR,KUBELET,DCGM \
+  --monitoring=SYSTEM,API_SERVER,SCHEDULER,CONTROLLER_MANAGER,STORAGE,POD,DEPLOYMENT,STATEFULSET,DAEMONSET,HPA,JOBSET,CADVISOR,KUBELET,DCGM \
   --quiet
 
 # Enable Managed Prometheus
@@ -77,19 +106,15 @@ querying.
 
 **Key GKE metrics:**
 
-| Metric                                  | Source             | Use           |
-| --------------------------------------- | ------------------ | ------------- |
-| `container_cpu_usage_seconds_total`     | cAdvisor           | Pod CPU usage |
-| `container_memory_working_set_bytes`    | cAdvisor           | Pod memory    |
-:                                         :                    : usage         :
-| `kube_pod_status_phase`                 | kube-state-metrics | Pod lifecycle |
-| `apiserver_request_duration_seconds`    | API Server         | Control plane |
-:                                         :                    : latency       :
-| `scheduler_scheduling_duration_seconds` | Scheduler          | Scheduling    |
-:                                         :                    : performance   :
-| `node_cpu_seconds_total`                | Kubelet            | Node CPU      |
-| `DCGM_FI_DEV_GPU_UTIL`                  | DCGM               | GPU           |
-:                                         :                    : utilization   :
+| Metric                                            | Source             | Use                    |
+| -------------------------------------------------- | ------------------ | ---------------------- |
+| `container_cpu_usage_seconds_total`                | cAdvisor           | Pod CPU usage          |
+| `container_memory_working_set_bytes`               | cAdvisor           | Pod memory usage       |
+| `kube_pod_status_phase`                            | kube-state-metrics | Pod lifecycle          |
+| `apiserver_request_duration_seconds`               | API Server         | Control plane latency  |
+| `scheduler_scheduling_attempt_duration_seconds`    | Scheduler          | Scheduling performance |
+| `kubernetes.io/node/cpu/core_usage_time`           | Cloud Monitoring   | Node CPU               |
+| `DCGM_FI_DEV_GPU_UTIL`                             | DCGM               | GPU utilization        |
 
 ## Live Resource Usage (kubectl-only)
 
@@ -149,6 +174,11 @@ High GPU utilization    | `DCGM_FI_DEV_GPU_UTIL`                              | 
 PVC near capacity       | `kubelet_volume_stats_used_bytes / capacity`        | > 85%
 Scheduling failures     | `scheduler_schedule_attempts_total{result="error"}` | > 0
 
+> **Prerequisite:** The `kube_*` series above (e.g., `kube_pod_status_phase`,
+> `kube_pod_container_status_restarts_total`, `kube_node_status_condition`)
+> come from **kube-state-metrics**, which GKE does not collect by default.
+> Deploy the Managed Prometheus kube-state-metrics package first.
+
 ### Proposing Dashboards & Alerts (Production Rules)
 
 When designing or proposing alerting and dashboard strategies for GKE:
@@ -197,6 +227,18 @@ architectures and performance-sensitive workloads.
 -   **Cloud Profiler**: Add the Cloud Profiler agent to your app. Profiles CPU
     and memory usage in production with low overhead. Identifies hotspots and
     compares across versions.
+
+**Recent additions:**
+
+-   **Managed OpenTelemetry for GKE (Preview)**: Managed in-cluster OTLP
+    endpoint plus auto-instrumentation for traces, metrics, and logs. Requires
+    GKE 1.34.1-gke.2178000+; enable with `gcloud beta container clusters
+    update ... --managed-otel-scope=COLLECTION_AND_INSTRUMENTATION_COMPONENTS`.
+-   **PSI (Pressure Stall Information) metrics**: cAdvisor
+    `container_pressure_{cpu,memory,io}_{waiting,stalled}_seconds_total` series
+    (beta in Kubernetes 1.34) can be collected via a Managed Prometheus
+    `ClusterNodeMonitoring` resource; GKE's documented collection path requires
+    GKE 1.35+.
 
 ## LQL Query Examples
 

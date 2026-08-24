@@ -56,11 +56,14 @@ CAUSE THE APPLICATION TO CRASH.
 
 2.  **Register for ad event callbacks**
     -   [ ] Set the `adEventCallback` on the `RewardedAd` object.
-        *   Drop the reference to the rewarded ad when the ad is dismissed
-            or fails to show.
+        *   Drop the reference to the rewarded ad when the ad is dismissed or
+            fails to show.
 
-3.  **Add an opt-in UI element** to give users the choice to watch the rewarded
-    ad in exchange for an in-app reward.
+3.  **Add a UI element to view the ad for a reward**
+    *   Rewarded ads **must never be shown automatically**. Users must
+        explicitly opt in.
+    *   Add a UI element, such as a button, that shows the ad upon user
+        interaction.
 
 4.  **Show the ad**
     *   The `show()` method requires an `OnUserEarnedRewardListener`.
@@ -70,9 +73,8 @@ CAUSE THE APPLICATION TO CRASH.
     -   [ ] Run `gradle build -x test` to confirm a successful clean build.
         Resolve any GMA SDK related compile errors.
 
-#### Troubleshooting
+### Links
 
-**ONLY** if you exhaust your internal knowledge and not able to complete the
-workflow steps, read
-https://developers.google.com/admob/android/next-gen/rewarded.md.txt and try
-again.
+Additional documentation:
+
+-   https://developers.google.com/admob/android/next-gen/rewarded.md.txt

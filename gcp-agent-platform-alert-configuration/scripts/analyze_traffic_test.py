@@ -21,34 +21,18 @@ import datetime
 import json
 import os
 import sys
-
-
 import time
 import unittest
 from unittest import mock
 
 import analyze_traffic  # pytype: disable=import-error
+import mock_traffic_data  # pytype: disable=import-error
 
 
 class AnalyzeTrafficTest(unittest.TestCase):
 
-  def setUp(self):
-    super().setUp()
-    self.mock_data_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "_internal"
-    )
-    if not os.path.exists(self.mock_data_dir):
-      raise FileNotFoundError(
-          f"Could not find mock data directory: {self.mock_data_dir}"
-      )
-
-  def _load_mock_data(self, filename):
-    filepath = os.path.join(self.mock_data_dir, filename)
-    with open(filepath, "r") as f:
-      return json.load(f)
-
   def test_classify_seasonal(self):
-    data = self._load_mock_data("mock_seasonal.json")
+    data = mock_traffic_data.SEASONAL_TRAFFIC
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Seasonal / Cyclical")
     self.assertEqual(
@@ -57,13 +41,13 @@ class AnalyzeTrafficTest(unittest.TestCase):
     )
 
   def test_classify_steady(self):
-    data = self._load_mock_data("mock_steady.json")
+    data = mock_traffic_data.STEADY_TRAFFIC
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Steady / Consistent")
     self.assertEqual(results["recommended_algorithm"], "1w Z-Score Baseline")
 
   def test_classify_bursty(self):
-    data = self._load_mock_data("mock_bursty.json")
+    data = mock_traffic_data.BURSTY_TRAFFIC
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Bursty / Inconsistent")
     self.assertEqual(results["recommended_algorithm"], "Moving Averages")
@@ -89,24 +73,26 @@ class AnalyzeTrafficTest(unittest.TestCase):
     self.assertEqual(results["recommended_algorithm"], "1w Z-Score Baseline")
 
   def test_classify_very_low_constant_traffic(self):
-    # Constant 0.005 traffic (below 0.01 zero threshold) should still be Steady/Consistent
-    # due to mean_last being non-zero (0.005 != 0.0)
+    # Constant 0.005 traffic (below 0.01 zero threshold) should still be
+    # Steady/Consistent due to mean_last being non-zero (0.005 != 0.0)
     data = [0.005] * 4032
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Steady / Consistent")
     self.assertEqual(results["recommended_algorithm"], "1w Z-Score Baseline")
 
   def test_classify_near_zero_spike_falls_to_steady(self):
-    # 4031 zeros and a single 0.05 value. mean_last is 0.05/2016 = 0.0000248 <= 0.0001,
-    # so variance_ratio is forced to 0.0, and it falls back to Steady/Consistent.
+    # 4031 zeros and a single 0.05 value. mean_last is 0.05/2016 = 0.0000248,
+    # which is <= 0.0001, so variance_ratio is forced to 0.0, and it falls back
+    # to Steady/Consistent.
     data = [0.0] * 4031 + [0.05]
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Steady / Consistent")
     self.assertEqual(results["recommended_algorithm"], "1w Z-Score Baseline")
 
   def test_classify_single_spike_bursty(self):
-    # 4031 zeros and a single 0.5 value. mean_last is 0.5/2016 = 0.000248 > 0.0001,
-    # so variance_ratio is computed (~44.88 > 2.0) and it classifies as Bursty/Inconsistent.
+    # 4031 zeros and a single 0.5 value. mean_last is 0.5/2016 = 
+    # 0.000248 > 0.0001, so variance_ratio is computed (~44.88 > 2.0) and it
+    # classifies as Bursty/Inconsistent.
     data = [0.0] * 4031 + [0.5]
     results = analyze_traffic.compute_metrics_and_classify(data)
     self.assertEqual(results["profile"], "Bursty / Inconsistent")

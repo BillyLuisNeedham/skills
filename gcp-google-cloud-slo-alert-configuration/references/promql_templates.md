@@ -5,15 +5,17 @@ windows.
 
 ## Table of Contents
 
--   [General Templates](#general-templates) (lines 18-213)
-    -   Single Window Templates (lines 20-64)
-    -   Multi-Window Templates (lines 66-134)
-    -   Window-Based Templates (lines 136-213)
--   [System Templates](#system-templates) (lines 214-328)
-    -   Cloud Run Revision Availability (lines 216-243)
-    -   Vertex AI Reasoning Engine Availability (lines 245-269)
-    -   App Hub Service Availability (lines 271-296)
-    -   Cloud Run Revision (Filtered) (lines 298-328)
+-   [General Templates](#general-templates) (lines 20-215)
+    -   Single Window Templates (lines 22-66)
+    -   Multi-Window Templates (lines 68-136)
+    -   Window-Based Templates (lines 138-215)
+-   [System Templates](#system-templates) (lines 216-330)
+    -   Cloud Run Revision Availability (lines 218-245)
+    -   Vertex AI Reasoning Engine Availability (lines 247-271)
+    -   App Hub Service Availability (lines 273-298)
+    -   Cloud Run Revision (Filtered) (lines 300-330)
+-   [Terraform Alert Policy Template](#terraform-alert-policy-template) (lines
+    331-360)
 
 ## General Templates
 
@@ -324,4 +326,34 @@ and
     )
   ) > (1 - 0.99) * 14.4
 )
+```
+
+## Terraform Alert Policy Template
+
+When generating Terraform configurations for SLO alert policies, wrap the PromQL
+query in a `google_monitoring_alert_policy` resource with
+`condition_prometheus_query_language`, and include the required `user_labels`:
+
+```terraform
+resource "google_monitoring_alert_policy" "slo_burn_rate_alert" {
+  project      = var.project_id
+  display_name = "[SLO] $${var.service_name} - Burn Rate Alert"
+  combiner     = "OR"
+
+  conditions {
+    display_name = "Burn Rate Condition"
+    condition_prometheus_query_language {
+      query    = <<EOT
+{promql_query}
+EOT
+      duration = "300s" # Omit duration for lookback windows > 25h (e.g., 3d)
+    }
+  }
+
+  user_labels = {
+    created-with-google-skill = "google-cloud-slo-alert-configuration"
+  }
+
+  notification_channels = var.notification_channels
+}
 ```

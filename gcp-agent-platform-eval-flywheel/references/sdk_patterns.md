@@ -1,6 +1,6 @@
 # Agent Platform Evaluation SDK Patterns
 
-Code patterns for common evaluation scenarios using `agentplatform._genai.evals`.
+Code patterns for common evaluation scenarios using `agentplatform._genai.evals`
 
 ## Initialization
 
@@ -254,8 +254,8 @@ for case in result.eval_case_results:
 
 Evaluate agents built with the
 [Managed Agents API](https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/managed-agents).
-This pattern covers the full workflow: generate scenarios, run inference, and
-evaluate — all using the agent's resource name.
+This pattern covers the full workflow: generate scenarios, run inference,
+and evaluate — all using the agent's resource name.
 
 ```python
 import agentplatform
@@ -275,7 +275,7 @@ scenarios = client.evals.generate_conversation_scenarios(
 )
 scenarios.show()
 
-# Step 2: Run inference — execute the agent against each scenario.
+# Step 2: Run inference, execute the agent against each scenario.
 inference_results = client.evals.run_inference(
     agent=AGENT_RESOURCE,
     src=scenarios,

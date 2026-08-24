@@ -128,52 +128,54 @@ echo "$PODS_JSON" | jq -r '
 
 # 8. Node pool min size
 section 'Node pool at minimum size floor'
-# GKE cluster autoscaler exposes pool minimums via the cluster-autoscaler-status ConfigMap.
-# This avoids needing gcloud auth or guessing cluster names from the kube context.
-CA_STATUS=$(kubectl get configmap cluster-autoscaler-status -n kube-system -o jsonpath='{.data.status}' 2>/dev/null || true)
-if [[ -n "$CA_STATUS" ]]; then
-  echo "$CA_STATUS" | awk '
-    /^  Name:/ { pool=$2 }
-    /^  Health:/ {
-      target = ""; min = ""
-      if (match($0, /cloudProviderTarget=[0-9]+/)) {
-         split(substr($0, RSTART, RLENGTH), t, "=")
-         target = t[2]
-      }
-      if (match($0, /minSize=[0-9]+/)) {
-         split(substr($0, RSTART, RLENGTH), m, "=")
-         min = m[2]
-      }
-      if (target != "" && min != "" && target <= min) {
-         print pool "\t(blocked: current nodes (" target ") is at or below min-nodes (" min "))"
-      }
-    }
-  ' | column -t -s $'\t' || echo '(none)'
-else
-  # Fallback to gcloud if configmap is unavailable (e.g. lack of RBAC)
-  CONTEXT=$(kubectl config current-context 2>/dev/null || echo "")
-  if [[ "$CONTEXT" =~ ^gke_([^_]+)_([^_]+)_(.+)$ ]]; then
-    PROJECT="${BASH_REMATCH[1]}"
-    LOCATION="${BASH_REMATCH[2]}"
-    CLUSTER="${BASH_REMATCH[3]}"
-    POOLS_JSON=$(gcloud container node-pools list --cluster="$CLUSTER" --location="$LOCATION" --project="$PROJECT" --format="json(name,autoscaling.minNodeCount)" 2>/dev/null || echo "[]")
-    if [[ "$POOLS_JSON" != "[]" ]]; then
-      echo "$NODES_JSON" | jq -r '.items[] | .metadata.labels["cloud.google.com/gke-nodepool"]' | grep -v "^null$" | sort | uniq -c > .tmp_pool_counts.$$ || true
-      
-      echo "$POOLS_JSON" | jq -r '.[] | "\(.name)\t\(.autoscaling.minNodeCount // 0)"' | while IFS=$'\t' read -r POOL MIN_NODES; do
-        if [[ -n "$MIN_NODES" && "$MIN_NODES" != "null" && "$MIN_NODES" -gt 0 ]]; then
-          CURRENT=$(grep " $POOL$" .tmp_pool_counts.$$ | awk '{print $1}')
-          if [[ -n "$CURRENT" && "$CURRENT" -le "$MIN_NODES" ]]; then
-            echo -e "$POOL\t(blocked: current nodes ($CURRENT) is at or below min-nodes ($MIN_NODES))"
-          fi
+# GKE's managed cluster autoscaler runs on the control plane and does NOT expose
+# the cluster-autoscaler-status ConfigMap, so gcloud is the primary path here.
+CONTEXT=$(kubectl config current-context 2>/dev/null || echo "")
+if [[ "$CONTEXT" =~ ^gke_([^_]+)_([^_]+)_(.+)$ ]]; then
+  PROJECT="${BASH_REMATCH[1]}"
+  LOCATION="${BASH_REMATCH[2]}"
+  CLUSTER="${BASH_REMATCH[3]}"
+  POOLS_JSON=$(gcloud container node-pools list --cluster="$CLUSTER" --location="$LOCATION" --project="$PROJECT" --format="json(name,autoscaling.minNodeCount)" 2>/dev/null || echo "[]")
+  if [[ "$POOLS_JSON" != "[]" ]]; then
+    echo "$NODES_JSON" | jq -r '.items[] | .metadata.labels["cloud.google.com/gke-nodepool"]' | grep -v "^null$" | sort | uniq -c > .tmp_pool_counts.$$ || true
+
+    echo "$POOLS_JSON" | jq -r '.[] | "\(.name)\t\(.autoscaling.minNodeCount // 0)"' | while IFS=$'\t' read -r POOL MIN_NODES; do
+      if [[ -n "$MIN_NODES" && "$MIN_NODES" != "null" && "$MIN_NODES" -gt 0 ]]; then
+        CURRENT=$(grep " $POOL$" .tmp_pool_counts.$$ | awk '{print $1}')
+        if [[ -n "$CURRENT" && "$CURRENT" -le "$MIN_NODES" ]]; then
+          echo -e "$POOL\t(blocked: current nodes ($CURRENT) is at or below min-nodes ($MIN_NODES))"
         fi
-      done | column -t -s $'\t' || echo '(none)'
-      rm -f .tmp_pool_counts.$$
-    else
-      echo "(Could not fetch node pool details via gcloud)"
-    fi
+      fi
+    done | column -t -s $'\t' || echo '(none)'
+    rm -f .tmp_pool_counts.$$
   else
-    echo "(Skipping node pool limits check: missing RBAC for ConfigMap and kube context is not in gke_PROJECT_LOCATION_CLUSTER format for gcloud fallback)"
+    echo "(Could not fetch node pool details via gcloud)"
+  fi
+else
+  # Fallback: SELF-MANAGED (open-source, in-cluster) cluster autoscaler only.
+  # Those deployments publish pool minimums via the cluster-autoscaler-status
+  # ConfigMap in kube-system; GKE never creates this ConfigMap.
+  CA_STATUS=$(kubectl get configmap cluster-autoscaler-status -n kube-system -o jsonpath='{.data.status}' 2>/dev/null || true)
+  if [[ -n "$CA_STATUS" ]]; then
+    echo "$CA_STATUS" | awk '
+      /^  Name:/ { pool=$2 }
+      /^  Health:/ {
+        target = ""; min = ""
+        if (match($0, /cloudProviderTarget=[0-9]+/)) {
+           split(substr($0, RSTART, RLENGTH), t, "=")
+           target = t[2]
+        }
+        if (match($0, /minSize=[0-9]+/)) {
+           split(substr($0, RSTART, RLENGTH), m, "=")
+           min = m[2]
+        }
+        if (target != "" && min != "" && target <= min) {
+           print pool "\t(blocked: current nodes (" target ") is at or below min-nodes (" min "))"
+        }
+      }
+    ' | column -t -s $'\t' || echo '(none)'
+  else
+    echo "(Skipping node pool limits check: kube context is not in gke_PROJECT_LOCATION_CLUSTER format for gcloud, and no self-managed cluster-autoscaler-status ConfigMap found)"
   fi
 fi
 
@@ -194,8 +196,8 @@ Next steps:
   - Node-level blocks: remove the "scale-down-disabled" annotation to allow
     the autoscaler to consider the node for removal.
   - System pods: isolate non-DaemonSet kube-system pods to a "system" pool
-    using the namespace annotation:
-    cloud.google.com/default-compute-class-non-daemonset: "system-class"
+    using the namespace label:
+    kubectl label ns kube-system cloud.google.com/default-compute-class-non-daemonset=system-class
 
 For per-node scale-down reasons from the autoscaler itself, run:
   ./assets/log-autoscaler-events.sh <cluster-name>

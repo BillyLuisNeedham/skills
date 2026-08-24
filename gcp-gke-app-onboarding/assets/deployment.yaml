@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: node-app-deployment
+  namespace: my-app # Replace with your namespace
   labels:
     app: node-app
 spec:
@@ -17,19 +18,24 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 10001
+        # Matches the `node` user (uid/gid 1000) set via USER in the Dockerfile
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
       - name: node-app
-        # Replace <IMAGE_PATH> with your actual container image path
-        # e.g., us-docker.pkg.dev/my-project/my-repo/node-app@sha256:0123456789abcdef...
-        image: gcr.io/my-project/node-app@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        # Replace with your actual Artifact Registry image path and real digest,
+        # e.g., us-docker.pkg.dev/<PROJECT_ID>/<REPO>/node-app@sha256:<DIGEST>
+        image: us-docker.pkg.dev/my-project/my-repo/node-app@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
         ports:
         - containerPort: 8080
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         resources:
           requests:
             cpu: "100m"
@@ -45,7 +51,7 @@ spec:
           periodSeconds: 5
         readinessProbe:
           httpGet:
-            path: /healthz
+            path: /readyz
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5
@@ -54,6 +60,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: node-app-service
+  namespace: my-app # Replace with your namespace
 spec:
   selector:
     app: node-app
@@ -61,4 +68,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
-  type: LoadBalancer
+  # ClusterIP for internal access; for external exposure use the Gateway API —
+  # see the gke-service-networking skill
+  type: ClusterIP

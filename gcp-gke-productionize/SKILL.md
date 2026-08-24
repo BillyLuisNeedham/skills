@@ -2,7 +2,7 @@
 name: gke-productionize
 metadata:
   category: Containers
-description: Orchestrates comprehensive production readiness reviews and assessments for GKE clusters and workloads across scalability, security, reliability, observability, backup/DR, and cost optimization. Use when asked to productionize, prepare, assess, audit, or review a GKE cluster or workload before going live to production. Don't use for deep-dive single-domain implementation (use specific domain skills like gke-scaling, gke-platform-security, gke-workload-security, gke-service-networking, gke-reliability instead).
+description: Orchestrates comprehensive production readiness reviews and assessments for GKE clusters and workloads across scalability, security, reliability, observability, backup/DR, and cost optimization. Use when asked to productionize, prepare, assess, audit, or review a GKE cluster or workload before going live to production. Don't use for deep-dive single-domain implementation (use specific domain skills like gke-workload-scaling, gke-platform-security, gke-workload-security, gke-service-networking, gke-reliability instead).
 ---
 
 # GKE Productionize Skill
@@ -10,7 +10,8 @@ description: Orchestrates comprehensive production readiness reviews and assessm
 This skill acts as a high-level orchestrator for preparing a GKE cluster and its
 workloads for production readiness.
 
-> [!IMPORTANT] This is a **meta-skill** or **orchestrator skill**. You are
+> [!IMPORTANT]
+> This is a **meta-skill** or **orchestrator skill**. You are
 > expected to invoke and run many other specialized skills listed in this
 > document as part of the overall productionization process. Do not attempt to
 > implement all production readiness features directly within this skill;
@@ -37,8 +38,13 @@ Run these commands to understand the cluster setup:
 
 -   Check cluster details: `gcloud container clusters describe {cluster_name}
     --location {location} --project {project}`
--   Check for Autopilot vs Standard: Look for `autopilot: true` in the describe
-    output.
+-   Check for Autopilot vs Standard: Look for the following block in the
+    describe output:
+
+    ```yaml
+    autopilot:
+      enabled: true
+    ```
 -   Check release channel: Look for `releaseChannel`.
 
 #### Workload Discovery
@@ -124,11 +130,52 @@ Ensure efficient use of resources.
 -   **Action**: You MUST run the `gke-cost-optimization` skill for strategies on
     rightsizing, quotas, and Spot VMs.
 
+#### I. Upgrades & Maintenance Posture
+
+Ensure a safe, predictable upgrade posture.
+
+-   **Action**: You MUST run the `gke-upgrades` skill for release channel
+    selection, maintenance windows/exclusions, and node pool upgrade strategy.
+
+#### J. Golden Path Defaults Audit
+
+Ensure the cluster configuration matches recommended defaults.
+
+-   **Action**: You MUST run the `gke-golden-path` skill to compare the cluster
+    against golden path defaults and report deviations with severity and
+    remediation.
+
 ### 3. Production Readiness Scoring
 
 After the assessment, provide a summary report with a RAG (Red, Amber, Green)
 status for each area and an overall readiness score. This helps prioritize
 remediation efforts.
+
+Apply this rubric deterministically so repeated assessments of the same
+environment produce the same result:
+
+1.  **Per-domain criteria**: For each assessed domain (A-J), list the concrete
+    checks performed (from the domain skill's guidance) and classify each check
+    as **pass**, **fail-critical** (production-blocking, e.g., no resource
+    requests, no backups for stateful data, public control plane in a locked
+    down environment), or **fail-minor** (improvement, e.g., missing VPA
+    recommendations, no Spot usage for batch).
+2.  **RAG mapping (per domain)**:
+    -   **Red** = one or more fail-critical checks.
+    -   **Amber** = no fail-critical, but one or more fail-minor checks.
+    -   **Green** = all checks pass.
+3.  **Domain score**: Green = 100, Amber = 50, Red = 0.
+4.  **Weighted overall score**: weight Security, Reliability, and Backup/DR at
+    2x; all other assessed domains at 1x. Overall score = sum(domain score x
+    weight) / sum(weights), rounded to the nearest integer. Exclude domains
+    that are not applicable (e.g., Backup/DR for fully stateless workloads) from
+    both sums and note the exclusion.
+5.  **Readiness verdict**: >= 90 with no Red domains = "Production ready";
+    70-89 with no Red domains = "Ready with follow-ups"; anything else =
+    "Not production ready".
+
+In the report, show the per-domain check lists, RAG status, weights, and the
+computed overall score.
 
 ## Adaptability Guidelines
 

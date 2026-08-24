@@ -48,6 +48,16 @@ the requirements, and outputs a Terraform configuration.
     all fields left blank, apply the recommended defaults defined in the "SRE
     Best Practice Suggestion" of each step.
 
+*   **User Labels**: Include a `user_labels` block in all
+    `google_monitoring_alert_policy` resources to track policies created by this
+    skill:
+
+    ```terraform
+    user_labels = {
+      created-with-google-skill = "google-cloud-slo-alert-configuration"
+    }
+    ```
+
 *   **Terraform Output**: Write the generated observability configuration ONLY
     as Terraform (`.tf`) files using the `google_monitoring_alert_policy`
     resource and `condition_prometheus_query_language` resources.
@@ -215,9 +225,15 @@ the requirements, and outputs a Terraform configuration.
     `Window-Based` template for window-based SLOs.
 2.  Populate the template with the `ServiceScope` labels, `ServiceLevel`
     targets, and `ServiceLevelIndicator` metrics.
-3.  Wrap it in Terraform (`google_monitoring_alert_policy`).
+3.  Wrap it in Terraform (`google_monitoring_alert_policy`), ensuring the
+    `user_labels` block includes `created-with-google-skill =
+    "google-cloud-slo-alert-configuration"`.
 4.  Present the `.tf` block with a plain English explanation of the math.
-5.  **CRITICAL:** Explicitly warn the user in the final summary if no
+5.  In the final summary, inform the user that the alert policies have been
+    tagged with the `created-with-google-skill =
+    "google-cloud-slo-alert-configuration"` user label to track policies created
+    by this skill.
+6.  **CRITICAL:** Explicitly warn the user in the final summary if no
     notification channels are configured. Inform them that you can assist with
     setting those up if they would like.
 

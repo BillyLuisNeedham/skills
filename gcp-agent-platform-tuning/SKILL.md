@@ -278,7 +278,7 @@ environment: they would downgrade packages other tools may share.
         you **MUST** present the candidates to the user and ask them to select
         one. You **MUST** stop tool execution immediately after reporting the
         missing file or presenting candidates, and wait for the user's response.
-        Do **NOT** ask for 80/20 validation split permission, and do **NOT**
+        Do **NOT** ask for 90/10 validation split permission, and do **NOT**
         attempt to upload the dataset before receiving a valid dataset file
         selection from the user.
     *   **If the file is found and verified**, proceed to Step 1.1 Formatting &
@@ -315,9 +315,12 @@ environment: they would downgrade packages other tools may share.
     `scripts/prepare_dataset.py` to convert.
 -   **Validation Split Confirmation**: If the user only provides a training
     dataset, **you must prompt the user** to seek permission to split the
-    training dataset 80/20 to form a validation dataset (using
-    `--validation_split 0.2`). If they agree, proceed with the split. If they
-    decline, just use the training dataset without a validation dataset.
+    training dataset 90/10 to form a validation dataset (using
+    `--validation_split 0.1`). If they agree, proceed with the split. If they
+    decline, just use the training dataset without a validation dataset. Do
+    **NOT** offer an 80/20 split; the tuning service rejects it, for the reason
+    given in
+    [Data Preparation Guide](references/data_prep.md#sizing-the-validation-split).
 -   **Validation**: If data is already in JSONL, validate it before uploading.
     Simply having a `.jsonl` extension is not enough. You must verify that the
     content schema is valid for tuning (e.g. correct system/user/model roles).
@@ -394,6 +397,10 @@ Output: `{"models": [...], "total_count": N, "truncated": bool}`.
         --epochs epochs
     ```
 
+    `--model` takes either the display name (`Qwen 3 8B`) or the same resource
+    name you pass to `--base_model` (`qwen/qwen3@qwen3-8b`), so the value chosen
+    in Step 2.1 can be reused as-is.
+
 > [!NOTE] **Handling Missing Dataset Errors:** If `scripts/calculate_cost.py`
 > fails because the dataset file (e.g. `my_data.jsonl` or `dummy_data.jsonl`)
 > cannot be found, you **MUST** inform the user that the dataset file does not
@@ -449,6 +456,11 @@ at
 [documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-model-tuning#supported-models).
 
 
+`--base_model` takes a publisher model **resource name**
+(`{publisher}/{model_id}@{version_id}`), not the display name shown in the
+catalog. See "Model Resource Name Format" in `references/models.md` for the
+format, verified examples, and how to look up a name you do not have.
+
 ```bash
 python3 scripts/tune_open_model.py \
     --project YOUR_PROJECT \
@@ -464,6 +476,27 @@ python3 scripts/tune_open_model.py \
 This script is open model only, and `--location` falls back to `global` if
 omitted. Always pass the location the user confirmed in section 0.2 explicitly,
 so it is visible in the command string you present for approval.
+
+> [!WARNING] **`--output_uri` is required for open models.** The Python SDK
+> declares it as `output_uri: Optional[str] = None`, but the tuning backend
+> rejects open model jobs that omit it with `INVALID_ARGUMENT: The output_uri
+> field is required for this model.` Treat the SDK's "optional" signature as
+> wrong here and always pass a GCS destination.
+
+Because the flag is mandatory, you must establish where the tuned model is
+written before you can submit. **Never invent a bucket name, derive one from the
+project number, or run `gcloud storage buckets create` unprompted.** Creating a
+bucket is a mutating action and is subject to the Tier M confirmation policy
+below.
+
+-   **The user named a bucket or URI** → use it, appending a unique per-job
+    directory as in section 1.2.
+-   **A bucket was already used for the dataset upload in section 1.2** →
+    propose reusing it for the output and ask the user to confirm.
+-   **Neither** → **STOP and ask the user** where they want the tuned model
+    stored. Offer to create a bucket for them as one of the options. If they
+    accept, propose the exact bucket name and location, get explicit
+    confirmation, and only then create it.
 
 > [!IMPORTANT] **Interactive Confirmation Required (Tier M):** Before proceeding
 > with job submission, you **MUST** present the proposed command string showing

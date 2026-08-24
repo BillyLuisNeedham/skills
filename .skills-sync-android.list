@@ -2,6 +2,7 @@ android-adaptive
 android-agp-9-upgrade
 android-android-cli
 android-android-intent-security
+android-android-profiler
 android-appfunctions
 android-camerax
 android-display-glasses-with-jetpack-compose-glimmer
@@ -11,11 +12,10 @@ android-leanback-to-compose-tv-migration
 android-media3-cast-integration
 android-migrate-xml-views-to-jetpack-compose
 android-navigation-3
-android-perfetto-sql
-android-perfetto-trace-analysis
 android-play-billing-library-version-upgrade
 android-play-policy-insights
 android-r8-analyzer
+android-restore-credentials
 android-styles
 android-testing-setup
 android-verified-email

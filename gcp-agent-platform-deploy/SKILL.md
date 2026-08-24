@@ -47,6 +47,11 @@ following safety tiers based on the action requested:
         `undeploy-model`, you MUST first verify that the endpoint and deployed
         model exist; if `describe` or `list` returns a 404 or empty result, you
         MUST halt and inform the user rather than attempting undeployment.
+    *   **Same-turn restriction**: Do not run the command in the same turn as
+        presenting the confirmation prompt. End your turn after asking and wait
+        for the user's reply; only execute after explicit approval. Printing a
+        preview and then calling the tool before the user can answer does not
+        count as obtaining confirmation.
 3.  **Tier D: Destructive & Irreversible (`delete`)**
     *   **Rule**: This requires **explicit typed confirmation**. You MUST output
         a text message explaining the irreversible nature of endpoint or model
@@ -199,13 +204,40 @@ Interpret the probe result and act:
 > [!WARNING] Deploying models, especially large ones, consumes significant
 > compute resources and incurs costs.
 >
-> 1.  You **MUST** refer to
+> 1.  You **MUST** compute an hourly $ estimate for the requested
+>     `--machine-type` before proposing a deploy. Try, in order, and fall
+>     through on any failure (tool unavailable, tool returns `status !=
+>     "success"`, script exits non-zero, script rejects the machine type):
+>
+>     a. If the `estimate_cost` tool is available AND returns `status ==
+>     "success"`, use its result -- it returns live SKU-resolved pricing
+>     (machine + accelerator + total) from `CostEstimationService` rather than a
+>     hardcoded snapshot. On any other status (including `error`), fall through
+>     to (b).
+>
+>     b. Otherwise, run `scripts/calculate_cost.py`. The accelerator type and
+>     count are fixed per machine type in Model Garden and derived
+>     automatically. Example:
+>
+>     ```bash
+>     python3 scripts/calculate_cost.py \
+>         --machine-type=g2-standard-48
+>     ```
+>
+>     If the script exits non-zero (unknown `--machine-type` — a routine state
+>     for machines in the Model Garden catalog but not yet in the price
+>     snapshot, e.g. A4/B200 today), fall through to (c). Do NOT invent a
+>     number.
+>
+>     c. Fall back to
 >     [Agent Platform prediction pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing?hl=en#prediction-and-explanation)
->     to calculate a rough cost estimation based on the requested
->     `--machine-type` and `--accelerator-type` (and count).
+>     if the tool is unavailable AND the script does not know the requested
+>     machine type. Read the accelerator + hourly rate directly off that page
+>     and cite the URL in the estimate you present to the user.
+>
 > 2.  You **MUST** present this cost estimation to the user and warn them that
 >     this is the **list price**, which may differ from their actual bill due to
->     potential discounts or reservations.
+>     potential discounts, reservations, or non-`us-central1` regions.
 > 3.  You **MUST ALWAYS** request explicit confirmation from the user agreeing
 >     to the estimated cost before executing any `deploy` command.
 
@@ -430,7 +462,7 @@ recommend an alternative region or machine type that currently has availability.
 `--region` or `--machine-type` parameters.
 
 > [!WARNING] If the alternative suggestions involve changing the machine type or
-> accelerator, you **MUST** recalculate the estimated cost using
-> [Agent Platform prediction pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing?hl=en#prediction-and-explanation),
-> warn the user about list prices versus actual billing, and get their explicit
-> confirmation for the new cost before retrying the deployment.
+> accelerator, you **MUST** recalculate the estimated cost by re-running
+> `scripts/calculate_cost.py` with the new params (see §3), warn the user about
+> list prices versus actual billing, and get their explicit confirmation for the
+> new cost before retrying the deployment.

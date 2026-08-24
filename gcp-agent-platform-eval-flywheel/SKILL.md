@@ -50,6 +50,11 @@ to the following safety tiers based on the action requested:
         that consume compute resources and incur costs. This requires
         **interactive confirmation** with 'Yes'/'No' options. Once granted once,
         you do not have to prompt for future evaluation.
+    *   **Same-turn restriction**: Do not run the evaluation in the same turn as
+        presenting the confirmation prompt. End your turn after asking and wait
+        for the user's reply; only execute after explicit 'Yes' / approval.
+        Printing a preview and then calling the tool before the user can answer
+        does not count as obtaining confirmation.
 
 ## Setup
 

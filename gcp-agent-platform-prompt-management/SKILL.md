@@ -38,7 +38,13 @@ accidental mutation or permanent deletion of prompt resources:
     *   **Same-turn restriction**: Do not execute the creation code in the same
         turn as presenting the confirmation prompt. Stop and wait for the user's
         reply; only execute after explicit 'Yes' / approval.
-    *   **Gold Standard Example**:
+    *   Every parameter in the card must trace back to something the user said.
+        The target model is a user choice, not a default: if the user did not
+        name one, ASK before building the card. Do not carry over the model that
+        appears in the examples here or in `references/create.md`.
+    *   **Gold Standard Example** — for a user who said "create a prompt called
+        Customer Support Greeting for gemini-2.5-pro with the template Hello
+        {{user_name}}, how can I help...":
 
         > I will create a prompt in Agent Platform with the following
         > parameters. Please confirm this information before I proceed:
@@ -99,10 +105,12 @@ these steps:
 > [!TIP]
 >
 > **Placeholder Parameter Replacement:** The Python scripts below use uppercase
-> string placeholders (like `"PROJECT_ID"`, `"LOCATION_ID"`, and `"PROMPT_ID"`).
-> You **MUST** dynamically replace these placeholders with the actual Project
-> ID, Region, and Prompt ID values provided in the user's prompt (or discovered
-> context) before generating or providing the scripts.
+> string placeholders (like `"PROJECT_ID"`, `"LOCATION_ID"`, `"PROMPT_ID"`, and
+> `"MODEL_ID"`). You **MUST** dynamically replace these placeholders with the
+> actual Project ID, Region, Prompt ID, and target model values provided in the
+> user's prompt (or discovered context) before generating or providing the
+> scripts. If the user did not supply one of these, ask -- a placeholder is
+> never satisfied by guessing a plausible value.
 
 ## 1. Managing Prompts via Agent Platform SDK
 
@@ -181,8 +189,11 @@ prompts.delete(prompt_id="PROMPT_ID")
     enclosed in double curly braces) in your prompt templates.
 -   **Versioning**: Always tag or record version IDs when making updates to
     production prompts.
--   **Model Reference**: Specify the target model ID (e.g., `gemini-2.5-pro`)
-    when creating the prompt to ensure consistency.
+-   **Model Reference**: A prompt is created against a target model ID, which
+    the snippets carry as the `"MODEL_ID"` placeholder. Like the other
+    placeholders it is MUST-replace, and it is replaced from what the user
+    said -- if they named no model, ask. Do not substitute a plausible current
+    model such as `gemini-2.5-pro`.
 -   **Underlying Schema**: When using the Dataset API, always use the correct
     `metadata_schema_uri` and nested `metadata` structure to ensure the prompt
     is recognized by Agent Platform Studio and the Prompts SDK.

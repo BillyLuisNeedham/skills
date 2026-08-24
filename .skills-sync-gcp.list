@@ -12,6 +12,7 @@ gcp-agent-platform-troubleshooting
 gcp-agent-platform-tuning
 gcp-agent-platform-tuning-management
 gcp-alloydb-basics
+gcp-application-design-center-design-deploy
 gcp-bigquery-ai-ml
 gcp-bigquery-basics
 gcp-bigquery-bigframes
@@ -29,8 +30,6 @@ gcp-data-manager-api-event-ingestion
 gcp-data-manager-api-setup
 gcp-datalineage-bigquery-asset-impact-analysis
 gcp-datalineage-summary
-gcp-design
-gcp-design-deploy
 gcp-detection-engineering-coverage-evaluation
 gcp-developer-device-platform-basics
 gcp-firebase-basics
@@ -41,6 +40,8 @@ gcp-gemini-interactions-api
 gcp-gemini-live-api
 gcp-gke-ai-troubleshooting-handle-disruption-gpu-tpu
 gcp-gke-ai-troubleshooting-jobset-interruption
+gcp-gke-ai-troubleshooting-tpu-dynamic-slices-monitoring
+gcp-gke-ai-troubleshooting-tpu-metrics-monitoring
 gcp-gke-ai-troubleshooting-tpu-vbar-oom
 gcp-gke-app-onboarding
 gcp-gke-backup-dr
@@ -62,8 +63,6 @@ gcp-gke-productionize
 gcp-gke-reliability
 gcp-gke-service-networking
 gcp-gke-storage
-gcp-gke-tpu-dynamic-slices-monitoring
-gcp-gke-tpu-metrics-monitoring
 gcp-gke-upgrades
 gcp-gke-workload-scaling
 gcp-gke-workload-security
@@ -91,6 +90,7 @@ gcp-google-cloud-solution-guided-gke-ai-migration
 gcp-google-cloud-solution-n-tier-serverless-web-app
 gcp-google-cloud-solution-rag-enterprise-search-gke-sqldb
 gcp-google-cloud-storage-basics
+gcp-google-cloud-storage-fuse
 gcp-google-cloud-waf-cost-optimization
 gcp-google-cloud-waf-operational-excellence
 gcp-google-cloud-waf-performance-optimization
@@ -102,9 +102,10 @@ gcp-google-mobile-ads-banner
 gcp-google-mobile-ads-get-started
 gcp-google-mobile-ads-interstitial
 gcp-google-mobile-ads-rewarded
+gcp-iam-helper-for-policy-simulator
+gcp-iam-helper-for-privileged-access-management
 gcp-ima-dai-sdk
 gcp-ima-sdk-client-side
-gcp-infra-deployment-debugging
 gcp-managed-airflow-dag-authoring
 gcp-managed-airflow-migrations
 gcp-spanner-basics

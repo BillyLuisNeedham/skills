@@ -34,23 +34,9 @@ Before containerizing, assess the application:
 
 ### 2. Containerization
 
-Create a container image:
-
-**Dockerfile (recommended for most apps):**
-
-```dockerfile
-# Multi-stage build for smaller, more secure images
-FROM golang:1.22 AS builder
-WORKDIR /app
-COPY . .
-RUN CGO_ENABLED=0 go build -o server .
-
-FROM gcr.io/distroless/static:nonroot
-COPY --from=builder /app/server /server
-USER nonroot:nonroot
-EXPOSE 8080
-ENTRYPOINT ["/server"]
-```
+Create a container image. A Dockerfile with a multi-stage build is recommended
+for most apps — see the Go Dockerfile in
+[`references/go-example.md`](./references/go-example.md) for a worked example.
 
 **Best practices:**
 
@@ -58,6 +44,13 @@ ENTRYPOINT ["/server"]
 -   Use distroless or minimal base images to reduce attack surface
 -   Run as non-root user
 -   Log to `stdout` and `stderr` for Cloud Logging collection
+
+A complete worked Node.js example is provided in [`assets/`](./assets/):
+[`Dockerfile`](./assets/Dockerfile) (non-root `node` user),
+[`index.js`](./assets/index.js) (implements distinct `/healthz` and `/readyz`
+endpoints), [`package.json`](./assets/package.json), and
+[`deployment.yaml`](./assets/deployment.yaml) (hardened Deployment plus
+ClusterIP Service, probes wired to `/healthz` and `/readyz`).
 
 For applications where writing a Dockerfile is not preferred, you can use
 [**Cloud Native Buildpacks**](https://buildpacks.io/) to automatically detect
@@ -93,59 +86,9 @@ gcloud artifacts docker images describe \
 
 ### 4. Manifest Generation
 
-Generate Kubernetes manifests for the application:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-  namespace: default
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: my-app
-  template:
-    metadata:
-      labels:
-        app: my-app
-    spec:
-      containers:
-      - name: my-app
-        image: <REGION>-docker.pkg.dev/<PROJECT>/<REPO>/<IMAGE>:<TAG>
-        ports:
-        - containerPort: 8080
-        resources:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8080
-          initialDelaySeconds: 5
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-app
-spec:
-  selector:
-    app: my-app
-  ports:
-  - port: 80
-    targetPort: 8080
-  type: ClusterIP
-```
+Generate Kubernetes manifests for the application. A baseline Deployment +
+ClusterIP Service manifest (probes, resource requests/limits, 2 replicas) is in
+[`references/go-example.md`](./references/go-example.md).
 
 **Checklist for manifests:**
 
@@ -154,6 +97,18 @@ spec:
 -   At least 2 replicas for production
 -   Service type appropriate (ClusterIP for internal, use Gateway API for
     external)
+
+See [`assets/deployment.yaml`](./assets/deployment.yaml) for a hardened worked
+example. A production-hardened pod spec must include ALL of: `runAsNonRoot:
+true`, `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false`,
+`capabilities.drop: ["ALL"]`, `seccompProfile: {type: RuntimeDefault}`,
+`automountServiceAccountToken: false` (unless the pod needs the token — then say
+why), resource requests, digest-pinned image, and a ClusterIP Service.
+
+That checklist is the baseline for any pod spec produced here. For manifest work
+beyond it — Gateway API routes, GCS FUSE and secret volume mounting, `subPath`
+overlays, Spot VM targeting, or AI/inference serving specs — see
+`gke-manifest-generation`.
 
 ### 5. Deploy
 
@@ -173,6 +128,21 @@ kubectl apply -f manifests/
 kubectl rollout status deployment/my-app
 kubectl get pods -l app=my-app
 ```
+
+## Golden Path Onboarding Checklist
+
+For every production application onboarding to GKE:
+
+1.  **Container Security**: Non-root user (`runAsNonRoot: true`), lockfile
+    install, minimal/distroless base image.
+2.  **Resource Requests**: Explicit CPU and memory requests (mandatory for GKE
+    Autopilot).
+3.  **Health Probes**: Both liveness (`livenessProbe`) and readiness
+    (`readinessProbe`) probes configured.
+4.  **Reliability & Availability**: At least 2 replicas and a
+    `PodDisruptionBudget` (`minAvailable: 1` or `2`).
+5.  **IAM & Workload Identity**: Workload Identity
+    (`iam.gke.io/gcp-service-account`) instead of static service account keys.
 
 ## Next Steps
 

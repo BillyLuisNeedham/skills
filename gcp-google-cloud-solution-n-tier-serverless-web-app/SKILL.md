@@ -3,7 +3,7 @@ name: google-cloud-solution-n-tier-serverless-web-app
 metadata:
   category: MultiProductSolutions
 description: >-
-  Guides agents to interactively discover customer requirements for a Secure n-tier serverless web application and generate a tailored cloud multi-product solution that incorporates opinionated best practices and architecture guidance. Use when users need agentic assistance with designing and creating a multi-product solution in the cloud for Secure n-tier serverless web application. Don't use when designing VM or GKE-based architectures or when not using Google Cloud.
+  Assists in developing a secure n-tier serverless web application based on best practices and architecture guidance. Use when users need agentic assistance with designing and creating a multi-product solution in Google Cloud for a secure n-tier serverless web application. Don't use when designing VM or GKE-based architectures or when not using Google Cloud.
 ---
 
 <!-- disableFinding(all) -->
@@ -21,9 +21,39 @@ Cloud Run application layer, and a Cloud SQL for PostgreSQL database layer.
 The architecture enforces strict physical and network isolation across all tiers (T1 to TN):
 
 *   **Tier 1 presentation tier (frontend / reverse proxy)**: Public-facing UI rendering/gateway service (Cloud Run). Exposes the entry point via Cloud Load Balancing and routes requests downstream to internal tiers privately via Direct VPC Egress.
-*   **Tier 2..N application tier (internal microservices / business logic)**: Private application services (Cloud Run). 100% isolated from the internet (Ingress: VPC-internal, `INGRESS_TRAFFIC_INTERNAL_ONLY`), reachable exclusively via upstream VPC routing (`egress = "ALL_TRAFFIC"` with Private Google Access on the subnet for `*.run.app` URLs, or `egress = "PRIVATE_RANGES_ONLY"` via an internal Application Load Balancer).
+*   **Tier 2..N application tier (internal microservices / business logic)**: Private application services (Cloud Run). 100% isolated from the internet (Ingress: VPC-internal, `INGRESS_TRAFFIC_INTERNAL_ONLY`), reachable exclusively via upstream VPC routing (`egress = "ALL_TRAFFIC"` with Private Google Access on the subnet for `*.run.app` URLs).
 *   **Data tier**: Private Cloud SQL for persistent data and Memorystore for
     Redis for caching, reachable exclusively from authorized application tiers.
+
+## General guidance to the LLM
+
+### 1. Direct Resource Map (Zero-Search File Access)
+All necessary reference architectures, HCL templates, and checklists are co-located in this skill. Use exact relative paths from this skill folder:
+
+| Asset Path | Purpose & Usage |
+| :--- | :--- |
+| `assets/main.tf` | **Single Source of Truth for Terraform (HCL)**. Contains all security boundaries, Cloud Run v2 configs, PSC endpoints, DNS private zones, and firewall rules. |
+| `assets/output-template.md` | Standardized Solution Architecture report markdown structure. |
+| `references/non-negotiable-architectural-rules.md` | Non-negotiable security rules, audit checklist, and product mappings. |
+| `references/related-guidance.md` | Supplemental architecture guidance for non-standard or multi-region requirements. |
+
+- **No Directory Crawling**: Do NOT run `list_dir` chains down workspace directories to discover these files.
+- **No Search Thrashing on Local Files**: Do NOT run `code_search` or `find_by_name` queries to look inside `assets/main.tf`. Read the file directly using `view_file` once and reuse the context.
+- **No Redundant Skill Searches**: Do NOT call `skill_search` for serverless or n-tier architecture skills while executing this skill.
+
+### 2. Direct Inline Generation (No Subagent Delegation)
+- Perform all architecture compilation, Terraform drafting, `gcloud` command assembly, and validation script generation **directly in the primary conversation**.
+- Do **NOT** invoke subagents (`invoke_subagent`) to research external GitHub Terraform modules, probe environment configs, or draft reports. All required patterns are fully contained in `assets/main.tf` and `references/`.
+
+### 3. One-Shot Clean Artifact Writing
+- Generate complete, fully-rendered, and valid HCL blocks and Markdown reports in a single `write_to_file` call.
+- Avoid leaving placeholders or malformed code fences that require multi-turn `replace_file_content` and `grep_search` patch loops.
+- **No Unpopulated Placeholders**: When embedding code or scripts inside architecture reports (e.g., Section 6 of `assets/output-template.md`), always inline the actual complete Terraform code, gcloud commands, and validation script code. Never output literal template placeholder comments (e.g., `# [Paste of main.tf file contents]`).
+
+### 4. Technical Completeness Checklist
+- When providing a concise architecture summary or security checklist (e.g., when instructed not to generate full IaC), you MUST explicitly include the following technical specifications:
+    - For regional load balancer deployments: regional proxy-only subnet purpose (`REGIONAL_MANAGED_PROXY`) and `network` parameter on regional forwarding rules.
+    - Cloud SQL PostgreSQL version (`POSTGRES_18`), Edition (`Enterprise Edition`), High Availability (`Regional HA`), and Private Service Connect (`psc_enabled = true`).
 
 ## Workflow
 
@@ -35,8 +65,8 @@ phases:
 
 *   **Phase 1: Requirements discovery and analysis**: Analyze the workload's
     requirements, constraints, dependencies, and current state.
-*   **Phase 2: Solution design & IaC drafting**: Build a technology stack, architecture, and deployment configuration for the workload. **IMPORTANT: You should strongly recommend and offer to generate the complete Terraform code (based on `assets/main.tf` and adhering to all Phase 3 specifications) alongside the solution architecture during this phase.** This allows the user to immediately review and iteratively modify the code as the conversation continues. However, if the user explicitly states they do not want code, confirm their preference before proceeding.
-*   **Phase 3: Implementation plan & iterative refinement**: Modify and refine the generated Terraform code and deployment instructions as the conversation and user feedback evolve.
+*   **Phase 2: Solution design & IaC drafting**: Build a technology stack, architecture, and deployment configuration for the workload. **IMPORTANT: You should offer to generate the complete Terraform code (based on `assets/main.tf` and adhering to all Phase 3 specifications) alongside the solution architecture during this phase.** This allows the user to immediately review and iteratively modify the code as the conversation continues. However, if the user explicitly states they do not want code, do not generate it yet.
+*   **Phase 3: Implementation plan & iterative refinement**: Modify and refine the generated design and deployment instructions as the conversation and user feedback evolve.
 *   **Phase 4: Solution validation**: Validate that the deployment meets the
     requirements of the workload.
 
@@ -51,7 +81,7 @@ To prevent multi-turn interview fatigue and maintain trajectory determinism acro
     *   **Region**: `us-central1`.
     *   **Database**: Cloud SQL for PostgreSQL (`POSTGRES_18`) Enterprise Edition via Private Service Connect (`psc_enabled = true`).
     *   **Edge Protection**: Global external Application Load Balancer with Cloud Armor WAF (`sqli-v33-stable`) and Cloud CDN (`enable_cdn = true`).
-    *   **Networking & Security**: Direct VPC Egress (`ALL_TRAFFIC`), `run.app.` Cloud DNS private zone, least-privilege egress firewalls (`TCP 5432, 443`), and Cloud SQL Auth Proxy sidecar (`DB_SOCKET_PATH` with IAM Auth).
+    *   **Networking & Security**: Direct VPC Egress (`ALL_TRAFFIC`), `run.app.` Cloud DNS private zone, least-privilege Cloud NGFW egress firewall policies (`TCP 5432, 443`), and Cloud SQL Auth Proxy sidecar (`DB_SOCKET_PATH` with IAM Auth).
 
 2.  **Disambiguation Protocol (`Maximum 2 Optional Questions`)**:
     If the user's initial prompt leaves requirements open-ended (and is not fast-forwarding with exact specs), do **not** present a multi-topic questionnaire. Only ask up to **2 optional disambiguation questions** concisely before confirmation:
@@ -62,13 +92,13 @@ To prevent multi-turn interview fatigue and maintain trajectory determinism acro
 
 ### Phase 2: Solution design
 
-1.  **Retrieve the 9 architectural security boundaries and report audit checklist from `references/non-negotiable-architectural-rules.md` and product mapping from `references/related-guidance.md`**. *Important*: Use the retrieved content to ground your design and verify the report audit checklist before TF generation (`assets/main.tf` is the Single Source of Truth for exact HCL). If the [Google Developer Knowledge MCP Server](https://developers.google.com/knowledge/mcp) is connected, query docs dynamically in real time.
+1.  **Retrieve the 9 architectural security boundaries and report audit checklist from `references/non-negotiable-architectural-rules.md`. If the customer request is _not_ requesting a direct deployment 80% case, also retrieve `references/related-guidance.md`. *Important*: Use the retrieved content to ground your design and verify the report audit checklist before TF generation (`assets/main.tf` is the Single Source of Truth for exact HCL). If the [Google Developer Knowledge MCP Server](https://developers.google.com/knowledge/mcp) is connected, query docs dynamically in real time.
 
-2.  **Map components to Google Cloud products**: Map your confirmed decomposition directly to Google Cloud products based on Section 11 ("Comprehensive product mapping specifications") inside `references/related-guidance.md`:
-    *   **Public Ingress & WAF**: global or regional external Application Load Balancer (`INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER`), Cloud Armor (`sqli-v33-stable`), Cloud CDN (if global Application Load Balancer). Note: When deploying a regional external Application Load Balancer, an explicit proxy-only subnet (`purpose = "REGIONAL_MANAGED_PROXY"`) is required in the VPC and `network` must be specified on the regional forwarding rule.
-    *   **Internal compute tiers (T1 to TN)**: Cloud Run microservices (`INGRESS_TRAFFIC_INTERNAL_ONLY`), Direct VPC Egress configured with `egress = "ALL_TRAFFIC"`, Private Google Access enabled on the subnet, and a Cloud DNS Managed Private Zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` mapping `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`) when calling internal `*.run.app` URLs (to prevent queries from resolving via public Google DNS to `216.58.x.x` and hitting `deny_all_egress` or failing VPC-internal ingress checks), or `egress = "PRIVATE_RANGES_ONLY"` when routing via an internal Application Load Balancer, deployed from specified/placeholder container image.
-    *   **Private data tier**: Cloud SQL PostgreSQL via Private Service Connect + IAM DB Auth. If database caching was selected, add Memorystore Redis via Private Services Access. Depending on reliability requirements, specify either "Cloud SQL for PostgreSQL Enterprise edition instance" or a "Cloud SQL for PostgreSQL Enterprise Plus edition instance".
-    *   **Secrets, Registry, & Security**: Secret Manager, Artifact Registry, least-privilege egress firewalls (explicitly permitting outbound TCP port 5432 to Cloud SQL PSC IP and TCP port 443 to Private Google Access VIPs `199.36.153.4/30, 199.36.153.8/30` on `allow_backend_db_egress` so the Cloud SQL Auth Proxy sidecar can query `sqladmin.googleapis.com` and exchange tokens for ephemeral IAM certs on startup without crashing), and optional VPC Service Controls.
+2.  **Map components to Google Cloud products**: Map your confirmed decomposition directly to Google Cloud products using these mandatory product mapping specifications:
+    *   **Public Ingress & WAF**: global or regional external Application Load Balancer (`INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER`), Cloud Armor (`sqli-v33-stable`), Cloud CDN (if global Application Load Balancer; note that Cloud CDN is NOT supported on regional Application Load Balancers). Note: When deploying a regional external Application Load Balancer, an explicit proxy-only subnet (`purpose = "REGIONAL_MANAGED_PROXY"`) is required in the VPC and `network` must be specified on the regional forwarding rule.
+    *   **Internal compute tiers (T1 to TN)**: Cloud Run microservices (`INGRESS_TRAFFIC_INTERNAL_ONLY`), Direct VPC Egress configured with `egress = "ALL_TRAFFIC"`, Private Google Access enabled on the subnet, and a Cloud DNS Managed Private Zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` mapping `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`) when calling internal `*.run.app` URLs, deployed from specified/placeholder container image.
+    *   **Private data tier**: Cloud SQL for PostgreSQL (`POSTGRES_18`) via Private Service Connect + IAM DB Auth. If database caching was selected, add Memorystore Redis via Private Services Access. Depending on reliability requirements, specify either "Cloud SQL for PostgreSQL Enterprise edition instance" or a "Cloud SQL for PostgreSQL Enterprise Plus edition instance".
+    *   **Secrets, Registry, & Security**: Secret Manager, Artifact Registry, Cloud NGFW global/regional network firewall policies (`google_compute_network_firewall_policy` + `google_compute_network_firewall_policy_rule` explicitly permitting outbound TCP port 5432 to Cloud SQL PSC IP and TCP port 443 to Private Google Access VIPs `199.36.153.4/30, 199.36.153.8/30` on `allow_backend_db_egress`), and optional VPC Service Controls.
 
 3.  **Create architecture diagram**: Create a clean Mermaid format architecture diagram (`assets/output-template.md`) illustrating the multi-tier request and data flow across entry point, public reverse proxy, private microservice compute tiers, and private database/caching endpoints.
 
@@ -80,7 +110,7 @@ To prevent multi-turn interview fatigue and maintain trajectory determinism acro
     Phase 3 mandatory specifications`) into a single Markdown file structured
     strictly per the standardized Google Cloud Solution Architecture output
     template at `assets/output-template.md` and present them to the user.
-    When saving or outputting the report artifact, append an ISO 8601 UTC timestamp and ensure the filename strictly ends with the `.md` extension (`e.g., workload_name_architecture_report-20260701T212820Z.md`). Verify that all 9 security boundaries from `assets/main.tf` are documented cleanly in your report. 
+    When saving or outputting the report artifact, append an ISO 8601 UTC timestamp and ensure the filename strictly ends with the `.md` extension (`e.g., workload_name_architecture_report-20260701T212820Z.md`). Verify that all 9 security boundaries from `assets/main.tf` are documented cleanly in your report, and all template placeholders are replaced with actual complete code blocks. 
 
 5.  **Request review and iterate**: Present the solution architecture (and Terraform code, `gcloud` script, or validation script if generated) to the user and request feedback. Modify and refine both the architecture and code iteratively as the conversation continues.
 

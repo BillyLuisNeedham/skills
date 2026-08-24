@@ -30,7 +30,7 @@ compute and data tiers.]
     targets, auto-scaling concurrency, and multi-zone regional high
     availability]
 *   **Cost**: [Details of cost constraints, serverless $0 idle cost preferences
-    (`ALL_TRAFFIC` + PGA vs internal Application Load Balancer), and pricing models]
+    (`ALL_TRAFFIC` + PGA), and pricing models]
 *   **Operations & Observability**: [Details of monitoring, structured logging,
     database Query Insights, and continuous deployment requirements]
 *   **Performance**: [Details of latency, connection pooling, Cloud CDN caching,
@@ -78,8 +78,8 @@ lifecycle, ensuring strict security boundary segregation:]
 
 ### 4.1. Google Cloud products and features mapping
 
-[Map your confirmed decomposition directly to Google Cloud products based on
-Section 11 ("Comprehensive product mapping specifications") inside `references/related-guidance.md`. Justify every selection and note
+[Map your confirmed decomposition directly to Google Cloud products based on the
+mandatory product mapping specifications in `SKILL.md`. Justify every selection and note
 trade-offs:]
 
 [Populate the following table with the appropriate content at runtime.]
@@ -90,6 +90,7 @@ trade-offs:]
 ### 4.2. Architecture diagram
 
 [Mermaid architecture flowchart illustrating the request and data flow across public and private tiers:]
+[The following diagram is a sample and must be updated to reflect actual recommendation if necessary.]
 
 ```mermaid
 flowchart TD
@@ -127,7 +128,7 @@ The current text is for example only.]
     > [!WARNING]
     > **Critical Ingress Bypass Gotcha**: If a public Cloud Run service is not explicitly restricted at the ingress level, external attackers can completely bypass your Application Load Balancer and Cloud Armor WAF security policies (`sqli-v33-stable`) by sending HTTP requests directly to the default `*.run.app` URL. To eliminate this critical security bypass risk, this design configures the Tier 1 frontend ingress to **`internal-and-cloud-load-balancing`** (`INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER`), and all intermediate/internal microservice tiers (`Tiers 2..N`) strictly to **`internal`** (`INGRESS_TRAFFIC_INTERNAL_ONLY`).
 *   **Zero Public Exposure, VPC-Internal Ingress (`INGRESS_TRAFFIC_INTERNAL_ONLY`), & Cloud DNS (`google_dns_managed_zone`)**: While many designs casually refer to intermediate microservices or the backend application as "private", to make them genuinely private across serverless architectures, this design configures the backend application service ingress strictly to **`VPC-internal` (`INGRESS_TRAFFIC_INTERNAL_ONLY`)**. Furthermore, because `BACKEND_URL` (`*.a.run.app`) resolves via public Google DNS to public IPv4 VIPs (`216.58.x.x`) by default — causing packets via `ALL_TRAFFIC` egress to hit the `deny_all_egress` firewall or fail `VPC-internal` ingress requirements — this design configures a **Cloud DNS Managed Private Zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` with `google_dns_record_set` mapping `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`)**. This guarantees that all downstream internal microservice tiers (T2..TN) resolve securely to internal PGA endpoints, maintaining zero public internet exposure.
-*   **Least-Privilege VPC Egress Firewall Rules & Sidecar IAM Cert Exchange (`443`)**: This design enforces **least-privilege VPC Egress Firewall rules (`google_compute_firewall`) to restrict traffic precisely between tiers**. It enforces a default-deny VPC Egress policy (`0.0.0.0/0`) on the Cloud Run subnet (`priority = 65534`), and adds explicit allow rules so Tier 1 (`frontend`) can only egress to Tier 2 (`backend application`) (`port 443/8080` along with Private Google Access VIPs `199.36.153.4/30` and `199.36.153.8/30`), and backend application can only egress (`allow_backend_db_egress`) to the Data Tier (`Cloud SQL port 5432` / `Redis port 6379`) AND Private Google Access VIPs (`port 443` on `199.36.153.4/30 / 199.36.153.8/30`). Permitting outbound TCP port `443` to PGA VIPs alongside port `5432` is critical: when Cloud Run initializes `cloud_sql_instance` volumes (`IAM Auth`), the sidecar queries `sqladmin.googleapis.com` (`port 443`) and OAuth endpoints to exchange tokens for ephemeral client certificates on startup; blocking this traffic causes the sidecar cert exchange to crash.
+*   **Least-Privilege Cloud NGFW Egress Firewall Policies & Sidecar IAM Cert Exchange (`443`)**: This design enforces **least-privilege Cloud NGFW Global/Regional Firewall Policies (`google_compute_network_firewall_policy_rule`) to restrict traffic precisely between tiers**. It enforces a default-deny VPC Egress policy (`0.0.0.0/0`) on the Cloud Run subnet (`priority = 65534`), and adds explicit allow rules so Tier 1 (`frontend`) can only egress to Tier 2 (`backend application`) (`port 443/8080` along with Private Google Access VIPs `199.36.153.4/30` and `199.36.153.8/30`), and backend application can only egress (`allow_backend_db_egress`) to the Data Tier (`Cloud SQL port 5432` / `Redis port 6379`) AND Private Google Access VIPs (`port 443` on `199.36.153.4/30 / 199.36.153.8/30`). Permitting outbound TCP port `443` to PGA VIPs alongside port `5432` is critical: when Cloud Run initializes `cloud_sql_instance` volumes (`IAM Auth`), the sidecar queries `sqladmin.googleapis.com` (`port 443`) and OAuth endpoints to exchange tokens for ephemeral client certificates on startup; blocking this traffic causes the sidecar cert exchange to crash.
 *   **Cloud SQL Auth Proxy & IAM-Based Database Authentication (`DB_SOCKET_PATH`)**: This design includes the **Cloud SQL Auth Proxy** (run via Unix socket volume sidecar `/cloudsql/project:region:instance`) and **IAM-based database authentication** (`cloudsql.iam_authentication = on`) using short-lived IAM OAuth tokens (`roles/cloudsql.client` via `google_sql_user`) rather than hardcoded database passwords. Note that because the Auth Proxy sidecar queries `sqladmin.googleapis.com` (`443`) over PGA VIPs during container startup for IAM certificate exchange, `allow_backend_db_egress` explicitly permits TCP port `443` to `199.36.153.4/30, 199.36.153.8/30`. When configuring database connection strings in application drivers, **`DB_SOCKET_PATH` (`/cloudsql/...` Unix socket) is recommended over direct TCP (`DB_PSC_ENDPOINT`) as the primary/default path**, since the Auth Proxy sidecar automatically handles transparent IAM authentication, short-lived OAuth token refresh, and mutual TLS without requiring password rotation or custom token acquisition code.
 *   **Optional VPC Service Controls (`enable_vpc_sc`)**: Wraps
     `run.googleapis.com`, `sqladmin.googleapis.com`, and

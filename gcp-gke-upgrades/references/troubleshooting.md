@@ -83,9 +83,14 @@ kubectl describe validatingwebhookconfigurations WEBHOOK_NAME
 
 **Fix — temporarily disable problematic webhook:**
 ```bash
-# Add failure policy annotation or delete temporarily
+# Back up the webhook configuration first
+kubectl get validatingwebhookconfigurations WEBHOOK_NAME -o yaml > webhook-backup.yaml
+
+# Then delete temporarily
 kubectl delete validatingwebhookconfigurations WEBHOOK_NAME
+
 # Re-create after upgrade
+kubectl apply -f webhook-backup.yaml
 ```
 
 ## 5. PVC attachment issues
@@ -161,7 +166,8 @@ GPU nodes upgrade successfully, but ML pods are stuck in `CrashLoopBackOff` with
    spec:
      containers:
      - name: vectoradd
-       image: nvidia/samples:vectoradd-cuda11.6.0
+       # Pin a tag whose CUDA version matches your node's driver
+       image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda11.7.1-ubuntu20.04
        resources:
          limits:
            nvidia.com/gpu: 1

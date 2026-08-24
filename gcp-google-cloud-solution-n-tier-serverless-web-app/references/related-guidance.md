@@ -7,50 +7,42 @@ This document provides deep technical guidance and architectural best practices 
 
 The architecture enforces strict physical and network isolation between the tiers:
 1.  **Presentation tier**: Public-facing UI rendering and reverse-proxy service (Cloud Run).
-2.  **Application tier**: Private business logic service (Cloud Run), reachable only from the VPC.
+2.  **Application tiers**: Private business logic service (Cloud Run), reachable only from the VPC.
 3.  **Data tier (database and cache)**: Private persistent storage (Cloud SQL) and in-memory caching (Memorystore Redis), reachable only from the application tier.
 
 ---
 
 ## Table of Contents
 
-* **[1. Strict three-tier architecture overview](#1-strict-three-tier-architecture-overview)** *(Lines 56–90)*
-* **[2. Ingress and routing: external vs. internal](#2-ingress-and-routing-external-vs-internal)** *(Lines 91–105)*
-  * [Presentation tier ingress](#presentation-tier-ingress) *(Lines 93–97)*
-  * [Application tier ingress](#application-tier-ingress) *(Lines 98–105)*
-* **[3. Least-privilege network egress and VPC firewalls](#3-least-privilege-network-egress-and-vpc-firewalls)** *(Lines 106–116)*
-* **[4. Caching tier: Memorystore for Redis (optional)](#4-caching-tier-memorystore-for-redis-optional)** *(Lines 117–132)*
-  * [Redis deployment and security](#redis-deployment-and-security) *(Lines 123–132)*
-* **[5. Secure database access: Private Service Connect and Cloud SQL Auth Proxy](#5-secure-database-access-private-service-connect-and-cloud-sql-auth-proxy)** *(Lines 133–142)*
-* **[6. Security and operational best practices](#6-security-and-operational-best-practices)** *(Lines 143–160)*
-  * [Presentation tier as a reverse proxy](#presentation-tier-as-a-reverse-proxy) *(Lines 145–150)*
-  * [Secrets management](#secrets-management) *(Lines 151–153)*
-  * [Optional VPC Service Controls perimeter](#optional-vpc-service-controls-perimeter) *(Lines 154–160)*
-* **[7. Content delivery network (Cloud CDN) (optional)](#7-content-delivery-network-cloud-cdn-optional)** *(Lines 161–172)*
-  * [How it works and trade-offs](#how-it-works-and-trade-offs) *(Lines 165–172)*
-* **[8. Load balancer topology: global vs. regional](#8-load-balancer-topology-global-vs-regional)** *(Lines 173–212)*
-  * [Comparison and trade-offs](#comparison-and-trade-offs) *(Lines 177–187)*
-  * [Why choose a regional Application Load Balancer? (compliance and data residency)](#why-choose-a-regional-application-load-balancer-compliance-and-data-residency) *(Lines 188–192)*
-  * [Regional proxy-only subnet and network parameter requirements](#regional-proxy-only-subnet-and-network-parameter-requirements) *(Lines 193–197)*
-  * [Terraform resource mapping (global to regional)](#terraform-resource-mapping-global-to-regional) *(Lines 198–212)*
-* **[9. Observability and monitoring (optional)](#9-observability-and-monitoring-optional)** *(Lines 213–253)*
-  * [9.1 VPC Flow Logs (Network Auditing)](#91-vpc-flow-logs-network-auditing) *(Lines 219–224)*
-  * [9.2 Firewall Rules Logging (Network Access Auditing)](#92-firewall-rules-logging-network-access-auditing) *(Lines 225–231)*
-  * [9.3 Load Balancer Access Logs (Application Ingress Auditing)](#93-load-balancer-access-logs-application-ingress-auditing) *(Lines 232–237)*
-  * [9.4 Cloud Monitoring Alerting Policies (Proactive Operations)](#94-cloud-monitoring-alerting-policies-proactive-operations) *(Lines 238–242)*
-  * [9.5 Advanced industry observability checklist (production best practices)](#95-advanced-industry-observability-checklist-production-best-practices) *(Lines 243–253)*
-* **[10. Container image storage and deployment strategy (Artifact Registry)](#10-container-image-storage-and-deployment-strategy-artifact-registry)** *(Lines 254–285)*
+* **[1. Strict three-tier architecture overview](#1-strict-three-tier-architecture-overview)** *(Lines 49–82)*
+* **[2. Ingress and routing: external vs. internal](#2-ingress-and-routing-external-vs-internal)** *(Lines 84–100)*
+  * [Presentation tier ingress](#presentation-tier-ingress) *(Lines 86–90)*
+  * [Application tier ingress](#application-tier-ingress) *(Lines 91–99)*
+* **[3. Least-privilege network egress and Cloud NGFW firewall policies](#3-least-privilege-network-egress-and-cloud-ngfw-firewall-policies)** *(Lines 102–111)*
+* **[4. Caching tier: Memorystore for Redis (optional)](#4-caching-tier-memorystore-for-redis-optional)** *(Lines 113–128)*
+  * [Redis deployment and security](#redis-deployment-and-security) *(Lines 119–127)*
+* **[5. Secure database access: Private Service Connect and Cloud SQL Auth Proxy](#5-secure-database-access-private-service-connect-and-cloud-sql-auth-proxy)** *(Lines 130–138)*
+* **[6. Security and operational best practices](#6-security-and-operational-best-practices)** *(Lines 140–157)*
+  * [Presentation tier as a reverse proxy](#presentation-tier-as-a-reverse-proxy) *(Lines 142–147)*
+  * [Secrets management](#secrets-management) *(Lines 148–150)*
+  * [Optional VPC Service Controls perimeter](#optional-vpc-service-controls-perimeter) *(Lines 151–156)*
+* **[7. Content delivery network (Cloud CDN) (optional)](#7-content-delivery-network-cloud-cdn-optional)** *(Lines 159–169)*
+  * [How it works and trade-offs](#how-it-works-and-trade-offs) *(Lines 163–168)*
+* **[8. Load balancer topology: global vs. regional](#8-load-balancer-topology-global-vs-regional)** *(Lines 171–210)*
+  * [Comparison and trade-offs](#comparison-and-trade-offs) *(Lines 175–185)*
+  * [Why choose a regional Application Load Balancer? (compliance and data residency)](#why-choose-a-regional-application-load-balancer-compliance-and-data-residency) *(Lines 186–190)*
+  * [Regional proxy-only subnet and network parameter requirements](#regional-proxy-only-subnet-and-network-parameter-requirements) *(Lines 191–195)*
+  * [Terraform resource mapping (global to regional)](#terraform-resource-mapping-global-to-regional) *(Lines 196–209)*
+* **[9. Observability and monitoring (optional)](#9-observability-and-monitoring-optional)** *(Lines 212–252)*
+  * [9.1 VPC Flow Logs (Network Auditing)](#91-vpc-flow-logs-network-auditing) *(Lines 218–223)*
+  * [9.2 Firewall Policy Logging (Network Access Auditing)](#92-firewall-policy-logging-network-access-auditing) *(Lines 224–230)*
+  * [9.3 Load Balancer Access Logs (Application Ingress Auditing)](#93-load-balancer-access-logs-application-ingress-auditing) *(Lines 231–236)*
+  * [9.4 Cloud Monitoring Alerting Policies (Proactive Operations)](#94-cloud-monitoring-alerting-policies-proactive-operations) *(Lines 237–241)*
+  * [9.5 Advanced industry observability checklist (production best practices)](#95-advanced-industry-observability-checklist-production-best-practices) *(Lines 242–251)*
+* **[10. Container image storage and deployment strategy (Artifact Registry)](#10-container-image-storage-and-deployment-strategy-artifact-registry)** *(Lines 254–283)*
   * [Recommended storage: Artifact Registry](#recommended-storage-artifact-registry) *(Lines 258–263)*
   * [Deployment strategy: pre-existing images vs. initial bootstrapping](#deployment-strategy-pre-existing-images-vs-initial-bootstrapping) *(Lines 264–279)*
-  * [Other service patterns](#other-service-patterns) *(Lines 280–285)*
-* **[11. Comprehensive product mapping specifications](#11-comprehensive-product-mapping-specifications)** *(Lines 286–307)*
-  * [11.1 Public ingress and WAF](#111-public-ingress-and-waf) *(Lines 290–294)*
-  * [11.2 Compute tier (Cloud Run v2 with Direct VPC Egress)](#112-compute-tier-cloud-run-v2-with-direct-vpc-egress) *(Lines 295–300)*
-  * [11.3 Data tier and secrets (`100% private, zero public IP exposure`)](#113-data-tier-and-secrets-100-private-zero-public-ip-exposure) *(Lines 301–307)*
-* **[12. Architectural design trade-offs and rationale](#12-architectural-design-trade-offs-and-rationale)** *(Lines 308–318)*
-  * [12.1 Single-domain reverse-proxy pattern and CORS elimination](#121-single-domain-reverse-proxy-pattern-and-cors-elimination) *(Lines 310–312)*
-  * [12.2 Ingress bypass gotcha vs. Application Load Balancer enforcement](#122-ingress-bypass-gotcha-vs-application-load-balancer-enforcement) *(Lines 313–315)*
-  * [12.3 Container image lifecycle decoupling](#123-container-image-lifecycle-decoupling) *(Lines 316–318)*
+  * [Other service patterns](#other-service-patterns) *(Lines 280–283)*
 
 ---
 
@@ -93,25 +85,28 @@ flowchart TD
 
 ### Presentation tier ingress
 *   **External Entry Point**: Exposed via a **global external Application Load Balancer** or **regional external Application Load Balancer** with **Cloud Armor** WAF protection.
-*   **CDN Caching**: **Cloud CDN** is enabled on the Application Load Balancer backend service to cache static assets (HTML, JS, CSS, images) at the edge, reducing compute load on the Presentation Tier.
+*   **CDN Caching**: **Cloud CDN** is enabled on the Application Load Balancer backend service to cache static assets (HTML, JS, CSS, images) at the edge, reducing compute load on the Presentation Tier. Cloud CDN does not support the regional external Application Load Balancer and can't be used with that load balancer.
 *   **Ingress Bypass Protection**: Ingress is restricted to `internal-and-cloud-load-balancing` to ensure all public traffic must pass through Cloud Armor.
 
-### Application tier ingress
-*   **Zero Public Exposure**: Ingress is set strictly to **VPC-internal** (`INGRESS_TRAFFIC_INTERNAL_ONLY`). The Application Tier has no public URL and cannot be reached from the internet.
-*   **Private VPC Routing (`*.run.app` vs. internal Application Load Balancer)**: Because the Application Tier's ingress is restricted to VPC-internal, any request targeting its default `*.run.app` URL must arrive via the VPC to be recognized as internal (`INGRESS_TRAFFIC_INTERNAL_ONLY`). However, `BACKEND_URL` (`*.a.run.app`) resolves via public Google DNS to public IPv4 VIPs (`216.58.x.x`) by default. Under `egress = "PRIVATE_RANGES_ONLY"`, traffic from the Presentation Tier to public IPs (`*.run.app`) bypasses the VPC and exits directly to the internet, causing the Backend to reject the request with a 403 or 404 error. Furthermore, when the Presentation Tier uses `egress = "ALL_TRAFFIC"`, packets destined for that public VIP (`216.58.x.x`) hit the `deny_all_egress` firewall (which blocks `0.0.0.0/0`) OR fail at the backend because its ingress requires VPC-internal traffic. To satisfy this routing requirement and pass egress firewalls safely, the Presentation Tier (and any upstream service calling an internal `*.run.app` URL) must either:
-    1. Use `egress = "ALL_TRAFFIC"` combined with enabling Private Google Access (`private_ip_google_access = true`) on the subnet, configuring VPC egress firewalls (`google_compute_firewall`) to allow Google API VIP ranges (`199.36.153.4/30`, `199.36.153.8/30`), **and deploying a Cloud DNS Managed Private Zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` that maps `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`)**. This ensures `BACKEND_URL` queries resolve to internal PGA VIPs inside the VPC, passing egress firewalls cleanly and delivering requests with internal VPC identity.
-    2. Route traffic to the Backend privately using an internal Application Load Balancer, which allows keeping `egress = "PRIVATE_RANGES_ONLY"`.
+### Application tiers ingress
+*   **Greater than 3 tiers**: If there are more than 3 tiers in the deployment, then there can be more than one application tier.
+*   **Zero Public Exposure**: Ingress is set strictly to **VPC-internal** (`INGRESS_TRAFFIC_INTERNAL_ONLY`). The Application Tiers have no public URL and cannot be reached from the internet.
+*   **Private VPC Routing (`*.run.app`)**: Upstream services calling an internal `*.run.app` URL (e.g., Presentation Tier calling Application Tier) must configure the following:
+    *   **Direct VPC Egress**: Set `egress = "ALL_TRAFFIC"` on the calling Cloud Run service.
+    *   **Private Google Access**: Enable `private_ip_google_access = true` on the Cloud Run subnet.
+    *   **Cloud NGFW Egress Rules**: Configure firewall policy rules (`google_compute_network_firewall_policy_rule`) allowing outbound traffic to Google API VIP ranges (`199.36.153.4/30`, `199.36.153.8/30`).
+    *   **Cloud DNS Managed Private Zone**: Deploy a private zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` that maps `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`).
 
 ---
 
-## 3. Least-privilege network egress and VPC firewalls
+## 3. Least-privilege network egress and Cloud NGFW firewall policies
 
-We implement strict network-level isolation using **Direct VPC Egress** combined with zero-trust **VPC Egress Firewall Rules** (or Cloud NGFW policies):
+Implement strict network-level isolation using **Direct VPC Egress** combined with zero-trust **Cloud NGFW Global or Regional Network Firewall Policies** (`google_compute_network_firewall_policy` and `google_compute_network_firewall_policy_rule`):
 
-*   **Default Egress Deny**: The Cloud Run subnets enforce a default-deny egress firewall policy (`destination_ranges = ["0.0.0.0/0"]`, low priority), ensuring serverless runtimes cannot reach unauthorized internal destinations or leak data to external IPs.
-*   **Presentation Tier**: Enforces an explicit egress allow rule permitting the Presentation Tier service account to send traffic strictly to the Application Tier (permitting the Cloud Run subnet CIDR alongside Google API VIP ranges `199.36.153.4/30`, `199.36.153.8/30` when using Private Google Access and a Cloud DNS Managed Private Zone for `*.run.app` calls via `ALL_TRAFFIC`). It is **not** granted access to Data tier subnets or endpoints.
+*   **Default Egress Deny**: The Cloud Run subnets enforce a default-deny egress network firewall policy rule (`dest_ip_ranges = ["0.0.0.0/0"]`, priority `65534`), ensuring serverless runtimes cannot reach unauthorized internal destinations or leak data to external IPs.
+*   **Presentation Tier**: Enforces an explicit egress allow rule permitting the Presentation Tier service account to send traffic strictly to the Application Tier (permitting the Cloud Run subnet CIDR alongside Google API VIP ranges `199.36.153.4/30`, `199.36.153.8/30` for `ALL_TRAFFIC` Private Google Access `*.run.app` routing). It is **not** granted access to Data tier subnets or endpoints.
 *   **Application Tier**: Configured with `egress = "PRIVATE_RANGES_ONLY"`, enforcing an explicit egress allow rule permitting the Backend service account to reach exclusively the local VPC Cloud SQL Private Service Connect endpoint (TCP 5432) and Memorystore Redis instance (TCP 6379).
-*   **Firewall Rules Logging**: Each egress firewall rule supports optional Firewall Rules Logging (configured via `log_config` with `metadata = "INCLUDE_ALL_METADATA"` when `enable_monitoring` is true) to audit allowed and denied connections for security verification and compliance.
+*   **Firewall Policy Logging**: Each network firewall policy rule supports optional logging (`enable_logging = var.enable_monitoring`) to audit allowed and denied connections for security verification and compliance.
 
 ---
 
@@ -223,12 +218,12 @@ VPC Flow Logs record a sample of network flows sent from and received by VM inte
 *   **Default Configuration**: Configured by default (`enable_monitoring = true`) on the Cloud Run subnet (`cloud_run_subnet`) with a cost-optimized capture rate of **`10%` (`flow_sampling = 0.1`)** over a **`1-minute` aggregation interval (`aggregation_interval = "INTERVAL_1_MIN"`)**.
 *   **Cost Trade-off & Tuning**: Flow logs can generate massive volumes of data in high-traffic environments, leading to significant **Cloud Logging ingestion and storage costs**. You can increase `flow_sampling` up to `1.0` and shorten `aggregation_interval` if your security or diagnostics require more detailed packet flow data. Alternatively, if you do not need flow data or want zero observability ingestion costs during development, you can disable VPC Flow Logs along with other optional logging controls by setting `enable_monitoring = false`.
 
-### 9.2 Firewall Rules Logging (Network Access Auditing)
-Firewall Rules Logging records when a VPC firewall rule allows or denies traffic.
+### 9.2 Firewall Policy Logging (Network Access Auditing)
+Firewall Policy Logging records when a Cloud NGFW network firewall policy rule allows or denies traffic.
 *   **Captured Data**: Connection 5-tuple (source/destination IP, source/destination port, protocol), action taken (ALLOW or DENY), rule name, and instance/service account metadata.
 *   **Use Cases**: Verifying zero-trust egress policies (e.g., auditing any denied connection attempts from Cloud Run containers or verifying valid traffic to Cloud SQL and Redis), security compliance, and threat hunting.
 *   **Cost Trade-off**: Like VPC Flow Logs, high-volume firewall logging can increase Cloud Logging ingestion volumes.
-*   **Toggleable**: Controlled via the `enable_monitoring` variable by attaching a `log_config` block (`metadata = "INCLUDE_ALL_METADATA"`) to each firewall rule.
+*   **Toggleable**: Controlled via the `enable_monitoring` variable by setting `enable_logging = var.enable_monitoring` on each network firewall policy rule.
 
 ### 9.3 Load Balancer Access Logs (Application Ingress Auditing)
 Load Balancer access logs capture detailed metadata for every HTTP request entering your application through the global external Application Load Balancer.
@@ -281,38 +276,3 @@ When provisioning core infrastructure via Terraform, choose one of two workflows
 ### Other service patterns
 
 * https://docs.cloud.google.com/run/docs/samples/cloudrun-helloworld-service.md.txt
-
----
-
-## 11. Comprehensive product mapping specifications
-
-When mapping workload components across N tiers during solution design, enforce these mandatory product selections:
-
-### 11.1 Public ingress and WAF
-*   **Load Balancer**: global or regional external Application Load Balancer exposing ONLY the presentation tier Cloud Run service (via a Serverless NEG). Note: If deploying a **regional** external Application Load Balancer, an additional **proxy-only subnet** (`google_compute_subnetwork` with `purpose = "REGIONAL_MANAGED_PROXY"` and `role = "ACTIVE"`) is required in the target VPC network, and the regional forwarding rule (`google_compute_forwarding_rule`) must explicitly specify the `network` parameter.
-*   **Security at the Edge**: Cloud Armor WAF security policy with SQL injection (`sqli-v33-stable`) and XSS protection enabled.
-*   **Edge Caching**: Cloud CDN enabled (`enable_cdn = true`) on the Application Load Balancer backend service when using a global Application Load Balancer (to cache static assets and reduce frontend compute load).
-
-### 11.2 Compute tier (Cloud Run v2 with Direct VPC Egress)
-*   **Tier 1 presentation tier**: Cloud Run (`google_cloud_run_v2_service.frontend`) with ingress set strictly to `INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER`, along with `google_cloud_run_v2_service_iam_member` granting `roles/run.invoker` (`allUsers`) for Application Load Balancer ingress.
-*   **Tiers 2..N internal microservices**: Cloud Run (`google_cloud_run_v2_service.backend_application` and `orders_service`) with ingress set strictly to `INGRESS_TRAFFIC_INTERNAL_ONLY` (VPC-internal).
-*   **Least-Privilege IAM Invocation (`roles/run.invoker`)**: For every internal Cloud Run service, you MUST create a `google_cloud_run_v2_service_iam_member` resource granting `roles/run.invoker` directly to the immediate upstream calling Service Account (`serviceAccount:<upstream_sa>`).
-*   **Direct VPC Egress Mechanics & Cloud DNS**: Every compute tier must configure `vpc_access { network_interfaces { subnetwork = ... } }`. For upstream tiers calling internal `*.run.app` URLs, set `egress = "ALL_TRAFFIC"`, enable Private Google Access on the subnet (`private_ip_google_access = true`), **and configure a Cloud DNS Managed Private Zone (`google_dns_managed_zone`) for `run.app.` bound to `vpc_network` mapping `*.run.app` directly to Private Google Access VIPs (`199.36.153.4/30 / 199.36.153.8/30`)**; OR route via an internal Application Load Balancer (`egress = "PRIVATE_RANGES_ONLY"`).
-
-### 11.3 Data tier and secrets (`100% private, zero public IP exposure`)
-*   **Relational Database (`Zero Public IP Exclusively`)**: Cloud SQL PostgreSQL (`database_version = "POSTGRES_18"`) with **Public IP explicitly disabled** (`ipv4_enabled = false`), connected exclusively via Private Service Connect (`PSC`) (`psc_enabled = true`, `google_compute_forwarding_rule`) (`100% private, zero public IP exposure`). Enable IAM database authentication (`cloudsql.iam_authentication = on`).
-*   **In-Memory Cache (`Private IP Exclusively`)**: Memorystore for Redis connected exclusively via **Private Services Access (`PSA`)** over Private IP (`connect_mode = "PRIVATE_SERVICE_ACCESS"`, `authorized_network`) alongside `google_service_networking_connection` (`100% private, zero public IP exposure`).
-*   **Secret Management**: Secret Manager (`google_secret_manager_secret`) to safely mount database passwords or API keys as container environment variables.
-
----
-
-## 12. Architectural design trade-offs and rationale
-
-### 12.1 Single-domain reverse-proxy pattern and CORS elimination
-By routing all user traffic through the single presentation domain (`https://pipeline.example.com`), the Presentation Tier acts as a reverse proxy. This eliminates the public attack surface of internal microservices and completely avoids browser Cross-Origin Resource Sharing (`CORS`) preflight latency and configuration challenges.
-
-### 12.2 Ingress bypass gotcha vs. Application Load Balancer enforcement
-If a public Cloud Run service is not restricted at the ingress level, external attackers can bypass the Application Load Balancer and Cloud Armor WAF entirely by sending direct HTTP requests to the default `*.run.app` domain. Enforcing `INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER` on Tier 1 and `INGRESS_TRAFFIC_INTERNAL_ONLY` on Tiers 2..N eliminates this bypass hazard.
-
-### 12.3 Container image lifecycle decoupling
-To prevent Terraform state sync collisions from breaking active CI/CD deployments, decouple core infrastructure provisioning from application code lifecycle by using placeholder containers (`us-docker.pkg.dev/cloudrun/container/hello`) or existing Artifact Registry URIs during initial IaC setup. automated pipelines (Cloud Build / GitHub Actions) can then issue independent `gcloud run deploy` revision updates.

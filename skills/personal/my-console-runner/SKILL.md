@@ -1,6 +1,7 @@
 ---
 name: my-console-runner
-description: Point the Console at an existing ticket pool. Detects the pool's facts, interviews for my-issue-runner's six answers plus the pool port, writes console.json and AGENT.md into the pool directory, then starts the Console server bound to that pool and opens the browser. Use when Issues already exist and you want to drive them from the Console instead of the terminal runner.
+description: Point the Console at an existing ticket pool: detect, interview, write console.json and AGENT.md, launch the server.
+disable-model-invocation: true
 ---
 
 Issues already exist. This skill connects them to the Console.
@@ -20,8 +21,7 @@ config as data, so regenerating a pool's config never means copying engine code.
 One server process per pool. Tickets whose blockers are all `done` run as one super-step, each in
 its own git worktree, on the harness and model `console.json` assigns. Anything that needs a human
 becomes an interrupt on that ticket's card: a checkpoint Brief, a merge-approval, a crash, a
-deadlock, the final Review. Answering an interrupt resumes the pool. Line-1 state markers stay the
-truth on disk, so a pool the Console drives remains drivable by `run.sh`.
+deadlock, the final Review. Answering an interrupt resumes the pool.
 
 ## 0. Pointed at a configured pool
 
@@ -63,9 +63,7 @@ Seven questions, each with your recommendation attached:
 6. What counts as a checkpoint on this job specifically
 7. Which port the pool should pin. Probe 8787 at setup time; recommend it when it is free,
    otherwise the next free port, or the pool's current pin on a re-interview. A concrete answer
-   becomes the `port` key in `console.json` and must bind exactly at launch or the engine
-   refuses loudly naming the port. `auto` (or next free) writes no key, so the engine hunts
-   8787-or-next-free at boot.
+   becomes the `port` key in `console.json`; `auto` (or next free) writes no key.
 
 Recommend the orchestrator's own model for every subagent unless there is a reason to go smaller.
 Delegating a skill to a cheaper model moves the substance of an Issue onto that model, which is
@@ -134,9 +132,8 @@ Write `console.json` into the pool directory. All seven answers land here as dat
 - `resolver` is the merge resolver harness, or `none`. The engine falls back to the
   `~/.issue-runner` default when the key is absent, but write it explicitly so the pool's config
   says what it does.
-- `port` records the port answer when it is a concrete number. Omit it for `auto`, so the engine
-  hunts 8787-or-next-free at boot. A pinned port must bind exactly at launch or the engine
-  refuses loudly naming the port.
+- `port` records the port answer when it is a concrete number. Omit it for `auto`. What each
+  does at launch is in step 5.
 - `reviewer` and `checkpoint` record answers 5 and 6. The engine does not read them; the agents
   do, through `AGENT.md`. Write both places from the one answer.
 
@@ -162,7 +159,8 @@ One action, in order:
    If it does not, run `bun install` and `bun run build` in `~/repos/learning/ai-agent-graphs/ui/`.
 2. Start the server detached so it outlives this session, from the engine repo. The engine
    resolves the port itself: the `--port` flag wins, then the `console.json` pin, then
-   8787-or-next-free. Do not write `runs/server.pid`; that file is the engine's pool lock.
+   8787-or-next-free. A pinned port must bind exactly at launch or the engine refuses loudly
+   naming the port. Do not write `runs/server.pid`; that file is the engine's pool lock.
    Run the launch as one command so the boot verdict is readable before the shell returns:
 
    ```
@@ -185,8 +183,8 @@ One action, in order:
    done
    ```
 
-   The log is truncated first so a boot line is always fresh: a relaunch must never read a
-   previous server's line and mistake it for a new boot.
+   The log is truncated first so a boot line is always fresh: a relaunch reads only this boot's
+   line.
 
    A live pool is refused at boot with a message naming the live pid, its fleet-registry port
    when known, and the pool directory. Surface that message verbatim and stop: open the running
@@ -204,8 +202,9 @@ One action, in order:
    fi
    ```
 
-Report the URL and the log path. To stop the server later, kill the pid in `runs/server.pid`;
-the engine writes it when it claims the pool.
+Report the URL and the log path, and name the absent spend cap: an unattended run spends until
+the pool stops. To stop the server later, kill the pid in `runs/server.pid`; the engine writes it
+when it claims the pool.
 
 Then stop. The run from here is the human's: tickets spawn real harnesses, checkpoints arrive as
 interrupts, and the first launch of a pool is theirs to watch.
@@ -215,11 +214,7 @@ interrupts, and the first launch of a pool is theirs to watch.
 Leave these alone rather than rediscovering them:
 
 - The pool lock: one server per pool, enforced at boot. `runs/server.pid` is the engine's file;
-  it claims it, refuses a live pool with a message naming the pid, the fleet-registry port when
-  known, and the pool directory, and clears it on a failed bind. The skill never reads or writes
-  it.
-- The port pin: `console.json`'s `port` key pins the pool's URL. A pinned port binds exactly at
-  launch or boot fails loudly naming the port; an unpinned pool hunts 8787-or-next-free at boot.
+  it claims it and clears it on a failed bind. The skill never reads or writes it.
 - The spawn kernel is ported from `run.sh`: non-interactive invocation with stdin closed, the
   fullest auto-approve permission mode per harness, the prompt glued from driver skill, AGENT.md,
   chain and roster. opencode gets the driver through `--command`; cursor's launch line comes from
@@ -233,42 +228,8 @@ Leave these alone rather than rediscovering them:
 - Line-1 markers are dual-written alongside the sqlite checkpoint and are the truth on conflict,
   so the pool on disk is always inspectable and `run.sh` agrees with the Console.
 - Per-ticket logs land in the pool's `runs/` directory, same as my-issue-runner writes them.
-- There is no spend cap. An unattended run spends until the pool quiesces.
 
 ---
 
-## Guide
-
-For the human. Written in Simplified Technical English.
-
-### What you get
-
-Two files in your pool directory. `console.json` holds your interview answers as data: the default
-harness and model, per-ticket overrides, the subagent roster, the merge resolver, the pool port,
-the reviewer and what counts as a checkpoint. `AGENT.md` tells each agent what the job is. The
-Console server reads both when it starts.
-
-To change the default harness or model for every pool, edit `~/.issue-runner`. To change them for
-one pool, edit that pool's `console.json`. To change one ticket, edit its entry under `assign`.
-
-### How to start
-
-Point the skill at a pool: `/my-console-runner <path-to-pool>`. It checks the pool, asks seven
-questions, writes the two files, starts the server and opens your browser. Run it again on a
-configured pool to relaunch without the questions.
-
-### How it stops
-
-The pool runs until something needs you. Then it waits. A ticket's checkpoint, a merge that needs
-your approval, a crash, a deadlock and the final Review all appear as interrupts on the card that
-raised them. Answer in the card or in its Detail. The pool resumes when you answer. A stop at a
-checkpoint is correct behaviour. Expect a good share of a real pool to stop this way.
-
-### What it does not do
-
-The server makes commits on the current branch. It does not push, and it does not open a pull
-request. You do those, after you have read the log.
-
-There is no spend cap. An unattended run spends until the pool stops.
-
-The pool on disk stays drivable by `run.sh`. The line-1 markers are the truth both executors read.
+The human-facing guide is [`GUIDE.md`](GUIDE.md): what you get, how to start, how it stops,
+what it does not do.

@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
 # Sync skills from mattpocock + android + gcp into this fork.
-# Idempotent — re-run any time to refresh.
+# Idempotent: re-run any time to refresh.
 #
 # What it does:
 #   1. Pulls mattpocock/skills (upstream) into this fork.
-#   2. Clones android/skills and copies each skill dir flat with `android-` prefix.
-#   3. Clones google/skills and copies each skill dir flat (under skills/) with `gcp-` prefix.
+#   2. Clones android/skills and copies each skill dir into skills/android/ with
+#      `android-` prefix.
+#   3. Clones google/skills and copies each skill dir into skills/gcp/ with
+#      `gcp-` prefix.
 #   4. Pulls the thermo-nuclear-code-quality-review skill from cursor/plugins into
 #      skills/personal/, overwriting it each run.
-#   5. Removes any previously-synced skill that no longer exists upstream.
-#   6. On a directory collision that we don't recognise as previously-synced,
+#   5. Removes any previously-synced skill that no longer exists upstream, plus
+#      legacy flat gcp-*/android-* dirs left at the repo root by older syncs.
+#   6. Regenerates skills/gcp/README.md and skills/android/README.md.
+#   7. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   7. Links every skill in the repo (except deprecated/) into ~/.claude/skills,
+#   8. Links every skill in the repo (except deprecated/) into ~/.claude/skills,
 #      ~/.agents/skills and ~/.cursor/skills via scripts/link-skills.sh.
-#   8. Generates an OpenCode slash-command stub per skill via
+#   9. Generates an OpenCode slash-command stub per skill via
 #      scripts/link-opencode-commands.sh (no-op if OpenCode isn't installed).
-#   9. Commits and pushes to origin.
+#  10. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -76,12 +80,14 @@ sync_source() {
 
   local -a newly_synced=()
 
+  mkdir -p "$REPO_DIR/skills/$prefix"
+
   while IFS= read -r -d '' skill_md; do
     local skill_dir skill_name target_name target
     skill_dir="$(dirname "$skill_md")"
     skill_name="$(basename "$skill_dir")"
     target_name="$prefix-$skill_name"
-    target="$REPO_DIR/$target_name"
+    target="$REPO_DIR/skills/$prefix/$target_name"
 
     if [[ -e "$target" ]]; then
       if ! grep -qx "$target_name" <<<"$previously_synced"; then
@@ -103,13 +109,113 @@ sync_source() {
     for new in "${newly_synced[@]+"${newly_synced[@]}"}"; do
       [[ "$new" == "$old" ]] && { found=1; break; }
     done
-    if (( found == 0 )) && [[ -d "$REPO_DIR/$old" ]]; then
-      echo "    - $old (stale, removed)"
-      rm -rf "$REPO_DIR/$old"
+    if (( found == 0 )); then
+      if [[ -d "$REPO_DIR/skills/$prefix/$old" ]]; then
+        echo "    - $old (stale, removed)"
+        rm -rf "$REPO_DIR/skills/$prefix/$old"
+      fi
+      if [[ -d "$REPO_DIR/$old" ]]; then
+        echo "    - $old (legacy flat dir, removed)"
+        rm -rf "$REPO_DIR/$old"
+      fi
     fi
   done <<<"$previously_synced"
 
+  # One-time migration cleanup, safe to keep permanently: sweep any remaining
+  # flat `$prefix-*` dirs at the repo root left over from the pre-bucket layout.
+  local legacy
+  for legacy in "$REPO_DIR"/"$prefix"-*; do
+    [[ -d "$legacy" ]] || continue
+    echo "    - $(basename "$legacy") (legacy flat dir, removed)"
+    rm -rf "$legacy"
+  done
+
   write_manifest "$prefix" "${newly_synced[@]+"${newly_synced[@]}"}"
+
+  regenerate_bucket_readme "$prefix" "$repo_url"
+}
+
+# Prints the first sentence of a SKILL.md frontmatter `description`, folded
+# onto one line with quotes stripped and long sentences truncated sensibly.
+# Prints nothing if the field is absent.
+skill_first_sentence() {
+  awk '
+    function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t\r]+$/, "", s); return s }
+    BEGIN { dq = sprintf("%c", 34); sq = sprintf("%c", 39) }
+    NR == 1 { if ($0 !~ /^---[ \t\r]*$/) exit; next }
+    /^(---|\.\.\.)[ \t\r]*$/ { exit }
+    !capturing && /^description:/ {
+      val = trim(substr($0, 13))
+      if (val ~ /^[|>][0-9+-]*$/) val = ""   # block scalar header; body follows
+      capturing = 1
+      next
+    }
+    capturing {
+      # Continuation lines are indented (or blank); anything at column 0 is the
+      # next key.
+      if ($0 ~ /^[ \t]/ || trim($0) == "") {
+        line = trim($0)
+        if (line != "") val = (val == "" ? line : val " " line)
+        next
+      }
+      capturing = 0
+    }
+    END {
+      gsub(/[\t\r]/, " ", val)
+      gsub(/ +/, " ", val)
+      val = trim(val)
+
+      n = length(val)
+      if (n >= 2) {
+        first = substr(val, 1, 1); last = substr(val, n, 1)
+        if (first == dq && last == dq) {
+          val = substr(val, 2, n - 2)
+        } else if (first == sq && last == sq) {
+          val = substr(val, 2, n - 2)
+        }
+      }
+
+      # First sentence: cut at the first period followed by whitespace.
+      if (match(val, /\. [^ ]/)) val = substr(val, 1, RSTART)
+      # Sensible truncation for one-sentence descriptions.
+      if (length(val) > 200) val = trim(substr(val, 1, 197)) "..."
+      print val
+    }
+  ' "$1"
+}
+
+# Regenerates skills/<label>/README.md: a flat list, one line per skill, linking
+# to its SKILL.md with the first sentence of its frontmatter description.
+# Generated by this script; do not hand-edit.
+regenerate_bucket_readme() {
+  local label="$1" repo_url="$2"
+  local bucket_dir="$REPO_DIR/skills/$label"
+  local readme="$bucket_dir/README.md"
+  local title
+  case "$label" in
+    gcp) title="GCP" ;;
+    android) title="Android" ;;
+    *) title="$label" ;;
+  esac
+
+  {
+    echo "# $title skills"
+    echo ""
+    echo "Skills synced from upstream ($repo_url), not promoted in the plugin. This file is generated by \`update-skills.sh\`; do not hand-edit."
+    echo ""
+    local skill_md name desc
+    for skill_md in "$bucket_dir"/*/SKILL.md; do
+      [[ -e "$skill_md" ]] || continue
+      name="$(basename "$(dirname "$skill_md")")"
+      desc="$(skill_first_sentence "$skill_md")"
+      if [[ -z "$desc" ]]; then
+        echo "- [$name](./$name/SKILL.md)"
+      else
+        echo "- [$name](./$name/SKILL.md): $desc"
+      fi
+    done
+  } > "$readme"
+  echo "    wrote skills/$label/README.md"
 }
 
 # Sync a single named skill into skills/personal/, keeping its original name.

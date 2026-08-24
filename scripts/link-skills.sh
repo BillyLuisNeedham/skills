@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# NOTE: This is a dev-only script, intended for use by maintainers of this repo.
+# It is not a supported installer. Modifications to it, or requests for
+# modifications, will not be approved.
+#
 # Links every skill in this repo (SKILL.md, excluding deprecated/) into the
 # local skill directories used by each agent harness:
-#   - ~/.claude/skills  — Claude Code        (symlink)
-#   - ~/.agents/skills  — pi / Agent-Skills-standard harnesses (symlink)
-#   - ~/.cursor/skills  — Cursor             (real copy; its picker won't follow symlinks)
+#   - ~/.claude/skills: Claude Code (symlink)
+#   - ~/.agents/skills: Codex and other Agent Skills-compatible harnesses (symlink)
+#   - ~/.cursor/skills: Cursor (real copy, because its picker won't follow symlinks)
+# The symlinked entries point into this repo, so a `git pull` is all that's
+# needed to keep those installed skills up to date. Cursor's copies are
+# refreshed by re-running this script.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 CURSOR_DEST="$HOME/.cursor/skills"

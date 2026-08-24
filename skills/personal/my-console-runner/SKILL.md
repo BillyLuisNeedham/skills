@@ -12,9 +12,11 @@ directory, then starts the Console server bound to that pool and opens the brows
 Issues here.** An empty or markerless pool is a reason to stop and say so, not a reason to invent
 tickets.
 
-The engine is one versioned copy, living at `~/repos/learning/ai-agent-graphs` (`engine/` for the
-server, `ui/` for the Console). If that repo moves, update this line. The pool carries its own
-config as data, so regenerating a pool's config never means copying engine code.
+The engine is one versioned copy per machine, its location read from the `engine=` line in
+`~/.console-runner` (`engine/` for the server, `ui/` for the Console). If the file or the line is
+missing, ask once where the engine repo lives and write it, one line, `engine=..`, before anything
+else. The pool carries its own config as data, so regenerating a pool's config never means copying
+engine code.
 
 ## How a Console run works
 
@@ -41,9 +43,10 @@ Look these up. Asking for them wastes a question:
 - which context files sit in the pool directory beside `issues/`, and their names
 - whether the worktree is clean
 - whether `~/.issue-runner` exists, and its contents if it does
+- whether `~/.console-runner` exists, and the `engine=` path it names if it does
 - which of `claude`, `opencode` and `agent` are on PATH
 
-Report all eight back in one short brief and get it confirmed. If the pool has no `issues/`
+Report all nine back in one short brief and get it confirmed. If the pool has no `issues/`
 directory, no Issues in it, or any Issue without a state marker, say which and stop: the human
 fixes the pool, or `to-tickets` writes it again. If the worktree is dirty, recommend committing
 before launch: tickets commit to the current branch, and an unattended agent can sweep unrelated
@@ -155,9 +158,10 @@ Below the marker:
 
 One action, in order:
 
-1. Build the Console if it is not built: `~/repos/learning/ai-agent-graphs/ui/dist/` must exist.
-   If it does not, run `bun install` and `bun run build` in `~/repos/learning/ai-agent-graphs/ui/`.
-2. Start the server detached so it outlives this session, from the engine repo. The engine
+1. Build the Console if it is not built. Read the engine repo path from the `engine=` line in
+   `~/.console-runner`; `$ENGINE/ui/dist/` must exist. If it does not, run `bun install` and
+   `bun run build` in `$ENGINE/ui/`.
+2. Start the server detached so it outlives this session, from `$ENGINE`. The engine
    resolves the port itself: the `--port` flag wins, then the `console.json` pin, then
    8787-or-next-free. A pinned port must bind exactly at launch or the engine refuses loudly
    naming the port. Do not write `runs/server.pid`; that file is the engine's pool lock.

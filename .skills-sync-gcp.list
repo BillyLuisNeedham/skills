@@ -17,6 +17,7 @@ gcp-bigquery-ai-ml
 gcp-bigquery-basics
 gcp-bigquery-bigframes
 gcp-bigtable-basics
+gcp-cloud-build-basics
 gcp-cloud-logging-configuration-basics
 gcp-cloud-logging-cross-project-configuration
 gcp-cloud-logging-query-generation
@@ -79,6 +80,7 @@ gcp-google-cloud-networking-observability
 gcp-google-cloud-recipe-auth
 gcp-google-cloud-recipe-foundation-builder
 gcp-google-cloud-recipe-onboarding
+gcp-google-cloud-scc-query
 gcp-google-cloud-slo-alert-configuration
 gcp-google-cloud-solution-agentic-ai-bidirectional-streaming
 gcp-google-cloud-solution-agentic-ai-borderless-data-lakehouse

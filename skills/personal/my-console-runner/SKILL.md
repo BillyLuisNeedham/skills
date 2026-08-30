@@ -225,8 +225,8 @@ Leave these alone rather than rediscovering them:
   Cursor's documentation and is unproven.
 - Upstream outcomes are injected into each ticket's prompt at spawn time, so downstream agents
   build on what upstream agents did.
-- A ticket that exits without setting its line-1 status is a crash and surfaces as an interrupt
-  carrying the log path.
+- A ticket that exits without an outcome status in its outcome JSON is a crash and surfaces as an
+  interrupt carrying the log path.
 - A merge conflict spawns the resolver agent; its resolution comes to the human as an approval
   interrupt, and rejecting hands the conflicted state over with the attempt noted.
 - Line-1 markers are dual-written alongside the sqlite checkpoint and are the truth on conflict,

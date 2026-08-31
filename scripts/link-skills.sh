@@ -94,11 +94,21 @@ prune_stale() {
     elif [[ "$dest" = "$CURSOR_DEST" && -d "$target" && -f "$target/SKILL.md" ]]; then
       # Cursor copies are real dirs, not symlinks: stale if the name is no
       # longer a current repo skill. Restrict to dirs holding a SKILL.md so we
-      # never touch unrelated Cursor content.
-      if ! grep -qxF "$name" <<<"$VALID_NAMES"; then
-        rm -rf "$target"
-        echo "removed stale $name ($dest)"
+      # never touch unrelated Cursor content. Dirs stamped with a .linked-from
+      # marker pointing outside this repo belong to another repo's linker
+      # (e.g. agent-console's scripts/link-skills.sh) and are left alone.
+      local from=""
+      if [ -f "$target/.linked-from" ]; then
+        from="$(cat "$target/.linked-from")"
       fi
+      case "$from" in
+        ""|"$REPO"|"$REPO"/*)
+          if ! grep -qxF "$name" <<<"$VALID_NAMES"; then
+            rm -rf "$target"
+            echo "removed stale $name ($dest)"
+          fi
+          ;;
+      esac
     fi
   done
   for name in github-triage triage-issue; do

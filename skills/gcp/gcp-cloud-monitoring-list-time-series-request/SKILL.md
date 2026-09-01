@@ -3,7 +3,7 @@ name: cloud-monitoring-list-time-series-request
 metadata:
   category: CloudObservabilityAndMonitoring
 description: >-
-  Generate valid Cloud Monitoring ListTimeSeries requests and aggregation
+  Generates valid Cloud Monitoring ListTimeSeries requests and aggregation
   specifications from metric descriptors and resource parameters. Use when asked
   to create, generate, format, or build ListTimeSeries requests, JSON payloads,
   filter expressions, or aligner/reducer aggregations for Cloud Monitoring
@@ -194,17 +194,16 @@ Present the generated `ListTimeSeries` REST query parameters. For example:
 
 --------------------------------------------------------------------------------
 
-### Validate Request via REST API
+### Validate Request via list_timeseries MCP Tool
 
-Always validate the generated request parameters against live Cloud Monitoring
-telemetry before returning the final output. DO NOT call the `list_timeseries`
-MCP tool. Perform an HTTP GET request directly to the Cloud Monitoring v3 REST
-API using `curl -s -H "Authorization: Bearer \$(gcloud auth print-access-token)"
--G` with `--data-urlencode` for all query fields (`name`, `filter`,
-`interval.startTime`, `interval.endTime`, `aggregation.alignmentPeriod`,
-`aggregation.perSeriesAligner`, `aggregation.crossSeriesReducer`, and
-`view=HEADERS`). An HTTP 200 OK response confirms that your filter and
-aggregation settings are valid.
+You MUST validate the generated request parameters against live Cloud Monitoring
+telemetry before returning the final output. Call the `list_timeseries` MCP tool
+passing all generated query parameters (`name`, `filter`, `interval`,
+`aggregation`). When validating you MUST set `view="HEADERS"` to minimize
+latency and payload size while verifying request structure. A response without
+API errors confirms that your filter and aggregation settings are valid.
+
+If the `list_timeseries` tool is unavailable, fall back to a direct API call.
 
 --------------------------------------------------------------------------------
 

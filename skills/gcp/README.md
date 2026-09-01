@@ -22,12 +22,14 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-bigquery-bigframes](./gcp-bigquery-bigframes/SKILL.md): Generates Python code using BigQuery DataFrames (BigFrames), the pandas/scikit-learn-style API over BigQuery.
 - [gcp-bigtable-basics](./gcp-bigtable-basics/SKILL.md): Assists in provisioning instances/tables, designing performant schemas, and querying data in Bigtable.
 - [gcp-cloud-build-basics](./gcp-cloud-build-basics/SKILL.md): Teaches the fundamentals of Google Cloud Build (GCB).
+- [gcp-cloud-databases-onboarding](./gcp-cloud-databases-onboarding/SKILL.md): Guides users through discovering their database requirements, recommends a Google Cloud database based on a recommendation matrix, and assists in database creation.
 - [gcp-cloud-logging-configuration-basics](./gcp-cloud-logging-configuration-basics/SKILL.md): Configure single-project Google Cloud Logging: regional log buckets, log sinks, log views, restricting or hiding sensitive logs in the default view (_Default) filter, IAM permissions for views (Log...
 - [gcp-cloud-logging-cross-project-configuration](./gcp-cloud-logging-cross-project-configuration/SKILL.md): Configure and troubleshoot Google Cloud cross-project centralized logging and read-time aggregation.
 - [gcp-cloud-logging-query-generation](./gcp-cloud-logging-query-generation/SKILL.md): Generates Logging Query Language (LQL) queries for Google Cloud Logging from natural language.
 - [gcp-cloud-monitoring-chart-generation](./gcp-cloud-monitoring-chart-generation/SKILL.md): Generates Google Cloud Monitoring Server-Driven UI (SDUI) Widget and XyChart Protocol Buffer textprotos from resolved PromQL or ListTimeSeries queries.
-- [gcp-cloud-monitoring-list-time-series-request](./gcp-cloud-monitoring-list-time-series-request/SKILL.md): Generate valid Cloud Monitoring ListTimeSeries requests and aggregation specifications from metric descriptors and resource parameters.
+- [gcp-cloud-monitoring-list-time-series-request](./gcp-cloud-monitoring-list-time-series-request/SKILL.md): Generates valid Cloud Monitoring ListTimeSeries requests and aggregation specifications from metric descriptors and resource parameters.
 - [gcp-cloud-monitoring-metric-selection](./gcp-cloud-monitoring-metric-selection/SKILL.md): Retrieve, query, and identify relevant Google Cloud Monitoring metric descriptors for a GCP service or resource (such as Compute Engine, Spanner, BigQuery, Cloud Run, Cloud SQL, Pub/Sub, Cloud Stor...
+- [gcp-cloud-monitoring-promql-query](./gcp-cloud-monitoring-promql-query/SKILL.md): Generates valid PromQL queries from Cloud Monitoring metric descriptors and resource parameters.
 - [gcp-cloud-run-basics](./gcp-cloud-run-basics/SKILL.md): Manages Cloud Run services, jobs, and worker pools.
 - [gcp-cloud-sql-basics](./gcp-cloud-sql-basics/SKILL.md): This file generates or explains Cloud SQL resources.
 - [gcp-data-manager-api-audience-ingestion](./gcp-data-manager-api-audience-ingestion/SKILL.md): Guides developers through managing (adding, removing, and clearing) audience members for Google products using the Data Manager API and its associated client libraries.
@@ -37,17 +39,23 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-datalineage-summary](./gcp-datalineage-summary/SKILL.md): Summarizes Google Cloud Data Lineage graphs to help users debug data quality issues and understand data provenance for BQ/GCS.
 - [gcp-detection-engineering-coverage-evaluation](./gcp-detection-engineering-coverage-evaluation/SKILL.md): Automates the end-to-end detection engineering workflow in Google SecOps using MCP tools.
 - [gcp-developer-device-platform-basics](./gcp-developer-device-platform-basics/SKILL.md): Provides guidance and instructions on managing remote devices on Developer Device Platform (DDP).
+- [gcp-finding-google-skills](./gcp-finding-google-skills/SKILL.md): Locates and loads the right Google product skill on demand from a remote catalog index, instead of preloading every skill.
 - [gcp-firebase-basics](./gcp-firebase-basics/SKILL.md): Provides foundational Firebase CLI setup, CLI installation, version checks (`firebase-tools@latest --version`), CLI login (including --no-localhost), project creation, project selection (`firebase...
 - [gcp-gcloud](./gcp-gcloud/SKILL.md): Provides safety-critical validation, guardrails, and data reduction for gcloud CLI operations across Google Cloud Platform (GCP) services and infrastructure.
 - [gcp-gemini-agents-api](./gcp-gemini-agents-api/SKILL.md): Manages custom Agent resources on Gemini Enterprise Agent Platform.
 - [gcp-gemini-api](./gcp-gemini-api/SKILL.md): Use when the user asks about using Gemini in an enterprise environment or explicitly mentions Vertex AI, Google Cloud, or Agent Platform.
 - [gcp-gemini-interactions-api](./gcp-gemini-interactions-api/SKILL.md): Guides the usage of Gemini Interactions API on Gemini Enterprise Agent Platform.
 - [gcp-gemini-live-api](./gcp-gemini-live-api/SKILL.md): Generates a Gemini LiveAPI client service class in the user's chosen programming language.
+- [gcp-genkit-dart](./gcp-genkit-dart/SKILL.md): Generates code and provides documentation for the Genkit Dart SDK.
+- [gcp-genkit-go](./gcp-genkit-go/SKILL.md): Develop AI-powered applications using Genkit in Go.
+- [gcp-genkit-js](./gcp-genkit-js/SKILL.md): Develop AI-powered applications using Genkit in Node.js/TypeScript.
+- [gcp-genkit-python](./gcp-genkit-python/SKILL.md): Develop AI-powered applications using Genkit in Python.
 - [gcp-gke-ai-troubleshooting-handle-disruption-gpu-tpu](./gcp-gke-ai-troubleshooting-handle-disruption-gpu-tpu/SKILL.md): Diagnoses, predicts, and mitigates node disruptions during Compute Engine host maintenance and hardware or software maintenance events for GPU and TPU workloads on GKE.
 - [gcp-gke-ai-troubleshooting-jobset-interruption](./gcp-gke-ai-troubleshooting-jobset-interruption/SKILL.md): Diagnoses GKE JobSet interruptions, restarts, and preemptions for AI/ML training workloads autonomously.
 - [gcp-gke-ai-troubleshooting-tpu-dynamic-slices-monitoring](./gcp-gke-ai-troubleshooting-tpu-dynamic-slices-monitoring/SKILL.md): Monitors, troubleshoots, and manages GKE TPU Dynamic Slices custom resources.
 - [gcp-gke-ai-troubleshooting-tpu-metrics-monitoring](./gcp-gke-ai-troubleshooting-tpu-metrics-monitoring/SKILL.md): Monitors and troubleshoots GKE TPU workloads, nodes, and node pools using GKE system metrics and PromQL.
 - [gcp-gke-ai-troubleshooting-tpu-vbar-oom](./gcp-gke-ai-troubleshooting-tpu-vbar-oom/SKILL.md): Diagnoses and prevents vbar_control_agent segfaults, out-of-memory (OOM) errors, and TPU device initialization failures on TPU v6e nodes in GKE caused by race conditions during TPU device resets or...
+- [gcp-gke-alert-configuration](./gcp-gke-alert-configuration/SKILL.md): Configures alerting policies in Terraform for Google Kubernetes Engine (GKE) clusters, workloads, and services using PromQL and Google Cloud Managed Service for Prometheus.
 - [gcp-gke-app-onboarding](./gcp-gke-app-onboarding/SKILL.md): Manages GKE application onboarding, covering containerization, deployment manifests, and migration.
 - [gcp-gke-backup-dr](./gcp-gke-backup-dr/SKILL.md): Configures Backup for GKE: the BackupRestore cluster addon, BackupPlan and RestorePlan resources, restore workflows, and CMEK-encrypted backups.
 - [gcp-gke-basics](./gcp-gke-basics/SKILL.md): Manages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment.
@@ -57,6 +65,7 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-gke-compute-classes](./gcp-gke-compute-classes/SKILL.md): Configures, optimizes, and troubleshoots GKE ComputeClasses.
 - [gcp-gke-cost-analysis](./gcp-gke-cost-analysis/SKILL.md): Answer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics.
 - [gcp-gke-cost-optimization](./gcp-gke-cost-optimization/SKILL.md): Optimizes GKE costs, rightsizes workloads, and configures Spot VMs, CUDs, cost allocation, and resource quotas.
+- [gcp-gke-custom-golden-image-discovery](./gcp-gke-custom-golden-image-discovery/SKILL.md): Discovers golden base images for creating GKE custom node images based on technical specifications or context clues.
 - [gcp-gke-golden-path](./gcp-gke-golden-path/SKILL.md): Provides GKE golden path configuration defaults, production readiness checklists, and cluster default patterns.
 - [gcp-gke-inference](./gcp-gke-inference/SKILL.md): Deploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers.
 - [gcp-gke-manifest-generation](./gcp-gke-manifest-generation/SKILL.md): Generates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters.
@@ -93,6 +102,8 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-google-cloud-solution-architecture](./gcp-google-cloud-solution-architecture/SKILL.md): Interactively discovers requirements for a specific cloud workload and generates design recommendations and architectural guidance to build a multi-product solution in Google Cloud.
 - [gcp-google-cloud-solution-build-deploy-agents](./gcp-google-cloud-solution-build-deploy-agents/SKILL.md): Designs, builds, and deploys AI agents or multi-agent systems on Google Cloud.
 - [gcp-google-cloud-solution-guided-gke-ai-migration](./gcp-google-cloud-solution-guided-gke-ai-migration/SKILL.md): Guides the migration of existing AI workloads (Cloud Run, Gemini API, Gemini Enterprise Agent Platform) to self-hosted GKE inference using gcloud and kubectl.
+- [gcp-google-cloud-solution-hybrid-search-alloydb](./gcp-google-cloud-solution-hybrid-search-alloydb/SKILL.md): Discovers requirements and generates architectural, design, and deployment guidance for dynamic hybrid search systems by combining semantic search and keyword search.
+- [gcp-google-cloud-solution-multi-agent-security](./gcp-google-cloud-solution-multi-agent-security/SKILL.md): Designs, deploys, and secures Google Cloud Agent Gateway solutions.
 - [gcp-google-cloud-solution-n-tier-serverless-web-app](./gcp-google-cloud-solution-n-tier-serverless-web-app/SKILL.md): Assists in developing a secure n-tier serverless web application based on best practices and architecture guidance.
 - [gcp-google-cloud-solution-rag-enterprise-search-gke-sqldb](./gcp-google-cloud-solution-rag-enterprise-search-gke-sqldb/SKILL.md): Discovers requirements, and generates architectural, design, and deployment guidance for a retrieval-augmented generation (RAG)-capable enterprise search system in Google Cloud.
 - [gcp-google-cloud-storage-basics](./gcp-google-cloud-storage-basics/SKILL.md): Stores, retrieves, and manages data as objects in Cloud Storage (Google Cloud Storage, or GCS) buckets.
@@ -113,6 +124,8 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-ima-dai-sdk](./gcp-ima-dai-sdk/SKILL.md): Integrates the Google Interactive Media Ads (IMA) Dynamic Ad Insertion (DAI) SDK into websites, web apps, mobile apps, or TV apps.
 - [gcp-ima-sdk-client-side](./gcp-ima-sdk-client-side/SKILL.md): Supports Interactive Media Ads (IMA) SDK.
 - [gcp-managed-airflow-dag-authoring](./gcp-managed-airflow-dag-authoring/SKILL.md): Provides guidance for authoring Apache Airflow DAGs in Managed Service for Apache Airflow (MSAA; formerly Cloud Composer).
+- [gcp-managed-airflow-dag-troubleshooting](./gcp-managed-airflow-dag-troubleshooting/SKILL.md): Provides guidance for troubleshooting Apache Airflow DAGs (failed DAG runs and task instances) in Managed Service for Apache Airflow (MSAA; formerly Cloud Composer).
 - [gcp-managed-airflow-migrations](./gcp-managed-airflow-migrations/SKILL.md): Provides guidance for migrating Apache Airflow DAGs in Managed Service for Apache Airflow (MSAA; formerly Cloud Composer).
+- [gcp-retrieving-developer-knowledge](./gcp-retrieving-developer-knowledge/SKILL.md): Searches, retrieves, and synthesizes official Google developer documentation across Google Cloud, AI/Gemini, Android, Chrome, Web, Flutter, Go, Firebase, and other Google developer platforms.
 - [gcp-spanner-basics](./gcp-spanner-basics/SKILL.md): Assists in provisioning instances and databases, designing performant schemas, and querying data in Spanner.
 - [gcp-workload-manager-basics](./gcp-workload-manager-basics/SKILL.md): Use this skill to manage Google Cloud Workload Manager evaluations, rules, scanned resources, and validation results by using public client libraries and the REST API.

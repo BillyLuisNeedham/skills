@@ -12,15 +12,17 @@ When the Developer Knowledge MCP server tools (`search_documents`, `get_document
 
 Before issuing REST requests, resolve authentication credentials using one of the following methods in order of precedence:
 
-1. **API Key (Recommended)**:
-   Check the environment for `DEVELOPERKNOWLEDGE_API_KEY` or `GOOGLE_API_KEY`.
-   - Pass via query parameter: `?key=${DEVELOPERKNOWLEDGE_API_KEY}`
-   - Or pass via header: `-H "X-Goog-Api-Key: ${DEVELOPERKNOWLEDGE_API_KEY}"`
-
-2. **OAuth 2.0 Access Token**:
-   If an API key is not set but `gcloud` or ambient Google Cloud credentials are present:
+1. **OAuth 2.0 Access Token (Recommended)**:
+   If `gcloud` or ambient Google Cloud credentials are present, nothing needs to be installed or configured.
    - Obtain access token: `ACCESS_TOKEN=$(gcloud auth print-access-token)`
    - Pass via header: `-H "Authorization: Bearer ${ACCESS_TOKEN}"`
+   - Also pass your quota project: `-H "X-Goog-User-Project: $(gcloud config get-value project 2>/dev/null)"`
+   - If this fails to authenticate, on a 401, a 403, or any other credential error, the account has a token the API will not accept. Substitute `gcloud auth application-default print-access-token` and retry; which credential the API accepts depends on how the environment was authenticated.
+
+2. **API Key**:
+   If a key is already provisioned, check the environment for `DEVELOPERKNOWLEDGE_API_KEY` or `GOOGLE_API_KEY`.
+   - Pass via query parameter: `?key=${DEVELOPERKNOWLEDGE_API_KEY}`
+   - Or pass via header: `-H "X-Goog-Api-Key: ${DEVELOPERKNOWLEDGE_API_KEY}"`
 
 ---
 

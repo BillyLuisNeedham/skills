@@ -20,7 +20,9 @@ The Developer Knowledge skill provides access to official Google developer docum
 1. **Direct Retrieval**: When answering a technical question, execute a single documentation lookup directly within your current conversation context (do not delegate retrieval to subagents):
    - **If MCP tools are present in your environment**: Call `answer_query` (for conceptual guides/workflows) or `search_documents` (for CLI flags/syntax).
    - **If MCP tools are not present**: Execute a REST API request via `curl` against `https://developerknowledge.googleapis.com/v1`.
-2. **Immediate & Complete Solution Output**: Immediately upon receiving the documentation response, output the complete, self-contained, and executable technical solution (commands with all required flags and placeholders, YAML/JSON configurations, or code snippets) directly in your response text.
+   - **A declared server is not always a connected server.** Some clients cannot complete the MCP handshake with this server and expose no `answer_query`, `search_documents` or `get_documents` tool at all, even though the plugin declares one. Treat their absence as normal and use the REST fallback below.
+2. **Confirm the lookup succeeded before using it**: A response that arrives is not automatically an answer. `PERMISSION_DENIED`, `UNAUTHENTICATED`, HTTP 401 or 403, an empty result set, or any error payload is a FAILED lookup even when the tool itself reported no error. On a failed lookup, do not answer as though it had succeeded. Try the other transport once, and if that also fails, state plainly in your reply to the user that you could not reach Developer Knowledge and are answering without it. Presenting recalled documentation as a retrieved result is the worst available outcome, because nothing in the reply distinguishes it from a real lookup.
+3. **Immediate & Complete Solution Output**: Immediately upon receiving the documentation response, output the complete, self-contained, and executable technical solution (commands with all required flags and placeholders, YAML/JSON configurations, or code snippets) directly in your response text.
 
 ## Tool Selection & Usage
 
@@ -33,7 +35,33 @@ When MCP tools are present in your active tool definitions:
 - **`get_documents(names=["documents/{uri_without_scheme}"])`**: Fetch full documentation pages by resource name (e.g. `names: ["documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run"]`).
 
 ### 2. REST API Fallback
-When MCP tools are not declared in your environment, use HTTP requests (`curl`) against the Developer Knowledge REST API (`https://developerknowledge.googleapis.com/v1`) with the environment API key (`DEVELOPERKNOWLEDGE_API_KEY`):
+When the MCP tools are absent, query the Developer Knowledge REST API
+(`https://developerknowledge.googleapis.com/v1`) with `curl`. Two credentials
+work, and you should try them in this order.
+
+**An existing Google credential, preferred.** If `gcloud` is authenticated,
+pass a bearer token and your quota project. Nothing needs to be installed or
+configured:
+
+```bash
+curl -s -X POST "https://developerknowledge.googleapis.com/v1:answerQuery" \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "X-Goog-User-Project: $(gcloud config get-value project 2>/dev/null)" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\": \"How do I configure public read access on Cloud Storage?\"}"
+```
+
+If that fails to authenticate, on a 401, a 403, or any other credential error,
+the account has a token the API will not accept. Substitute
+`gcloud auth application-default print-access-token` for
+`gcloud auth print-access-token` in the command above and try again. Which
+credential the API accepts depends on how the environment was authenticated, so
+treat an auth error here as a reason to try the application-default credential
+rather than as a failed lookup.
+
+**An API key, if one is configured.** Where `DEVELOPERKNOWLEDGE_API_KEY` is set
+in the environment, pass it as a `key` query parameter instead of an
+`Authorization` header. The remaining examples in this section use that form:
 - **Answer Query**:
   ```bash
   curl -s -X POST "https://developerknowledge.googleapis.com/v1:answerQuery?key=${DEVELOPERKNOWLEDGE_API_KEY}" \

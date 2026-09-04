@@ -150,7 +150,6 @@ available capacity, so it is the most likely to be scheduled successfully.
 Pinning a region up front restricts the job to that one region's capacity, which
 is why `global` is the recommended location for open model tuning.
 
-
 -   **The user named a location** → use it verbatim, provided it is `global` or
     one of the regions listed above. Do not talk them out of it.
 -   **The user asked which locations are supported** → answer the question.
@@ -198,7 +197,6 @@ safest choice) and tell the user why you switched.
 
 `global` is **not accepted for Gemini tuning today** — the service rejects it at
 job creation with a `FAILED_PRECONDITION` error, so do not propose it here.
-
 
 **There is no single region allowlist for Gemini.** Supported tuning regions
 vary by model and by model version: some Gemini models are restricted to two

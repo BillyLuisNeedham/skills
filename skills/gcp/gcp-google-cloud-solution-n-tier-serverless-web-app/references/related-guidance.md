@@ -272,7 +272,3 @@ When provisioning core infrastructure via Terraform, choose one of two workflows
     *   In new environments, infrastructure provisioning (VPC, Cloud SQL, IAM, Load Balancer) often precedes the initial application build. In this scenario, allow Terraform variables to use lightweight public placeholder images (such as `us-docker.pkg.dev/cloudrun/container/hello`).
     *   Once Terraform completes initial infrastructure bootstrapping, automated CI/CD pipelines (such as Cloud Build, GitHub Actions, or GitLab CI) build application code, push containers to Artifact Registry, and issue `gcloud run deploy` commands to update container image revisions on Cloud Run.
     *   **Terraform State Lifecycle**: Because application pipelines update container image revisions out-of-band, configure Terraform's `lifecycle { ignore_changes = [template[0].containers[0].image] }` block if necessary to prevent subsequent Terraform runs from reverting deployed application images back to initial placeholder values.
-
-### Other service patterns
-
-* https://docs.cloud.google.com/run/docs/samples/cloudrun-helloworld-service.md.txt

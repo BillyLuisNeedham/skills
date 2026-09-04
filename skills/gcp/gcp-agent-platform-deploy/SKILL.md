@@ -198,7 +198,6 @@ Interpret the probe result and act:
     to this project's Vertex AI API — enable it in the console or switch
     projects") and the concrete next action.
 
-
 ## 3. Deploying a Model
 
 > [!WARNING] Deploying models, especially large ones, consumes significant

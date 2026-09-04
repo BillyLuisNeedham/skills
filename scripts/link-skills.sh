@@ -5,14 +5,22 @@ set -euo pipefail
 # It is not a supported installer. Modifications to it, or requests for
 # modifications, will not be approved.
 #
-# Links every skill in this repo (SKILL.md, excluding deprecated/) into the
-# local skill directories used by each agent harness:
+# Links every skill in this repo (SKILL.md, excluding deprecated/ and misc/)
+# into the local skill directories used by each agent harness:
 #   - ~/.claude/skills: Claude Code (symlink)
 #   - ~/.agents/skills: Codex and other Agent Skills-compatible harnesses (symlink)
 #   - ~/.cursor/skills: Cursor (real copy, because its picker won't follow symlinks)
 # The symlinked entries point into this repo, so a `git pull` is all that's
 # needed to keep those installed skills up to date. Cursor's copies are
 # refreshed by re-running this script.
+#
+# `deprecated/` is retired and `misc/` is kept around but rarely used and not
+# promoted (see each bucket's own README): neither belongs in a daily-driver
+# skill directory, so both are skipped, same as everywhere else non-promoted
+# skills are kept out. `in-progress/` IS still linked: it's public on purpose,
+# feedback wanted, and this local install is exactly where that loop runs.
+# The find is deliberately rooted at $REPO, not $REPO/skills: assess-tech-test/
+# and peer-review/ hold a SKILL.md at the repo root and must stay linked.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 CURSOR_DEST="$HOME/.cursor/skills"
@@ -24,6 +32,7 @@ repo_skill_names() {
     -not -path '*/node_modules/*' \
     -not -path '*/.git/*' \
     -not -path '*/deprecated/*' \
+    -not -path '*/misc/*' \
     -print0 | while IFS= read -r -d '' skill_md; do
       basename "$(dirname "$skill_md")"
     done
@@ -84,6 +93,10 @@ prune_stale() {
           rm "$target"
           echo "removed deprecated $name ($dest)"
           ;;
+        "$REPO"/skills/misc/*)
+          rm "$target"
+          echo "removed misc $name ($dest)"
+          ;;
         "$REPO"/*)
           if [[ ! -f "$resolved/SKILL.md" ]]; then
             rm "$target"
@@ -134,5 +147,6 @@ done < <(
     -not -path '*/node_modules/*' \
     -not -path '*/.git/*' \
     -not -path '*/deprecated/*' \
+    -not -path '*/misc/*' \
     -print0
 )

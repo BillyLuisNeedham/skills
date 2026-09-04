@@ -5,7 +5,7 @@ Skills are organized into bucket folders under `skills/`:
 - `misc/`: kept around but rarely used, not promoted
 - `in-progress/`: beta: public on purpose, feedback wanted, not shipped in the plugin
 - `deprecated/`: no longer used
-- `personal/`: my own skills, not promoted, fork-owned
+- `personal/`: fork-owned and not promoted. My own `my-*` skills, plus individually vendored third-party skills that `update-skills.sh` re-copies verbatim on every run (see [FORK.md](./FORK.md)).
 - `gcp/`: Google Cloud skills, not promoted, synced from upstream
 - `android/`: Android skills, not promoted, synced from upstream
 

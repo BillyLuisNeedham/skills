@@ -9,8 +9,7 @@
 #   3. Clones google/skills and copies each skill dir into skills/gcp/ with
 #      `gcp-` prefix.
 #   4. Vendors individual third-party skills into skills/personal/, overwriting
-#      each one every run: thermo-nuclear-code-quality-review from cursor/plugins,
-#      and show-me from humanlayer/skills.
+#      each one every run: thermo-nuclear-code-quality-review from cursor/plugins.
 #   5. Removes any previously-synced skill that no longer exists upstream, plus
 #      legacy flat gcp-*/android-* dirs left at the repo root by older syncs.
 #   6. Regenerates skills/gcp/README.md and skills/android/README.md.
@@ -257,7 +256,6 @@ sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
 sync_single_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
-sync_single_skill "https://github.com/humanlayer/skills.git" "plugins/show-me/skills/show-me"
 
 echo "==> Linking skills to ~/.claude/skills, ~/.agents/skills and ~/.cursor/skills..."
 bash "$REPO_DIR/scripts/link-skills.sh"

@@ -1,6 +1,6 @@
 ---
-name: show-me
-description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
+name: my-show-me
+description: Help the user understand the current topic visually with concise ASCII diagrams, code-shape sketches, and focused HTML artifacts.
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
@@ -43,16 +43,23 @@ src/
 └── transport/      # sends API requests
 ```
 
-- Show component interaction, control flow, or data flow with Mermaid:
+- Show component interaction ordered over time as an ASCII lifeline diagram:
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Daemon
-    User->>UI: choose command
-    UI->>Daemon: send expanded prompt
-    Daemon-->>UI: stream result
+```text
+User          UI            Daemon
+ |            |               |
+ |─choose────>|               |
+ |  command   |─send prompt──>|
+ |            |<──stream──────|
+ |<─render────|               |
+```
+
+- Show data flow or dependency direction, where ordering is not the point, as ASCII boxes and arrows:
+
+```text
+┌──────┐  choose command  ┌────┐  expanded prompt  ┌────────┐
+│ User │ ───────────────> │ UI │ ────────────────> │ Daemon │
+└──────┘                  └────┘ <──── stream ──── └────────┘
 ```
 
 - Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
@@ -114,14 +121,23 @@ function expandSkill(command: string): string {
 }
 ```
 
-- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile. Then open it for the user:
+- For a visual UI, layout, state comparison, or concept too dense for ASCII, write one focused HTML file: a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile. Then open it for the user:
 
 ```
 Bash(open path/to/show-me-{description}.html)
 ```
 
+Mermaid is allowed inside that HTML file. Because the file is opened from disk rather than served, load the library and initialise it, or the diagram renders as raw text:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true })</script>
+```
+
 ### guidance
 
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
+
+Never emit Mermaid in terminal output. Use the text shapes above instead. Mermaid is fine inside an HTML file.
 
 You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.

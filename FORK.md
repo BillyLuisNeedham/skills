@@ -8,7 +8,7 @@ This repo is Billy's fork of `mattpocock/skills` (`upstream`). These rules keep 
 
 **Fork-owned**: a path that does not exist upstream. Merges never touch it. Examples: `skills/personal/`, `skills/personal/my-grilling/`.
 
-**Vendored skill**: a skill copied verbatim from a third-party repo into `skills/personal/` by `update-skills.sh` on every run, keeping its upstream name. Fork-owned by path, but read-only in practice: the sync deletes and re-copies it each run, so local edits are destroyed. Currently `thermo-nuclear-code-quality-review` (from `cursor/plugins`) and `show-me` (from `humanlayer/skills`). To change one, fork it under the `my-*` convention instead.
+**Vendored skill**: a skill copied verbatim from a third-party repo into `skills/personal/` by `update-skills.sh` on every run, keeping its upstream name. Fork-owned by path, but read-only in practice: the sync deletes and re-copies it each run, so local edits are destroyed. Currently `thermo-nuclear-code-quality-review` (from `cursor/plugins`). To change one, fork it under the `my-*` convention instead.
 _Avoid_: synced skill (that is the `gcp-`/`android-` whole-repo bucket mechanism, which prefixes names and tracks a manifest)
 
 ## Rules

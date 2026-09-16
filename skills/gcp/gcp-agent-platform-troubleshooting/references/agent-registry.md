@@ -5,7 +5,7 @@ registered in Google Cloud Agent Registry are not accepting traffic through
 Agent Gateway / IAP.
 
 Scope: Gemini Enterprise Agent Platform — Agent Registry (Preview). All commands
-use `gcloud alpha agent-registry`.
+use `gcloud agent-registry`.
 
 ## Table of Contents
 
@@ -34,11 +34,18 @@ use `gcloud alpha agent-registry`.
 Read these first when something is broken.
 
 1.  **Agent Registry is default-deny at the gateway.** Agent Gateway uses
-    Identity-Aware Proxy (IAP) to enforce IAM allow/deny policies bound to Agent
-    Registry resources. If a target hostname is not registered as a `Service`
-    (and a matching `roles/iap.egressor` binding does not exist for the calling
-    agent's principal), egress is blocked. Source:
-    `docs.cloud.google.com/iap/docs/agent-overview`.
+    Identity-Aware Proxy (IAP) to enforce authorization:
+
+    -   **UAP (Policy V2)**: When the gateway uses `iapPolicyVersion: "V2"`,
+        Gatekeeper queries the attached registries. If the destination matches,
+        Gatekeeper sets `destination.is_registered = true` and exposes rich CEL
+        metadata under `destination.agent_registry.*`. If not cataloged,
+        `destination.is_registered = false`.
+    -   **Legacy IAM v1**: When using legacy v1, if a target hostname is not
+        registered as a `Service` (and a matching `roles/iap.egressor` binding
+        does not exist on the registry entry for the calling agent's principal),
+        egress is blocked. Source:
+        `docs.cloud.google.com/iap/docs/agent-overview`.
 
 2.  **There are exactly three discoverable resource types**, and they are
     *projections* of the same writable `Service`:
@@ -69,7 +76,7 @@ Read these first when something is broken.
 6.  **Traffic permissions live on IAP, bound to registry resources.** The role
     that actually permits an agent to *use* a registered service is
     `roles/iap.egressor` (`iap.webServiceVersions.egressViaIAP`), bound via
-    `gcloud beta iap web set-iam-policy` with one of:
+    `gcloud iap web set-iam-policy` with one of:
     `--resource-type=agent-registry` (registry-wide), `--agent=`,
     `--mcp-server=`, or `--endpoint=` (per-resource). Source:
     `docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/assign-identity-iam`,
@@ -96,13 +103,25 @@ Read these first when something is broken.
     third-party MCP) is *manual*.
 
 10. **First debug command** is almost always: list the resource type and confirm
-    the hostname permutation you expect is actually present. `gcloud alpha
+    the hostname permutation you expect is actually present. `gcloud
     agent-registry endpoints list --project=$PROJECT_ID --location=$LOCATION`
 
 11. **Boundary controls visibility.** Agents are only discoverable if they are
     hosted in a project that is within the defined **Agent Management Boundary**
     of the Management Project. If an agent is missing from the list, check the
     boundary configuration.
+
+12. **Agent Gateway Dual-Registry Binding**: An Agent Gateway can link up to
+    **two** registries in its `registries` array, provided that **exactly one
+    registry is `global`**, and the second registry is either `regional` (e.g.
+    `us-central1`) or `multi-regional` (e.g. `us`, `eu`). Two regional
+    registries without a global are rejected by the control plane.
+
+13. **REST API Path Extensions (`.json`)**: When registering REST APIs (like
+    Zendesk), note that SDK clients append `.json` (e.g.
+    `/api/v2/tickets.json`). Ensure your UAP CEL rules or registry endpoint
+    interfaces account for exact paths, `/` subpaths, `.json` extensions, and
+    `?` query strings.
 
 --------------------------------------------------------------------------------
 
@@ -234,7 +253,7 @@ scheme, or extra subdomain mismatch will cause denial.
 #### Creating Consolidated Service via gcloud
 
 ```bash
-gcloud alpha agent-registry services create googleapis \
+gcloud agent-registry services create googleapis \
     --project=$PROJECT_ID --location=$LOCATION \
     --display-name="Google APIs" \
     --endpoint-spec-type=no-spec \
@@ -251,7 +270,7 @@ gcloud alpha agent-registry services create googleapis \
 ### Quick "is the hostname registered?" check
 
 ```bash
-gcloud alpha agent-registry services list \
+gcloud agent-registry services list \
   --project=$PROJECT_ID \
   --location=$LOCATION \
   --format="table(name.basename(), interfaces.url)" \
@@ -286,7 +305,7 @@ functional-type annotation. Everything else is manual.
 ### List
 
 ```bash
-gcloud alpha agent-registry agents list \
+gcloud agent-registry agents list \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -294,7 +313,7 @@ gcloud alpha agent-registry agents list \
 Filter:
 
 ```bash
-gcloud alpha agent-registry agents list \
+gcloud agent-registry agents list \
   --project=PROJECT_ID \
   --location=REGION \
   --filter="displayName='DISPLAY_NAME'"
@@ -303,7 +322,7 @@ gcloud alpha agent-registry agents list \
 ### Describe
 
 ```bash
-gcloud alpha agent-registry agents describe AGENT_NAME \
+gcloud agent-registry agents describe AGENT_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -317,7 +336,7 @@ IAM.
 Display name / description:
 
 ```bash
-gcloud alpha agent-registry services update AGENT_NAME \
+gcloud agent-registry services update AGENT_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --display-name="New name" \
@@ -327,7 +346,7 @@ gcloud alpha agent-registry services update AGENT_NAME \
 Endpoint URL:
 
 ```bash
-gcloud alpha agent-registry services update AGENT_NAME \
+gcloud agent-registry services update AGENT_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --interfaces=url=ENDPOINT_URL,protocolBinding=PROTOCOL
@@ -339,7 +358,7 @@ Agent spec payload (max size 10 KB to satisfy gRPC control plane metadata header
 limits):
 
 ```bash
-gcloud alpha agent-registry services update AGENT_NAME \
+gcloud agent-registry services update AGENT_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --agent-spec-content=@AGENT_SPEC
@@ -351,7 +370,7 @@ For automatically registered agents: delete from the source runtime -- registry
 entry follows. For manually registered agents:
 
 ```bash
-gcloud alpha agent-registry services delete AGENT_NAME \
+gcloud agent-registry services delete AGENT_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -368,7 +387,7 @@ gcloud alpha agent-registry services delete AGENT_NAME \
     the *target* agent resource:
 
     ```bash
-    gcloud beta iap web set-iam-policy agents-iap-policy.json \
+    gcloud iap web set-iam-policy agents-iap-policy.json \
       --project=PROJECT_ID \
       --agent=AGENT_ID \
       --region=REGION
@@ -422,7 +441,7 @@ manual registration with a tool spec.
 ### Register
 
 ```bash
-gcloud alpha agent-registry services create SERVER_NAME \
+gcloud agent-registry services create SERVER_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --display-name="DISPLAY_NAME" \
@@ -438,7 +457,7 @@ gcloud alpha agent-registry services create SERVER_NAME \
 ### List
 
 ```bash
-gcloud alpha agent-registry mcp-servers list \
+gcloud agent-registry mcp-servers list \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -449,7 +468,7 @@ Useful filters: - `displayName='NAME'` - `mcpServerId='urn:mcp:SERVER_URN'`
 ### Describe
 
 ```bash
-gcloud alpha agent-registry mcp-servers describe SERVER_NAME \
+gcloud agent-registry mcp-servers describe SERVER_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -463,7 +482,7 @@ Tool spec changes are not auto-detected -- re-upload when the server
 adds/changes tools:
 
 ```bash
-gcloud alpha agent-registry services update SERVER_NAME \
+gcloud agent-registry services update SERVER_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --mcp-server-spec-content=@TOOL_SPEC
@@ -472,7 +491,7 @@ gcloud alpha agent-registry services update SERVER_NAME \
 ### Delete
 
 ```bash
-gcloud alpha agent-registry services delete SERVER_NAME \
+gcloud agent-registry services delete SERVER_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -488,7 +507,7 @@ gcloud alpha agent-registry services delete SERVER_NAME \
     resource:
 
     ```bash
-    gcloud beta iap web set-iam-policy agents-iap-policy.json \
+    gcloud iap web set-iam-policy agents-iap-policy.json \
       --project=PROJECT_ID \
       --mcp-server=MCP_SERVER_ID \
       --region=REGION
@@ -544,7 +563,7 @@ REST APIs, internal HTTP services. Always manually registered.
 ### Register
 
 ```bash
-gcloud alpha agent-registry services create SERVICE_NAME \
+gcloud agent-registry services create SERVICE_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --display-name="DISPLAY_NAME" \
@@ -565,7 +584,7 @@ gcloud alpha agent-registry services create SERVICE_NAME \
 ### List
 
 ```bash
-gcloud alpha agent-registry endpoints list \
+gcloud agent-registry endpoints list \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -573,7 +592,7 @@ gcloud alpha agent-registry endpoints list \
 Filter:
 
 ```bash
-gcloud alpha agent-registry endpoints list \
+gcloud agent-registry endpoints list \
   --project=PROJECT_ID \
   --location=REGION \
   --filter="displayName='NAME'"
@@ -583,7 +602,7 @@ For URL-substring search, list `services` instead and filter on
 `interfaces.url`:
 
 ```bash
-gcloud alpha agent-registry services list \
+gcloud agent-registry services list \
   --project=PROJECT_ID \
   --location=REGION \
   --format="table(name.basename(), interfaces.url, interfaces.protocolBinding)" \
@@ -593,7 +612,7 @@ gcloud alpha agent-registry services list \
 ### Describe
 
 ```bash
-gcloud alpha agent-registry endpoints describe ENDPOINT_NAME \
+gcloud agent-registry endpoints describe ENDPOINT_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -601,7 +620,7 @@ gcloud alpha agent-registry endpoints describe ENDPOINT_NAME \
 ### Update
 
 ```bash
-gcloud alpha agent-registry services update SERVICE_NAME \
+gcloud agent-registry services update SERVICE_NAME \
   --project=PROJECT_ID \
   --location=REGION \
   --interfaces=url=ENDPOINT_URL,protocolBinding=PROTOCOL
@@ -610,7 +629,7 @@ gcloud alpha agent-registry services update SERVICE_NAME \
 ### Delete
 
 ```bash
-gcloud alpha agent-registry services delete SERVICE_NAME \
+gcloud agent-registry services delete SERVICE_NAME \
   --project=PROJECT_ID \
   --location=REGION
 ```
@@ -626,7 +645,7 @@ gcloud alpha agent-registry services delete SERVICE_NAME \
     agent's principal on the endpoint resource:
 
     ```bash
-    gcloud beta iap web set-iam-policy agents-iap-policy.json \
+    gcloud iap web set-iam-policy agents-iap-policy.json \
       --project=PROJECT_ID \
       --endpoint=ENDPOINT_ID \
       --region=REGION
@@ -659,8 +678,8 @@ role -- confirm against `docs.cloud.google.com/iam/docs/roles-permissions/iap`.
 -   **Endpoint registered in `global` but agent calls a regional URL**: registry
     location doesn't have to match the destination URL location, but the IAM
     binding's `--region` must match where the resource is registered. Check that
-    `--region=` on `gcloud beta iap web set-iam-policy` equals the location used
-    at creation.
+    `--region=` on `gcloud iap web set-iam-policy` equals the location used at
+    creation.
 -   **Endpoint not appearing in `endpoints list`**: created with the wrong spec
     type. Must use `--endpoint-spec-type=no-spec`.
 
@@ -690,11 +709,47 @@ Project-scoped, granted via standard IAM:
 These let humans and CI register and inspect entries. They do **not** grant
 runtime traffic.
 
-### Layer B — IAP egress permissions (let an agent actually send traffic)
+### Layer B — Traffic Authorization (Legacy v1 vs. UAP Policy V2)
 
-Bound on Agent Registry resources via `gcloud beta iap web set-iam-policy`. The
-role is always `roles/iap.egressor`. The scope of the binding determines which
-target resources the source agent can reach:
+Depending on the gateway's `iapPolicyVersion` setting, registry resources
+authorize traffic through one of two mechanisms:
+
+#### Mechanism B1: Unified Access Policy (UAP / Policy V2)
+
+When the attached IAP Authz Extension specifies `iapPolicyVersion: "V2"`,
+policies are decoupled from individual registry resources:
+
+-   `AccessPolicy` and `PolicyBinding` (`iam.googleapis.com/v3`) attach to the
+    Resource Manager hierarchy (Organization, Folder, Project) targeting numeric
+    resource URIs (e.g.
+    `//cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}`).
+-   Rules grant FQDN permission `iap.googleapis.com/resources.egressViaIAP`.
+-   Agent Registry entries dynamically populate the
+    `destination.agent_registry.*` CEL attributes evaluated at runtime:
+    -   `destination.is_registered` (boolean): `true` if target matches a
+        registry service.
+    -   `destination.agent_registry.resource_type`: `'ENDPOINT'`,
+        `'MCP_SERVER'`, `'AGENT'`, `'SKILL'`.
+    -   `destination.agent_registry.location`: region of registry resource.
+    -   `destination.agent_registry.mcp_server.name`: full MCP server resource
+        name.
+    -   `destination.agent_registry.mcp_server.method`: `'tools'`, `'prompts'`,
+        `'resources'`.
+    -   `destination.agent_registry.mcp_server.tool.name`: specific tool name
+        (e.g. `'updateTicket'`).
+    -   `destination.agent_registry.mcp_server.tool.annotations.read_only_hint`:
+        boolean.
+-   **Mandatory CEL Guard**: Always guard tool annotations with:
+    `(destination.agent_registry.mcp_server.method == 'tools') &&
+    (destination.agent_registry.mcp_server.tool.annotations.read_only_hint ==
+    true)`.
+
+#### Mechanism B2: Legacy IAM v1 (Per-Resource Bindings)
+
+In legacy v1, permissions are bound directly on Agent Registry resources via
+`gcloud iap web set-iam-policy`. The role is always `roles/iap.egressor`. The
+scope of the binding determines which target resources the source agent can
+reach:
 
 | Scope             | gcloud target flag               | Grants egress to      |
 | ----------------- | -------------------------------- | --------------------- |
@@ -744,17 +799,28 @@ Source:
 
 When debugging "wrong principal" errors: the principal is built from the agent's
 **resource URI**, not its display name and not its URN. View the resource URI
-via `gcloud alpha agent-registry agents describe`.
+via `gcloud agent-registry agents describe`.
 
 ### Full IAP role reference (relevant subset)
 
-Role                               | Permission grants the role provides                                     | When to use
----------------------------------- | ----------------------------------------------------------------------- | -----------
-`roles/iap.egressor` (Beta)        | `iap.webServiceVersions.egressViaIAP`                                   | **Agent egress through Agent Gateway**
-`roles/iap.httpsResourceAccessor`  | `iap.webServiceVersions.accessViaIAP`                                   | Human/service ingress to an IAP-protected web app
-`roles/iap.tunnelResourceAccessor` | `iap.tunnelDestGroups.accessViaIAP`, `iap.tunnelInstances.accessViaIAP` | Classic IAP TCP tunnels to GCE -- **not** for agent gateway
-`roles/iap.admin`                  | Full IAP admin (`iap.tunnel.*`, all getIam/setIam)                      | Manage IAP policies
-`roles/iap.viewer`                 | Read IAP settings                                                       | Audit
+| Role                               | Permission grants the role provides   | When to use   |
+| ---------------------------------- | ------------------------------------- | ------------- |
+| `roles/iap.egressor` (Beta)        | `iap.webServiceVersions.egressViaIAP` | **Agent       |
+:                                    :                                       : egress        :
+:                                    :                                       : through Agent :
+:                                    :                                       : Gateway**     :
+| `roles/iap.httpsResourceAccessor`  | `iap.webServiceVersions.accessViaIAP` | Human/service |
+:                                    :                                       : ingress to an :
+:                                    :                                       : IAP-protected :
+:                                    :                                       : web app       :
+| `roles/iap.tunnelResourceAccessor` | `iap.tunnelDestGroups.accessViaIAP`,  | Classic IAP   |
+:                                    : `iap.tunnelInstances.accessViaIAP`    : TCP tunnels   :
+:                                    :                                       : to GCE --     :
+:                                    :                                       : **not** for   :
+:                                    :                                       : agent gateway :
+| `roles/iap.admin`                  | Full IAP admin (`iap.tunnel.*`, all   | Manage IAP    |
+:                                    : getIam/setIam)                        : policies      :
+| `roles/iap.viewer`                 | Read IAP settings                     | Audit         |
 
 Source: `docs.cloud.google.com/iam/docs/roles-permissions/iap`.
 
@@ -762,21 +828,46 @@ Source: `docs.cloud.google.com/iam/docs/roles-permissions/iap`.
 
 ## 7. Common Registration Errors and Where to Look
 
-Symptom                                                               | Likely cause                                                                                   | Where to check
---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------
-`services create` fails: "manual registration not supported"          | Used `--location=us` or `--location=eu` (multi-regions)                                        | Switch to a region (e.g. `us-central1`) or `global`
-`services create` succeeds but resource missing from `endpoints list` | Wrong `*-spec-type`. `--endpoint-spec-type=no-spec` produces an `Endpoint`.                    | Re-create with the correct spec-type, or check `services list`
-`services update --mcp-server-spec-content` rejects file              | Spec > 10 KB                                                                                   | Trim the tool spec
-Agent calls API X, IAP returns 403                                    | Hostname variant not registered (commonly REP `*.LOCATION.rep.googleapis.com`)                 | `services list --filter="interfaces.url:FRAGMENT"`
-Agent calls API X, IAP returns 403 even though hostname is registered | Missing `roles/iap.egressor` binding for the source agent's principal                          | `gcloud beta iap web get-iam-policy --project= --region= --endpoint=...` (or `--mcp-server=`, `--agent=`, `--resource-type=agent-registry`)
-MCP tool call succeeds for one tool, denied for another               | IAP policy condition restricts `mcp.toolName` or `mcp.tool.isReadOnly`                         | Inspect the IAP policy on the MCP server resource
-Auto-registered Agent Runtime agent missing from registry             | Agent deployed via custom code, not Agent Runtime SDK                                          | Re-deploy via Agent Runtime, or register manually as a `Service`
-A2A agent has no skills in registry                                   | `agent-card.json` unreachable from Google's crawler                                            | Curl the Agent Card URL from a public network; verify content type and schema
-Agent principal mismatch in IAP policy                                | Principal built from wrong resource URI / project number / SA identifier                       | `gcloud alpha agent-registry agents describe` -> use Resource URI to construct
-`roles/iap.tunnelResourceAccessor` granted, still denied              | Wrong role -- agent egress requires `roles/iap.egressor`                                       | Replace the binding
-Endpoint Google Cloud console "Test connection" fails on private URL  | Connection test only works for public URLs (by design)                                         | Test via the agent itself or `curl` from a peered network
-`agents-iap-policy.json` set, still denied                            | Wrong `--region` flag on `set-iam-policy` -- must match resource location                      | Re-issue with the correct `--region`
-Cannot find URN for binding                                           | Use `mcp-servers describe` / `agents describe` and read the `name` field; format per section 1 | See URN formats in section 1
+| Symptom                            | Likely cause                     | Where to check                       |
+| ---------------------------------- | -------------------------------- | ------------------------------------ |
+| `services create` fails: "manual   | Used `--location=us` or          | Switch to a region (e.g.             |
+: registration not supported"        : `--location=eu` (multi-regions)  : `us-central1`) or `global`           :
+| `services create` succeeds but     | Wrong `*-spec-type`.             | Re-create with the correct           |
+: resource missing from `endpoints   : `--endpoint-spec-type=no-spec`   : spec-type, or check `services list`  :
+: list`                              : produces an `Endpoint`.          :                                      :
+| `services update                   | Spec > 10 KB                     | Trim the tool spec                   |
+: --mcp-server-spec-content` rejects :                                  :                                      :
+: file                               :                                  :                                      :
+| Agent calls API X, IAP returns 403 | Hostname variant not registered  | `services list                       |
+:                                    : (commonly REP                    : --filter="interfaces.url\:FRAGMENT"` :
+:                                    : `*.LOCATION.rep.googleapis.com`) :                                      :
+| Agent calls API X, IAP returns 403 | Missing `roles/iap.egressor`     | `gcloud iap web get-iam-policy       |
+: even though hostname is registered : binding for the source agent's   : --project= --region= --endpoint=...` :
+:                                    : principal                        : (or `--mcp-server=`, `--agent=`,     :
+:                                    :                                  : `--resource-type=agent-registry`)    :
+| MCP tool call succeeds for one     | IAP policy condition restricts   | Inspect the IAP policy on the MCP    |
+: tool, denied for another           : `mcp.toolName` or                : server resource                      :
+:                                    : `mcp.tool.isReadOnly`            :                                      :
+| Auto-registered Agent Runtime      | Agent deployed via custom code,  | Re-deploy via Agent Runtime, or      |
+: agent missing from registry        : not Agent Runtime SDK            : register manually as a `Service`     :
+| A2A agent has no skills in         | `agent-card.json` unreachable    | Curl the Agent Card URL from a       |
+: registry                           : from Google's crawler            : public network; verify content type  :
+:                                    :                                  : and schema                           :
+| Agent principal mismatch in IAP    | Principal built from wrong       | `gcloud agent-registry agents        |
+: policy                             : resource URI / project number /  : describe` -> use Resource URI to     :
+:                                    : SA identifier                    : construct                            :
+| `roles/iap.tunnelResourceAccessor` | Wrong role -- agent egress       | Replace the binding                  |
+: granted, still denied              : requires `roles/iap.egressor`    :                                      :
+| Endpoint Google Cloud console      | Connection test only works for   | Test via the agent itself or `curl`  |
+: "Test connection" fails on private : public URLs (by design)          : from a peered network                :
+: URL                                :                                  :                                      :
+| `agents-iap-policy.json` set,      | Wrong `--region` flag on         | Re-issue with the correct `--region` |
+: still denied                       : `set-iam-policy` -- must match   :                                      :
+:                                    : resource location                :                                      :
+| Cannot find URN for binding        | Use `mcp-servers describe` /     | See URN formats in section 1         |
+:                                    : `agents describe` and read the   :                                      :
+:                                    : `name` field; format per section :                                      :
+:                                    : 1                                :                                      :
 
 --------------------------------------------------------------------------------
 
@@ -813,50 +904,50 @@ Source: `docs.cloud.google.com/agent-registry/use-agentregistry-mcp`.
 
 ```bash
 # READ
-gcloud alpha agent-registry agents      list   --project=P --location=L
-gcloud alpha agent-registry agents      describe NAME --project=P --location=L
-gcloud alpha agent-registry mcp-servers list   --project=P --location=L
-gcloud alpha agent-registry mcp-servers describe NAME --project=P --location=L
-gcloud alpha agent-registry endpoints   list   --project=P --location=L
-gcloud alpha agent-registry endpoints   describe NAME --project=P --location=L
-gcloud alpha agent-registry services    list   --project=P --location=L
-gcloud alpha agent-registry services    describe NAME --project=P --location=L
+gcloud agent-registry agents      list   --project=P --location=L
+gcloud agent-registry agents      describe NAME --project=P --location=L
+gcloud agent-registry mcp-servers list   --project=P --location=L
+gcloud agent-registry mcp-servers describe NAME --project=P --location=L
+gcloud agent-registry endpoints   list   --project=P --location=L
+gcloud agent-registry endpoints   describe NAME --project=P --location=L
+gcloud agent-registry services    list   --project=P --location=L
+gcloud agent-registry services    describe NAME --project=P --location=L
 
 # WRITE  (always 'services'; the projection follows from --*-spec-type)
-gcloud alpha agent-registry services create NAME \
+gcloud agent-registry services create NAME \
     --project=P --location=L --display-name="..." \
     --endpoint-spec-type=no-spec \
     --interfaces=url=URL,protocolBinding=HTTP_JSON|GRPC|JSONRPC
 
-gcloud alpha agent-registry services create NAME \
+gcloud agent-registry services create NAME \
     --project=P --location=L --display-name="..." \
     --mcp-server-spec-type=tool-spec \
     --mcp-server-spec-content=@toolspec.json \
     --interfaces=url=URL,protocolBinding=JSONRPC
 
-gcloud alpha agent-registry services create NAME \
+gcloud agent-registry services create NAME \
     --project=P --location=L --display-name="..." \
     --agent-spec-content=@agent-card.json \
     --interfaces=url=URL,protocolBinding=HTTP_JSON
 
-gcloud alpha agent-registry services update NAME \
+gcloud agent-registry services update NAME \
     --project=P --location=L \
     [ --display-name="..." | --description="..." \
       | --interfaces=url=URL,protocolBinding=... \
       | --mcp-server-spec-content=@spec.json \
       | --agent-spec-content=@card.json ]
 
-gcloud alpha agent-registry services delete NAME --project=P --location=L
+gcloud agent-registry services delete NAME --project=P --location=L
 
 # IAP egress policy bindings (separate API, separate gcloud surface)
-gcloud beta iap web set-iam-policy POLICY.json \
+gcloud iap web set-iam-policy POLICY.json \
     --project=P --region=L \
     [ --resource-type=agent-registry
     | --agent=AGENT_ID
     | --mcp-server=MCP_SERVER_ID
     | --endpoint=ENDPOINT_ID ]
 
-gcloud beta iap web get-iam-policy \
+gcloud iap web get-iam-policy \
     --project=P --region=L \
     [ same target flags ]
 ```

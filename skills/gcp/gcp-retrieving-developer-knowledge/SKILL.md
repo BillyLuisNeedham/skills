@@ -31,7 +31,7 @@ Choose the appropriate tool based on availability in your runtime environment:
 ### 1. Developer Knowledge MCP Tools (Preferred)
 When MCP tools are present in your active tool definitions:
 - **`answer_query(query="...")`**: Use for conceptual guides, architectural comparisons, product choice overviews, and multi-step workflows.
-- **`search_documents(query="...", page_size=5)`**: Use for granular CLI flags, exact syntax, parameter names, and IAM permissions (`service.resource.verb`). Use 2–5 focused keywords (e.g., `cloud run filestore nfs mount gcloud`) rather than full conversational sentences.
+- **`search_documents(query="...")`**: Use for granular CLI flags, exact syntax, parameter names, and IAM permissions (`service.resource.verb`). Use 2–5 focused keywords (e.g., `cloud run filestore nfs mount gcloud`) rather than full conversational sentences.
 - **`get_documents(names=["documents/{uri_without_scheme}"])`**: Fetch full documentation pages by resource name (e.g. `names: ["documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run"]`).
 
 ### 2. REST API Fallback
@@ -61,7 +61,12 @@ rather than as a failed lookup.
 
 **An API key, if one is configured.** Where `DEVELOPERKNOWLEDGE_API_KEY` is set
 in the environment, pass it as a `key` query parameter instead of an
-`Authorization` header. The remaining examples in this section use that form:
+`Authorization` header. If neither credential is available, an API key is the
+supported path for this client: enable the API and create one by following the
+[Developer Knowledge quickstart](https://developers.google.com/knowledge/quickstart),
+then export it as `DEVELOPERKNOWLEDGE_API_KEY`. Say that you need a credential
+rather than answering without a lookup. The remaining examples in this section
+use that form:
 - **Answer Query**:
   ```bash
   curl -s -X POST "https://developerknowledge.googleapis.com/v1:answerQuery?key=${DEVELOPERKNOWLEDGE_API_KEY}" \
@@ -76,11 +81,13 @@ in the environment, pass it as a `key` query parameter instead of an
   ```bash
   curl -s "https://developerknowledge.googleapis.com/v1/documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run?key=${DEVELOPERKNOWLEDGE_API_KEY}"
   ```
-- **Batch Get Documents**:
+- **Batch Get Documents** (a `GET`, with one `names` parameter per document and no
+  request body; up to 20 per call):
   ```bash
-  curl -s -X POST "https://developerknowledge.googleapis.com/v1/documents:batchGet?key=${DEVELOPERKNOWLEDGE_API_KEY}" \
-    -H "Content-Type: application/json" \
-    -d '{"names": ["documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run"]}'
+  curl -s -G "https://developerknowledge.googleapis.com/v1/documents:batchGet" \
+    --data-urlencode "names=documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run" \
+    --data-urlencode "names=documents/docs.cloud.google.com/storage/docs/creating-buckets" \
+    --data-urlencode "key=${DEVELOPERKNOWLEDGE_API_KEY}"
   ```
 
 ## Synthesis & Output Guidelines

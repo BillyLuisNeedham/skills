@@ -23,6 +23,7 @@ Before issuing REST requests, resolve authentication credentials using one of th
    If a key is already provisioned, check the environment for `DEVELOPERKNOWLEDGE_API_KEY` or `GOOGLE_API_KEY`.
    - Pass via query parameter: `?key=${DEVELOPERKNOWLEDGE_API_KEY}`
    - Or pass via header: `-H "X-Goog-Api-Key: ${DEVELOPERKNOWLEDGE_API_KEY}"`
+   - If no key is set and no Google credential is available, an API key is the supported path for this client. Enable the API and create a key by following the [Developer Knowledge quickstart](https://developers.google.com/knowledge/quickstart), then export it as `DEVELOPERKNOWLEDGE_API_KEY`. Report that you need a credential rather than answering from memory.
 
 ---
 
@@ -85,21 +86,28 @@ Use to retrieve the full Markdown content of a specific documentation page when 
 
 Use to retrieve multiple documentation pages in a single roundtrip.
 
-- **Method & Path**: `POST https://developerknowledge.googleapis.com/v1/documents:batchGet`
-- **Request Body**:
-  ```json
-  {
-    "names": [
-      "documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run",
-      "documents/docs.cloud.google.com/run/docs/configuring/services/environment-variables"
-    ]
-  }
-  ```
+- **Method & Path**: `GET https://developerknowledge.googleapis.com/v1/documents:batchGet`
+- **No request body.** The names travel in the query string. A `POST` with a JSON
+  `names` array is not a defined method on this service and returns a 404 from the
+  Google frontend.
+- **Query Parameters**:
+  - `names` (required): repeat once per document, up to 20 per call. Format
+    `documents/{uri_without_scheme}`, each value 500 characters or fewer. Documents
+    are returned in the order requested.
+  - `view` (optional): `DOCUMENT_VIEW_BASIC`, `DOCUMENT_VIEW_CONTENT`, or
+    `DOCUMENT_VIEW_FULL`. Defaults to `DOCUMENT_VIEW_CONTENT`. Use
+    `DOCUMENT_VIEW_BASIC` when you need only titles and URIs, since full Markdown
+    content is large.
+  - `key`: API Key.
+- **Response**: `{"documents": [ ... ]}`, each entry carrying `name`, `uri`, `title`,
+  `description`, `dataSource`, `updateTime`, `contentLengthBytes`, and the full
+  Markdown in `content`.
 - **Example `curl`**:
   ```bash
-  curl -s -X POST "https://developerknowledge.googleapis.com/v1/documents:batchGet?key=${DEVELOPERKNOWLEDGE_API_KEY}" \
-    -H "Content-Type: application/json" \
-    -d '{"names": ["documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run"]}'
+  curl -s -G "https://developerknowledge.googleapis.com/v1/documents:batchGet" \
+    --data-urlencode "names=documents/docs.cloud.google.com/run/docs/overview/what-is-cloud-run" \
+    --data-urlencode "names=documents/docs.cloud.google.com/run/docs/configuring/services/environment-variables" \
+    --data-urlencode "key=${DEVELOPERKNOWLEDGE_API_KEY}"
   ```
 
 ---

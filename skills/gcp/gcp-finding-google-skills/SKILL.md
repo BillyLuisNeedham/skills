@@ -33,14 +33,14 @@ almost nothing until a lookup actually happens.
     The catalog is about 75 KB and may not fit in a single tool result; a
     truncated preview is alphabetical, so it reads as though only the first
     few products exist. Prefer narrowing it before reading. With `jq`:
-    `curl -sS {url} | jq -r '.skills[] | select((.name+" "+.description)|test("gke";"i")) | "\(.name)\t\(.entrypoint)"'`.
+    `curl -sSL {url} | jq -r '.skills[] | select((.name+" "+.description)|test("gke";"i")) | "\(.name)\t\(.entrypoint)"'`.
     In Windows PowerShell: `(Invoke-RestMethod {url}).skills | Where-Object {
     $_.description -match "gke" } | Select-Object name, entrypoint -First 3`.
     With neither, a plain `grep -o` over the raw JSON still isolates candidate
     names.
 
     Where no filtering tool exists, write the catalog to a file and read it in
-    parts (`curl -sS {url} -o skills-index.json`, or `Invoke-WebRequest {url}
+    parts (`curl -sSL {url} -o skills-index.json`, or `Invoke-WebRequest {url}
     -OutFile skills-index.json`). This is often the better option regardless: it
     survives truncation, and re-reading a local file costs nothing. Delete it
     when the request is done.
@@ -107,13 +107,13 @@ not re-entered for it.
 Reached from step 2. Work through these in order, stopping at the first that
 succeeds:
 
-1.  **Retry once with `curl -sS`.** If the first attempt used a summarizing
+1.  **Retry once with `curl -sSL`.** If the first attempt used a summarizing
     fetch tool or hit a transport error, this alone usually fixes it.
 
 2.  **List the repository tree instead.** Run
 
     ```bash
-    curl -sS 'https://api.github.com/repos/google/skills/git/trees/main?recursive=1'
+    curl -sSL 'https://api.github.com/repos/google/skills/git/trees/main?recursive=1'
     ```
 
     and read the paths ending in `SKILL.md`. Each is a candidate. Fetch the

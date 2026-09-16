@@ -35,11 +35,23 @@ permits it:
     resource, otherwise the authz extension won't actually run.
 3.  **Service-extension (delegated authz)** — the gateway calls IAP to make an
     allow/deny decision.
-4.  **IAP / IAM** — the agent's identity must have the **IAP egressor role**
-    (`roles/iap.egressor`, display name "IAP-secured Egressor") on the
-    registered resource, or be in a principal set that does.
-5.  **Principal Access Boundary (PAB)** — even with the IAM binding correct, a
-    PAB policy on the principal set can restrict which resources it can reach.
+4.  **IAP / IAM Policy Evaluation** — the agent's identity must be authorized by
+    IAP:
+    *   **IAM v1 (Legacy Policy Model)**: Evaluated when `iapPolicyVersion:
+        "V1"` (or unset). The agent identity must have the **IAP egressor role**
+        (`roles/iap.egressor`, display name "IAP-secured Egressor") directly
+        bound on the registered resource shadow resource in IAP.
+    *   **Unified Access Policy (UAP / Policy V2 / IAM v3)**: Evaluated when the
+        gateway's IAP Authz Extension metadata specifies `iapPolicyVersion:
+        "V2"`. Next-gen access control bound directly to Resource Manager
+        hierarchy nodes (Organizations, Folders, Projects) via `PolicyBinding`
+        (`iam.googleapis.com/v3`). Evaluates `AccessPolicy` rules with CEL
+        expressions on deep attributes (`destination.agent_registry.*` or
+        `destination.unregistered.*`). Follows strict evaluation invariants:
+        absolute DENY precedence (cannot be overridden by downstream projects),
+        and additive ALLOW aggregation across the CRM tree.
+5.  **Principal Access Boundary (PAB)** — even with the IAM/UAP binding correct,
+    a PAB policy on the principal set can restrict which resources it can reach.
     **PAB takes precedence over IAM Allow** — a correct egressor binding does
     nothing if a PAB scopes the principal away from the target.
 
@@ -50,14 +62,28 @@ authz policies. Denials *can* originate at this proxy layer before IAP runs (no
 IAP audit entry exists for those calls); those show up in load-balancer logs
 (see Step 3b).
 
-**Proxy Routing & TLS SNI:** The proxy performs TLS inspection and looks inside
-the HTTPS call for the SNI hostname. In Private Service Connect (PSC)
-environments, the client resolves APIs to internal VIPs, so the outer tunnel
-request is naturally logged as `CONNECT 240.0.0.2:443`. This is expected. The
-proxy intercepts this and evaluates routing based on the inner SNI hostname. If
-the corresponding hostname (e.g., `us-central1-aiplatform.googleapis.com`) is
-NOT registered, the proxy cannot route the traffic, resulting in a
-`default_denied` action on the `CONNECT` request before IAP is ever reached.
+**Proxy Routing, TLS SNI & Agent Connectivity Templates (ACT):** The proxy
+performs TLS inspection and looks inside the HTTPS call for the SNI hostname. In
+Private Service Connect (PSC) environments, the client resolves APIs to internal
+VIPs, so the outer tunnel request is naturally logged as `CONNECT
+240.0.0.2:443`. This is expected. The proxy intercepts this and evaluates
+routing based on the inner SNI hostname. If the corresponding hostname (e.g.,
+`us-central1-aiplatform.googleapis.com`) is NOT registered, the proxy cannot
+route the traffic, resulting in a `default_denied` action on the `CONNECT`
+request before IAP is ever reached.
+
+Under **VPC Service Controls (VPC-SC)**, Agent Gateway requires an **Agent
+Connectivity Template (ACT)** configured with `vpcEgress: ALL_TRAFFIC`:
+
+-   Traffic destined for external public APIs (e.g. `api.ipify.org`,
+    `api.weather.gov`) resolves to the synthetic PSC VIP `240.0.0.2:443`,
+    traverses the gateway, and egresses through the consumer VPC PSC-I Network
+    Attachment subnet via **Cloud NAT** (`gateway-nat-gateway`) using static
+    IPs. If Cloud NAT is missing or misconfigured, external traffic hangs or
+    resets silently.
+-   Traffic destined for Google APIs (e.g., Vertex AI, Cloud Run default domains
+    `*.run.app`) routes directly through Andromeda/Private Google Access to
+    Google Front Ends (GFE), bypassing Cloud NAT.
 
 ### Don't confuse `roles/iap.egressor` with other IAP roles
 
@@ -216,7 +242,8 @@ xychart-beta
             no  │                  yes │
                 │                      ▼
                 │             ┌────────────────────────────────┐
-                │             │ 3c. PSC Subnet Exhaustion Check│
+                │             │ 3c. PSC Subnet Exhaustion &    │
+                │             │ 3d. ACT ALL_TRAFFIC / Cloud NAT│
                 │             └────────────────────────────────┘
                 ▼
         ┌─────────────────────────────────────┐
@@ -238,8 +265,8 @@ xychart-beta
                          │
                          ▼
         ┌─────────────────────────────────────┐
-        │ 3. Pull IAP logs — DRY_RUN or       │
-        │    enforced? Allow or deny?         │
+        │ 3. Pull IAP logs — Check V1 vs V2,  │
+        │    DRY_RUN vs enforced, allow/deny? │
         └────────────────┬────────────────────┘
                          │
                          ▼
@@ -251,17 +278,17 @@ xychart-beta
             no   │                yes │
                  ▼                    ▼
        ┌──────────────────┐   ┌─────────────────────────────┐
-       │ Root cause:      │   │ 5. Does the agent identity  │
-       │ unregistered     │   │    (or its principal set)   │
-       │ hostname permu-  │   │    have IAP egressor on     │
-       │ term. Recommend  │   │    the registered resource? │
+       │ Root cause:      │   │ 5. Check IAM / UAP Policies:│
+       │ unregistered     │   │    - V1: roles/iap.egressor │
+       │ hostname permu-  │   │    - V2: AccessPolicy & CRM │
+       │ term. Recommend  │   │      PolicyBinding (CEL)    │
        │ registering all  │   └────────┬────────────────────┘
        │ five forms.      │            │
        └──────────────────┘            ▼
                             ┌─────────────────────────────┐
-                            │ 6. Authz extension wired to │
-                            │    the gateway? Pointing at │
-                            │    IAP?                     │
+                            │ 6. Authz extension wired?   │
+                            │    iapPolicyVersion V1/V2?  │
+                            │    Dual-registry valid?     │
                             └────────┬────────────────────┘
                                      ▼
                             ┌─────────────────────────────┐
@@ -310,9 +337,9 @@ commands from hanging:
     > ```bash
     > ACTIVE_PROJ=$(gcloud config get-value project)
     > # Check for gateways
-    > gcloud alpha network-services agent-gateways list --location=us-central1 --project=$ACTIVE_PROJ
+    > gcloud network-services agent-gateways list --location=us-central1 --project=$ACTIVE_PROJ
     > # Check for agents
-    > gcloud alpha agent-registry agents list --location=us-central1 --project=$ACTIVE_PROJ
+    > gcloud agent-registry agents list --location=us-central1 --project=$ACTIVE_PROJ
     > ```
     >
     > If you find the target resources in the active project, **proceed
@@ -320,12 +347,12 @@ commands from hanging:
 
     If resources are not in the active project, check prioritized dev projects:
     `bash for proj in duncanjames-tf-dev duncanjames-agw-tf; do # Check gateways
-    res_gw=$(gcloud alpha network-services agent-gateways list
-    --location=us-central1 --project=$proj 2>&1) if [[ "$res_gw" == *"NAME"* ]];
-    then echo "FOUND Gateways in project: $proj" echo "$res_gw" fi # Check
-    agents res_ag=$(gcloud alpha agent-registry agents list
-    --location=us-central1 --project=$proj 2>&1) if [[ "$res_ag" == *"NAME"* ]];
-    then echo "FOUND Registry in project: $proj" echo "$res_ag" fi done`
+    res_gw=$(gcloud network-services agent-gateways list --location=us-central1
+    --project=$proj 2>&1) if [[ "$res_gw" == *"NAME"* ]]; then echo "FOUND
+    Gateways in project: $proj" echo "$res_gw" fi # Check agents res_ag=$(gcloud
+    alpha agent-registry agents list --location=us-central1 --project=$proj
+    2>&1) if [[ "$res_ag" == *"NAME"* ]]; then echo "FOUND Registry in project:
+    $proj" echo "$res_ag" fi done`
 
     If you cannot find the target resource (e.g. the stuck gateway or the
     failing agent) in the default project:
@@ -367,7 +394,7 @@ startup/`set_up()`):
         Registry. **You MUST also explicitly suggest checking whether other
         required monitoring/tracing endpoints (such as
         `monitoring.googleapis.com` or `trace.mtls.googleapis.com`) are
-        registered as Endpoints**, and provide the `gcloud alpha agent-registry
+        registered as Endpoints**, and provide the `gcloud agent-registry
         endpoints create` commands for them.
     *   **Verify/Create Authorization Policy**: Explain that an
         `AuthorizationPolicy` must allow the agent's principal set to access the
@@ -395,14 +422,19 @@ If the logs you find do **not** match the symptom described in the user's prompt
     only issue.
 2.  In your diagnostic report, you MUST address the user's described symptom.
 3.  Explain that while you found a different error in the active logs (and
-    diagnose it), the user's described symptom (IAP denial) is typically caused
-    by:
-    *   Missing `roles/iap.egressor` or `roles/iap.httpsGatewayUser` on the
-        agent identity.
-    *   `AuthorizationPolicy` not being correctly bound to the Gateway.
-4.  Include the general troubleshooting steps for IAP denials (checking IAP
-    audit logs, verifying roles, checking policy bindings) as recommended fixes,
-    even if you couldn't verify them in the current log state.
+    diagnose it), for any logs or findings where the agent is getting a 403 to
+    an MCP server or endpoint, you must **check the IAP Egressor bindings on the
+    matching resource in the registry first**:
+    *   If there is no registry entry for the MCP server or endpoint, ensure
+        there is one created.
+    *   Ensure that the agent has the `roles/iap.egressor` role bound to the
+        registry entry. If there are no permissions matching, tell the user to
+        grant `roles/iap.egressor` against the registry entry.
+    *   Verify that an `AuthorizationPolicy` is correctly bound to the Gateway.
+4.  Include these prioritized troubleshooting steps for IAP denials (checking
+    registry entries and `roles/iap.egressor` bindings first, checking IAP audit
+    logs, and verifying Gateway policies) as recommended fixes, even if you
+    couldn't verify them in the current log state.
 
 ### Step 1 — Confirm the symptom in agent logs
 
@@ -542,21 +574,33 @@ What to read out of each entry:
 -   **`labels."iap.googleapis.com/audited_resource_name"`** — if this is
     `unregisteredResource`, the destination hostname isn't in the registry. Go
     to Step 4.
--   **The enforcement mode** — is IAP in dry-run?
+-   **The policy version & enforcement mode** — check `iapPolicyVersion` and
+    `iamEnforcementMode`:
 
     ```yaml
     service: iap.googleapis.com
     failOpen: true
     timeout: 1s
     metadata:
-      iamEnforcementMode: "DRY_RUN"
-      iapPolicyVersion: "V1"
+      iamEnforcementMode: "DRY_RUN"  # or "ENFORCED"
+      iapPolicyVersion: "v2"        # "v2" for UAP Policy V2; "V1" for legacy IAM v1
     ```
 
-    In `DRY_RUN` mode, denials are logged but the request proceeds. If your
-    agent is failing with a real 403 *and* IAP is in dry-run, the denial is
-    coming from somewhere else — most often the gateway's underlying egress
-    proxy (see Step 3b) or the destination service itself.
+    *   **In `DRY_RUN` mode**, denials are logged but the request proceeds. If
+        your agent is failing with a real 403 *and* IAP is in dry-run, the
+        denial is coming from somewhere else — most often the gateway's
+        underlying egress proxy (see Step 3b) or the destination service itself.
+    *   **Under UAP (`iapPolicyVersion: "v2"`)**, check
+        `protoPayload.metadata.policyEvaluationResults[]` and audit log entries.
+        UAP logs will display the evaluation outcomes across the Resource
+        Manager hierarchy (Organization, Folder, Project).
+        *   If an **explicit DENY** matched anywhere in the hierarchy (e.g., at
+            Org or Folder level), the request is rejected immediately, even if a
+            project-level policy allows it.
+        *   If **no ALLOW matched**, the request is denied by default-deny.
+        *   Check for CEL attribute mismatches (e.g., calling an unregistered
+            host when policies only allow `destination.agent_registry.*`, or
+            path mismatches like missing `.json` extensions in REST API paths).
 
 ### Step 3b — If there's no IAP audit entry for the failing call, pull the gateway proxy load-balancer log
 
@@ -607,14 +651,14 @@ Connect (PSC) subnet might be out of IP addresses.
     project to find the one that is stuck or relevant:
 
     ```bash
-    gcloud alpha network-services agent-gateways list --location=$LOCATION --project=$PROJECT_ID
+    gcloud network-services agent-gateways list --location=$LOCATION --project=$PROJECT_ID
     ```
 
 2.  **Identify the Network Attachment**: Describe the Agent Gateway to find the
     Network Attachment in use:
 
     ```bash
-    gcloud alpha network-services agent-gateways describe AGENT_GATEWAY_NAME --location=$LOCATION --project=$PROJECT_ID
+    gcloud network-services agent-gateways describe AGENT_GATEWAY_NAME --location=$LOCATION --project=$PROJECT_ID
     ```
 
     Look for `networkConfig.egress.networkAttachment` or
@@ -654,38 +698,146 @@ Connect (PSC) subnet might be out of IP addresses.
         a `/28` subnet is too small and easily exhausted, and recommend
         expanding the CIDR range to at least `/26` as a best practice.
 
+### Step 3d — Diagnosing Agent Connectivity Template (ACT) & Network Routing
+
+Under VPC Service Controls (VPC-SC), Agent Gateway relies on an **Agent
+Connectivity Template (ACT)**. If the agent experiences timeouts, silent
+connection hangs, or connection drops when attempting to reach public internet
+endpoints or internal services, check the ACT and consumer network
+configuration:
+
+1.  **Inspect the Agent Connectivity Template**:
+
+    ```bash
+    gcloud network-services agent-connectivity-templates describe ACT_NAME \
+      --location=$LOCATION --project=$PROJECT_ID
+    ```
+
+    Verify the `vpcEgress` mode:
+
+    -   `vpcEgress: ALL_TRAFFIC`: Intercepts and routes all traffic (Google APIs
+        and public Internet) into the consumer VPC network attachment.
+    -   `vpcEgress: DEFAULT`: Only Private Google Access traffic routes through
+        the template.
+
+2.  **Verify Consumer Cloud NAT for External Endpoints (BKI 28)**: When
+    `vpcEgress: ALL_TRAFFIC` is enabled, external internet traffic (e.g.,
+    `api.ipify.org`, `api.weather.gov`, third-party SaaS) resolves via synthetic
+    PSC VIP `240.0.0.2:443`, traverses the gateway, and exits through the
+    consumer VPC PSC-I subnet.
+
+    -   **Cloud NAT Requirement**: The consumer VPC **MUST** have a Cloud NAT
+        gateway configured that covers the PSC-I subnet range (e.g.,
+        `gateway-nat-gateway` with static IP).
+    -   If Cloud NAT is missing or does not cover the PSC-I subnet, TCP
+        connections to external internet endpoints will **hang silently or
+        reset** without any proxy error log!
+    -   Verify NAT status:
+
+        ```bash
+        gcloud compute routers nats list --router=ROUTER_NAME --region=$LOCATION --project=$PROJECT_ID
+        ```
+
+3.  **Verify Cloud DNS Peering**: Ensure the consumer VPC has Cloud DNS peering
+    configured so that Google API hostnames and registered domains correctly
+    resolve to the synthetic PSC VIP (`240.0.0.2:443`).
+
+4.  **Dangling ACT References on Teardown (BKI 30)**: If deleting an Agent
+    Connectivity Template fails with `FAILED_PRECONDITION: Resource ... is
+    already being used by resource(s) .../agentGateways/...` after the gateway
+    was already deleted, Network Services retained a dangling reference
+    (`FROM_AGENT_GATEWAY<ID>`). Clear it using Stubby:
+
+    ```bash
+    stubby call blade:network-services-prod-${REGION} google.internal.cloud.reference.References.DeleteReference \
+      "{name: 'projects/${PROJECT_NUMBER}/locations/${REGION}/references/FROM_AGENT_GATEWAY${GW_ID}'}"
+    ```
+
 ### Step 4 — Verify the hostname is registered (in the form the agent used)
 
 List registry entries — pick the right resource type for the destination:
 
 ```bash
-gcloud alpha agent-registry endpoints list      --project=$PROJECT_ID --location=$LOCATION
-gcloud alpha agent-registry mcp-servers list    --project=$PROJECT_ID --location=$LOCATION
-gcloud alpha agent-registry agents list         --project=$PROJECT_ID --location=$LOCATION
+gcloud agent-registry endpoints list      --project=$PROJECT_ID --location=$LOCATION
+gcloud agent-registry mcp-servers list    --project=$PROJECT_ID --location=$LOCATION
+gcloud agent-registry agents list         --project=$PROJECT_ID --location=$LOCATION
 ```
 
 Grep the output for the exact hostname from step 2. If it's missing, that's the
 root cause.
 
-### Step 5 — Verify IAM bindings on the registered resource and gateway
+### Step 5 — Verify IAM / UAP bindings on the registered resource
 
-To authorize egress, the agent's identity needs roles granted on both the
-gateway and the registry resources:
+Depending on whether your gateway uses **IAM v1** or **Unified Access Policy
+(UAP / Policy V2)** (determined by `iapPolicyVersion` in the Authz Extension),
+verify the corresponding authorization bindings:
 
-1.  **Gateway Access**: The agent needs `roles/iap.httpsGatewayUser` to connect
-    to the gateway. Verify or grant this role (often at the project level):
+#### Option A: Unified Access Policy (UAP / Policy V2 / IAM v3)
+
+In UAP, access policies are bound directly to the **Google Cloud Resource
+Manager (CRM) hierarchy** (Project, Folder, or Organization) rather than IAP
+shadow resources.
+
+1.  **List Policy Bindings on the Target Project**:
 
     ```bash
-    gcloud projects add-iam-policy-binding $PROJECT_ID \
-      --member="principalSet://agents.global.org-${ORG_ID}.system.id.goog/attribute.platformContainer/aiplatform/projects/${PROJECT_NUMBER}" \
-      --role="roles/iap.httpsGatewayUser"
+    gcloud iam policy-bindings list \
+      --target="//cloudresourcemanager.googleapis.com/projects/${PROJECT_ID}" \
+      --location=global
     ```
 
-2.  **Registry/Destination Access**: The agent needs `roles/iap.egressor` on the
-    registered resource. Bindings can live at the **registry level** or on a
-    **specific resource**.
+2.  **List Policy Bindings on Parent Folders / Organization**:
 
-#### Registry-level IAM policy
+    ```bash
+    # Folder level
+    gcloud iam policy-bindings list \
+      --target="//cloudresourcemanager.googleapis.com/folders/${FOLDER_ID}" \
+      --location=global
+
+    # Organization level
+    gcloud iam policy-bindings list \
+      --target="//cloudresourcemanager.googleapis.com/organizations/${ORGANIZATION_ID}" \
+      --location=global
+    ```
+
+3.  **Inspect the Referenced AccessPolicy**:
+
+    ```bash
+    gcloud iam access-policies get ACCESS_POLICY_ID --location=global
+    ```
+
+    *   Verify the rule uses the full FQDN permission:
+        `iap.googleapis.com/resources.egressViaIAP`.
+    *   Verify the agent's principal or principal set matches
+        `rules[].principals`.
+    *   Inspect CEL conditions: check for null dereferences, missing `.json`
+        extensions in REST API paths, or overly broad
+        `destination.is_registered == false` DENY rules that crash
+        unauthenticated agent boot routines.
+
+4.  **Check for Org Policy Constraint Blockers (BKI 24)**: If `gcloud iam
+    policy-bindings create` failed with `CUSTOM_ORG_POLICY_VIOLATION`, check
+    whether `constraints/iam.managed.disableAccessPolicyBinding` is enforced:
+
+    ```bash
+    gcloud org-policies describe constraints/iam.managed.disableAccessPolicyBinding --project=$PROJECT_ID
+    ```
+
+    To unblock, apply an override disabling the constraint (`enforce: false`).
+
+5.  **REST API Fallback for UAP Bindings**:
+
+    ```bash
+    curl -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+      "https://iam.googleapis.com/v3/projects/${PROJECT_ID}/locations/global/policyBindings"
+    ```
+
+#### Option B: IAM v1 (Legacy Policy Model)
+
+In IAM v1, `roles/iap.egressor` is bound directly to the IAP shadow resource at
+the registry or endpoint level:
+
+##### Registry-level IAM policy
 
 ```bash
 curl -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
@@ -694,7 +846,7 @@ curl -H "Authorization: Bearer $(gcloud auth application-default print-access-to
   -H "Content-Type: application/json"
 ```
 
-#### Per-endpoint IAM policy
+##### Per-endpoint IAM policy
 
 ```bash
 curl -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
@@ -703,7 +855,7 @@ curl -H "Authorization: Bearer $(gcloud auth application-default print-access-to
   -H "Content-Type: application/json"
 ```
 
-#### Same call, but for global registry:
+##### Same call, but for global registry:
 
 ```bash
 curl -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
@@ -720,22 +872,51 @@ service account or principal set with role `roles/iap.egressor`.
 #### List authz extensions
 
 ```bash
-gcloud beta service-extensions authz-extensions list \
+gcloud service-extensions authz-extensions list \
   --location=$LOCATION --project=$PROJECT_ID
 
-gcloud beta service-extensions authz-extensions describe RESOURCE_NAME \
+gcloud service-extensions authz-extensions describe RESOURCE_NAME \
   --location=$LOCATION --project=$PROJECT_ID
 ```
 
-#### Verify AuthorizationPolicy Binding
+#### Verify AuthorizationPolicy & AuthzExtension Wiring
 
-Verify that the `AuthorizationPolicy` is correctly bound to your `Gateway`. The
-policy must target the gateway resource. If it is not bound, the authorization
-logic will not be applied to the gateway traffic.
+1.  **Check `iapPolicyVersion` in Authz Extension**: Describe the Authz
+    Extension and inspect the `metadata` map:
 
-1.  Inspect the `AuthorizationPolicy` resource (retrieved from the API via
-    `gcloud` if available).
-2.  Ensure the policy's target matches the gateway's name and location.
+    ```bash
+    gcloud service-extensions authz-extensions describe RESOURCE_NAME \
+      --location=$LOCATION --project=$PROJECT_ID --format="yaml(metadata)"
+    ```
+
+    -   If using **UAP (Policy V2)**: `iapPolicyVersion` MUST be explicitly set
+        to `"V2"`.
+    -   If using **IAM v1**: `iapPolicyVersion` is `"V1"` or unset.
+    -   Check `iamEnforcementMode`: `"DRY_RUN"` logs evaluations without
+        blocking; `"ENFORCED"` actively blocks.
+
+2.  **Verify AuthorizationPolicy Binding**: Verify that the
+    `AuthorizationPolicy` is correctly bound to your `Gateway`. The policy must
+    target the gateway resource. If it is not bound, the authorization logic
+    will not be applied to the gateway traffic.
+
+    -   Inspect the `AuthorizationPolicy` resource.
+    -   Ensure the policy's target matches the gateway's name and location.
+
+3.  **Verify Multi-Registry Gateway Constraints (BKI 26)**: Inspect the Agent
+    Gateway description:
+
+    ```bash
+    gcloud network-services agent-gateways describe AGENT_GATEWAY_NAME \
+      --location=$LOCATION --project=$PROJECT_ID --format="yaml(registries)"
+    ```
+
+    -   Network Services permits at most **2 registries** bound to an Agent
+        Gateway.
+    -   When 2 registries are configured, **exactly ONE must be `global`** and
+        the second must be **`regional` or `multi-regional`**.
+    -   Configuring two regional, two multi-regional, or two global registries
+        will be rejected with HTTP 400 validation failure.
 
 #### List authz policies, agent gateways, and authz extensions via raw API
 
@@ -815,6 +996,99 @@ Run:**
 If permissions seem flaky, suspect the **PrincipalSet** binding. Move to a **1:1
 Principal binding** (bind the specific service account directly) to verify.
 
+### Step 9 — Cross-Project Runtime-to-Gateway Binding Verification
+
+When an Agent Runtime (Reasoning Engine) in Project A (`AE_PROJECT_NUMBER`)
+binds to an Agent Gateway in Centralized Governance Project B
+(`AGW_PROJECT_ID`):
+
+1.  **Check Deployer Caller Permissions:** Verify the deploying identity has
+    `roles/networkservices.viewer` (or `networkservices.agentGateways.get` and
+    `networkservices.agentGateways.use`) on the gateway in Project B:
+
+    ```bash
+    gcloud network-services agent-gateways describe GATEWAY_NAME \
+      --project=AGW_PROJECT_ID \
+      --location=REGION
+    ```
+2.  **Check Vertex AI Service Agent IAM in Gateway Project:** Ensure Project A's
+    service agent is authorized in Project B:
+
+    ```bash
+    gcloud projects get-iam-policy AGW_PROJECT_ID \
+      --flatten="bindings[].members" \
+      --filter="bindings.members:service-AE_PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com" \
+      --format="table(bindings.role)"
+    ```
+
+    Must have `roles/networkservices.viewer` or custom role
+    `ae_agw_cross_project_sa`
+    (`networkservices.agentGateways.get,networkservices.operations.get`).
+3.  **Validate Regional Colocation Invariant:** Both the runtime and the gateway
+    **MUST** be deployed in the exact same region (e.g. `us-central1`).
+    Cross-region bindings fail control plane validation with `INVALID_ARGUMENT`.
+4.  **Verify Context-Aware Access (CAA) Token Sharing Opt-Out:** Verify that the
+    agent runtime was deployed with:
+    `"GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES": False` Without
+    this, bound token enforcement drops credentials during cross-project egress,
+    returning `401 Context-Aware Access requirements are not met`.
+5.  **Validate IAP Policy Target (Server-Generated Resource ID vs Friendly
+    Name):** Ensure IAP policies (`gcloud iap web add-iam-policy-binding`)
+    target the server-generated resource ID (`agentregistry-00000000-...`
+    extracted via `registryResource`), NOT the friendly service name:
+
+    ```bash
+    gcloud agent-registry services describe MCP_SERVICE_NAME \
+      --project=AGW_PROJECT_ID \
+      --location=REGION \
+      --format='value(registryResource)'
+    ```
+6.  **Verify Cross-Project VPC Service Controls (VPC-SC):** If Project A and
+    Project B are in separate perimeters, ensure a perimeter bridge or
+    ingress/egress rules cover `aiplatform.googleapis.com`,
+    `networkservices.googleapis.com`, and `agentregistry.googleapis.com`.
+
+### Step 10 — Diagnose Secure Web Proxy (SWP) and Policy-Based Routing (PBR) Egress
+
+If the consumer VPC employs a downstream Secure Web Proxy (SWP) behind an Agent
+Gateway Network Attachment for Layer 7 inspection:
+
+1.  **Verify Next-Hop SWP Deployment Mode**: Confirm SWP is deployed directly in
+    the consumer VPC with `type: SECURE_WEB_GATEWAY` and
+    `routingMode: NEXT_HOP_ROUTING_MODE`. Do NOT attempt to use PSC Service
+    Attachments (which only support explicit `HTTP CONNECT` proxies) or static
+    routes (which fail because Network Attachments cannot bear VM instance tags).
+2.  **Verify Policy-Based Routing (PBR) Matching**:
+    Ensure a PBR exists with priority 200 matching source CIDR of the PSC-I subnet
+    (`10.20.1.0/24`) and destination `0.0.0.0/0` routing to `--next-hop-ilb-ip=<SWP_IP>`:
+
+    ```bash
+    gcloud network-connectivity policy-based-routes create agw-psci-to-swp-pbr \
+      --network=projects/PROJECT_ID/global/networks/VPC_NAME \
+      --source-range=10.20.1.0/24 \
+      --destination-range=0.0.0.0/0 \
+      --next-hop-ilb-ip=10.20.1.250 \
+      --priority=200 \
+      --project=PROJECT_ID
+    ```
+
+    Ensure a default fallback PBR exists with priority 1000 routing to `DEFAULT_ROUTING`.
+3.  **Verify Cloud NAT `ENDPOINT_TYPE_SWG` on Proxy Subnet**:
+    Ensure the Cloud NAT covering the proxy-only subnet (`REGIONAL_MANAGED_PROXY`)
+    includes `--endpoint-types=ENDPOINT_TYPE_VM,ENDPOINT_TYPE_SWG`. Without this,
+    SWP proxy backends cannot establish outbound connections to the internet.
+4.  **Verify GatewaySecurityPolicy CEL Allowlist**:
+    Check SWP logs for `DENIED` decisions under `networkservices.googleapis.com/Gateway`.
+    Verify that both external target domains and the regional AI Platform session
+    endpoint (`<region>-aiplatform.mtls.googleapis.com`) are allowed in CEL rules:
+
+    ```cel
+    inUrlList(host(), ['api.weather.gov', 'api.ipify.org', 'REGION-aiplatform.mtls.googleapis.com'])
+    ```
+
+    Omission of the regional AI Platform endpoint breaks ADK streaming queries
+    with HTTP 503 (`remote connection failure`).
+
 ## Quick reference: the checks in order
 
 When triaging a 403 or connection failure, walk these in order:
@@ -822,18 +1096,44 @@ When triaging a 403 or connection failure, walk these in order:
 1.  Confirm the error in the agent log (403 vs SSL Handshake Timeout vs
     Connection Reset).
 2.  Find the *exact hostname* in the gateway log (if 403).
-3.  Check IAP audit log: decision, principal, `iamEnforcementMode`, and watch
-    for `unregisteredResource`. 3b. If no IAP audit entry, pull gateway proxy
-    load-balancer log. 3c. If SSL Handshake Timeout or Connection Reset, run the
-    PSC Subnet Exhaustion Check.
+3.  Check IAP audit log: decision, principal, policy version
+    (`iapPolicyVersion="v2"` vs `"V1"`), `iamEnforcementMode`, and watch for
+    `unregisteredResource`.
+
+    -   3b. If no IAP audit entry, pull gateway proxy load-balancer log.
+    -   3c. If SSL Handshake Timeout or Connection Reset, run the PSC Subnet
+        Exhaustion Check.
+    -   3d. If timeouts or silent connection drops to public internet under
+        VPC-SC, verify Agent Connectivity Template (`vpcEgress: ALL_TRAFFIC`)
+        and Consumer Cloud NAT routing.
 
 4.  Confirm hostname is registered.
 
-5.  Check IAM on the registry/resource (`roles/iap.egressor`).
+5.  Check IAM / UAP Policies on the target:
 
-6.  Check authz extensions and policies.
+    -   IAM v1: Check `roles/iap.egressor` on the registry/endpoint shadow
+        resource.
+    -   UAP (Policy V2): Check CRM `PolicyBinding` and `AccessPolicy` across
+        Project, Folder, and Org. Verify CEL rules and check for Org Policy
+        blocker `constraints/iam.managed.disableAccessPolicyBinding`.
+
+6.  Check authz extensions (`iapPolicyVersion: "V2"` vs `"V1"`),
+    AuthorizationPolicy targets, and multi-registry constraints (max 2: 1
+    global + 1 regional/multi-regional).
 
 7.  Confirm agent identity has baseline roles. 7b. Check PAB policies. 7c. Check
     Cloud Run egress auth (impersonation).
 
 8.  If behavior is flaky, switch to direct Principal bindings.
+
+9.  If cross-project runtime binding (Project A -> Gateway in Project B), verify
+    deployer and service agent viewer permissions on Project B, regional
+    colocation, CAA opt-out
+    (`GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES: False`), and
+    server-generated resource ID in IAP bindings.
+
+10. If routing egress through a downstream Secure Web Proxy (SWP), verify Next-Hop
+    SWP mode (NOT PSC endpoint/service attachment), PBR source-range matching
+    on the PSC-I subnet (priority 200) to next-hop ILB IP, Cloud NAT with
+    `ENDPOINT_TYPE_SWG` on the proxy-only subnet, and GatewaySecurityPolicy CEL
+    allowlist for external domains and regional aiplatform sessions.

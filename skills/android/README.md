@@ -15,7 +15,9 @@ Skills synced from upstream (https://github.com/android/skills.git), not promote
 - [android-leanback-to-compose-tv-migration](./android-leanback-to-compose-tv-migration/SKILL.md): Provides instructions and architectural patterns for migrating Android TV applications from legacy Leanback UI Toolkit, Android Views, or Support Fragments to Jetpack Compose for TV (androidx.tv).
 - [android-media3-cast-integration](./android-media3-cast-integration/SKILL.md): Implements Google Cast support in Android apps using Jetpack Media3.
 - [android-migrate-xml-views-to-jetpack-compose](./android-migrate-xml-views-to-jetpack-compose/SKILL.md): Provides a structured workflow for migrating an Android XML View to Jetpack Compose.
+- [android-ml-kit-genai-prompt-api](./android-ml-kit-genai-prompt-api/SKILL.md): Analyzes Android codebases to implement ML Kit GenAI Prompt API.
 - [android-navigation-3](./android-navigation-3/SKILL.md): Learn how to install and migrate to Jetpack Navigation 3, and how to implement features and patterns such as deep links, multiple backstacks, scenes (dialogs, bottom sheets, list-detail, two-pane,...
+- [android-navigation-event](./android-navigation-event/SKILL.md): Intercept back gestures and run Predictive Back animations using the NavigationEvent (androidx.navigationevent) library in Compose Android.
 - [android-play-billing-library-version-upgrade](./android-play-billing-library-version-upgrade/SKILL.md): Use this skill when upgrading or migrating an Android project from any legacy Google Play Billing Library (PBL) version to the latest stable version of PBL.
 - [android-play-policy-insights](./android-play-policy-insights/SKILL.md): Automated auditor designed to verify Android applications against Google Play Policy domains.
 - [android-r8-analyzer](./android-r8-analyzer/SKILL.md): Analyzes Android build files and R8 keep rules to identify redundancies, broad package-wide rules, and rules that subsume library consumer keep rules.

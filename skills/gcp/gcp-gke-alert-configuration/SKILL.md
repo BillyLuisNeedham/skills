@@ -181,6 +181,15 @@ metrics while minimizing alert noise.
 *   **Plain English Response**: You must include a plain English explanation for
     what the alerts do in your response. Explain what the alert measures, what
     the threshold represents, and what a trigger indicates.
+*   **User Labels**: Include a `user_labels` block in all
+    `google_monitoring_alert_policy` resources to track policies created by this
+    skill:
+
+    ```terraform
+    user_labels = {
+      created-with-google-skill = "gke-alert-configuration"
+    }
+    ```
 
 --------------------------------------------------------------------------------
 

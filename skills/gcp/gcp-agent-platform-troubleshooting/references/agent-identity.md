@@ -140,13 +140,25 @@ Source:
 
 Source: <https://docs.cloud.google.com/iam/docs/principal-identifiers>
 
-Scope                               | Identifier
-:---------------------------------- | :---------
-Single agent                        | `principal://<TRUST_DOMAIN>/resources/<SERVICE>/<RESOURCE_PATH>`
-All agents in a trust domain        | `principalSet://<TRUST_DOMAIN>/*`
-All agents in a project             | `principalSet://<TRUST_DOMAIN>/attribute.platformContainer/aiplatform/projects/<PROJECT_NUMBER>`
-All agents in an org                | `principalSet://agents.global.org-<ORG_ID>.system.id.goog/attribute.platform/aiplatform`
-DIY agents (workload identity pool) | `principal://iam.googleapis.com/projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL>/subject/ns/<NS>/sa/<SA>`
+| Scope     | Identifier                                                                                                                       |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| Single    | `principal://<TRUST_DOMAIN>/resources/<SERVICE>/<RESOURCE_PATH>`                                                                 |
+: agent     :                                                                                                                                  :
+| All       | `principalSet://<TRUST_DOMAIN>/*`                                                                                                |
+: agents in :                                                                                                                                  :
+: a trust   :                                                                                                                                  :
+: domain    :                                                                                                                                  :
+| All       | `principalSet://<TRUST_DOMAIN>/attribute.platformContainer/aiplatform/projects/<PROJECT_NUMBER>`                                 |
+: agents in :                                                                                                                                  :
+: a project :                                                                                                                                  :
+| All       | `principalSet://agents.global.org-<ORG_ID>.system.id.goog/attribute.platform/aiplatform`                                         |
+: agents in :                                                                                                                                  :
+: an org    :                                                                                                                                  :
+| DIY       | `principal://iam.googleapis.com/projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL>/subject/ns/<NS>/sa/<SA>` |
+: agents    :                                                                                                                                  :
+: (workload :                                                                                                                                  :
+: identity  :                                                                                                                                  :
+: pool)     :                                                                                                                                  :
 
 Tips when debugging:
 
@@ -156,6 +168,39 @@ Tips when debugging:
     agent in the project the role — useful for shared roles (logging/quota), bad
     for sensitive resources.
 -   The `attribute.platform/aiplatform` set covers an *entire org*.
+
+### Principal Identifiers in Unified Access Policy (UAP / Policy V2)
+
+Under **Unified Access Policy** (`iam.googleapis.com/v3` `AccessPolicy` and
+`PolicyBinding`), principal identifiers are specified directly in the
+`rules[].principals` array:
+
+```yaml
+# In AccessPolicy rule definition:
+rules:
+  - description: "Allow project agents to access registered weather service"
+    principals:
+      - "principalSet://agents.global.org-123456789012.system.id.goog/attribute.platformContainer/aiplatform/projects/9876543210"
+      - "principal://agents.global.org-123456789012.system.id.goog/resources/aiplatform/projects/9876543210/locations/us-central1/reasoningEngines/weather-agent"
+    operations:
+      - permissions:
+          - "iap.googleapis.com/resources.egressViaIAP"
+```
+
+Important rules for UAP principal matching:
+
+1.  **Direct Principal vs. PrincipalSet**: You can specify either specific
+    `principal://...` URIs or broad `principalSet://...` group URIs in the
+    `principals` array.
+2.  **Audit Log Correlation**: In Cloud Audit Logs
+    (`protoPayload.authenticationInfo.principalSubject`), the runtime always
+    logs the exact `principal://` URI of the calling agent, which satisfies
+    either a direct `principal://` rule or a container-level `principalSet://`
+    rule.
+3.  **Service Accounts in UAP**: If an agent runs with a custom Service Account
+    (`SERVICE_ACCOUNT` mode), the principal string in UAP is
+    `serviceAccount:name@project.iam.gserviceaccount.com` (or
+    `principal://iam.googleapis.com/projects/...`).
 
 --------------------------------------------------------------------------------
 
@@ -480,8 +525,8 @@ principal as `members`. Per the policy assignment doc:
 }
 ```
 
-Apply with `gcloud beta iap web set-iam-policy ...
---resource-type=agent-registry` or `--endpoint=ENDPOINT_ID` depending on target.
+Apply with `gcloud iap web set-iam-policy ... --resource-type=agent-registry` or
+`--endpoint=ENDPOINT_ID` depending on target.
 
 ### Agent can't use an auth provider (auth manager)
 

@@ -11,7 +11,9 @@ android-engage-sdk-integration
 android-leanback-to-compose-tv-migration
 android-media3-cast-integration
 android-migrate-xml-views-to-jetpack-compose
+android-ml-kit-genai-prompt-api
 android-navigation-3
+android-navigation-event
 android-play-billing-library-version-upgrade
 android-play-policy-insights
 android-r8-analyzer

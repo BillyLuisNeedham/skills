@@ -3,15 +3,15 @@ name: google-cloud-solution-agentic-analytics-spark-knowledge-catalog
 metadata:
   category: MultiProductSolutions
 description: >-
-  Discovers requirements and generates guidance to design and deploy a governed,
-  secure agentic-analytics solution for data that's distributed across Google
-  Cloud, other cloud providers, or on-premises. Data that's outside Google Cloud
-  (such as data from Databricks, Snowflake, Salesforce, SAP, or Oracle systems)
-  is accessed through federation mechanisms such as Apache Iceberg, other
-  "zero-copy ETL" methods, or remote query push-down. Use this skill when
-  designing an architecture for efficient analytics across large volumes of
-  structured and unstructured data that's located in multiple systems and
-  environments, including other cloud providers and on-premises.
+  Discovers requirements and designs an end-to-end governed agentic analytics
+  solution using Knowledge Catalog and Managed Service for Apache Spark
+  (Lightning Engine). Use when designing data science and analytics workflows
+  across structured and unstructured distributed data (including in S3, Azure
+  Blob, AlloyDB, and Iceberg), establishing metadata governance with Knowledge
+  Catalog aspect types, or grounding agentic IDEs (VS Code, Antigravity) by
+  using the Google Cloud Data Agent Kit. Don't use for provisioning borderless
+  data lakehouse infrastructure (use
+  google-cloud-solution-agentic-ai-borderless-data-lakehouse instead).
 ---
 
 # Agentic analytics across cloud providers and data types

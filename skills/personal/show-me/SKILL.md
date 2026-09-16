@@ -1,5 +1,5 @@
 ---
-name: my-show-me
+name: show-me
 description: Help the user understand the current topic visually with concise ASCII diagrams, code-shape sketches, and focused HTML artifacts.
 ---
 

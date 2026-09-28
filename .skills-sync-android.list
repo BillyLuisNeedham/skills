@@ -2,6 +2,7 @@ android-adaptive
 android-agp-9-upgrade
 android-android-cli
 android-android-intent-security
+android-android-permissions-security
 android-android-profiler
 android-appfunctions
 android-camerax

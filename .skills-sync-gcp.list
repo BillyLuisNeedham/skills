@@ -16,6 +16,8 @@ gcp-application-design-center-design-deploy
 gcp-bigquery-ai-ml
 gcp-bigquery-basics
 gcp-bigquery-bigframes
+gcp-bigquery-observability
+gcp-bigquery-slot-cost-optimizer
 gcp-bigtable-basics
 gcp-cloud-build-basics
 gcp-cloud-databases-onboarding
@@ -77,9 +79,11 @@ gcp-gke-productionize
 gcp-gke-reliability
 gcp-gke-service-networking
 gcp-gke-storage
+gcp-gke-storage-troubleshooting
 gcp-gke-upgrades
 gcp-gke-workload-identity
 gcp-gke-workload-scaling
+gcp-gke-workload-scaling-troubleshooting
 gcp-gke-workload-security
 gcp-gke-workload-troubleshooting
 gcp-google-ads-api-account-diagnostics
@@ -90,6 +94,7 @@ gcp-google-analytics-admin-api-basics
 gcp-google-analytics-data-api-basics
 gcp-google-cloud-filestore-auditing
 gcp-google-cloud-filestore-autoscale
+gcp-google-cloud-filestore-log-troubleshooting
 gcp-google-cloud-filestore-nfs-browser
 gcp-google-cloud-global-frontend-configuration
 gcp-google-cloud-networking-observability

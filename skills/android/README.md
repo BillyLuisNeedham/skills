@@ -6,6 +6,7 @@ Skills synced from upstream (https://github.com/android/skills.git), not promote
 - [android-agp-9-upgrade](./android-agp-9-upgrade/SKILL.md): Upgrades, or migrates, an Android project to use Android Gradle Plugin (AGP) version 9.
 - [android-android-cli](./android-android-cli/SKILL.md): Provides instructions for installing and using the `android` CLI.
 - [android-android-intent-security](./android-android-intent-security/SKILL.md): Best practices for Android Intent security.
+- [android-android-permissions-security](./android-android-permissions-security/SKILL.md): Audits, detects gaps, and remediates Android permissions and IPC component security vulnerabilities.
 - [android-android-profiler](./android-android-profiler/SKILL.md): Manages Android performance profiling and debugging.
 - [android-appfunctions](./android-appfunctions/SKILL.md): Analyzes Android apps to identify key user workflows for AppFunctions such as creating a note, playing media, or sending an automated or AI agent triggered message, voice commands, or system shortc...
 - [android-camerax](./android-camerax/SKILL.md): Provide technical guidance for Android camera development with CameraX.
@@ -23,6 +24,6 @@ Skills synced from upstream (https://github.com/android/skills.git), not promote
 - [android-r8-analyzer](./android-r8-analyzer/SKILL.md): Analyzes Android build files and R8 keep rules to identify redundancies, broad package-wide rules, and rules that subsume library consumer keep rules.
 - [android-restore-credentials](./android-restore-credentials/SKILL.md): Provides knowledge and workflows to implement Android's Restore Credentials feature using the androidx.credentials library.
 - [android-styles](./android-styles/SKILL.md): Use this skill to integrate the Jetpack Compose Styles API into an Android project.
-- [android-testing-setup](./android-testing-setup/SKILL.md): Analyze and create a testing strategy for native Android apps - install testing libraries, set up test infrastructure, create harnesses for unit tests, UI tests, screenshot tests, and end-to-end te...
+- [android-testing-setup](./android-testing-setup/SKILL.md): Analyze and create a testing strategy for Android apps - install testing libraries, set up test infrastructure, create harnesses for unit tests, UI tests, screenshot tests, and end-to-end tests.
 - [android-verified-email](./android-verified-email/SKILL.md): Provides a complete workflow for implementing verified email retrieval on Android Credential Manager API.
-- [android-wear-compose-m3](./android-wear-compose-m3/SKILL.md): Expert guidance for working with Wear OS Compose Material3.
+- [android-wear-compose-m3](./android-wear-compose-m3/SKILL.md): Guidance for Wear OS Compose Material3 (Wear Compose Material 3 / Wear Compose Material3) watch and wearable apps.

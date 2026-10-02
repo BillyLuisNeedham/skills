@@ -8,3 +8,12 @@ Skills tied to my own setup, not promoted in the plugin. Fork-owned — upstream
 - **[my-wayfinder](./my-wayfinder/SKILL.md)** — Wayfinder, plus a sitrep opening every human-in-the-loop session — the map's position and the claimed ticket, built by a subagent and opened in the browser.
 - **[thermo-nuclear-code-quality-review](./thermo-nuclear-code-quality-review/SKILL.md)** — Extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Vendored from cursor/plugins.
 - **[show-me](./show-me/SKILL.md)** — Help the user understand the current topic visually with concise ASCII diagrams, code-shape sketches, and focused HTML artifacts.
+
+Vendored from [plannotator/effective-html](https://github.com/plannotator/effective-html) (MIT), patched to be user-invoked on every sync. Start at `/html`, which routes to the others by reading their `SKILL.md` files.
+
+- **[html](./html/SKILL.md)**: Router for self-contained single-file HTML artifacts: reports, explainers, decks, tools.
+- **[design-artifact](./design-artifact/SKILL.md)**: Creative direction for an HTML artifact: palette, type pairing, layout, theming.
+- **[html-wireframe](./html-wireframe/SKILL.md)**: Low-fidelity HTML wireframes that test hierarchy, navigation, and responsive structure.
+- **[html-prototype](./html-prototype/SKILL.md)**: Polished HTML mockups or working interactive prototypes.
+- **[html-plan](./html-plan/SKILL.md)**: HTML plans and roadmaps that keep source commitments traceable.
+- **[html-diagram](./html-diagram/SKILL.md)**: Self-contained HTML diagrams: architecture, sequence, state, timeline.

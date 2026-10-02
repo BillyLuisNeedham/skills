@@ -9,7 +9,9 @@
 #   3. Clones google/skills and copies each skill dir into skills/gcp/ with
 #      `gcp-` prefix.
 #   4. Vendors individual third-party skills into skills/personal/, overwriting
-#      each one every run: thermo-nuclear-code-quality-review from cursor/plugins.
+#      each one every run: thermo-nuclear-code-quality-review from cursor/plugins,
+#      and the six Effective HTML skills from plannotator/effective-html (patched
+#      to be user-invoked after each copy).
 #   5. Removes any previously-synced skill that no longer exists upstream, plus
 #      legacy flat gcp-*/android-* dirs left at the repo root by older syncs.
 #   6. Regenerates skills/gcp/README.md and skills/android/README.md.
@@ -218,28 +220,55 @@ regenerate_bucket_readme() {
   echo "    wrote skills/$label/README.md"
 }
 
-# Vendor a single named skill from a third-party repo into skills/personal/,
-# keeping its original name. Overwrites the target each run, so local edits to
-# a vendored skill are destroyed on the next sync.
+# Vendor one or more named skills from a third-party repo into skills/personal/,
+# keeping their original names. Clones the repo once. Overwrites each target
+# every run, so local edits to a vendored skill are destroyed on the next sync.
 sync_single_skill() {
-  local repo_url="$1" skill_subpath="$2"
-  local skill_name target
-  skill_name="$(basename "$skill_subpath")"
-  target="$REPO_DIR/skills/personal/$skill_name"
+  local repo_url="$1"
+  shift
+  local clone_dir
+  clone_dir="$TMP_DIR/personal-$(basename "$repo_url" .git)"
 
-  echo "==> Syncing personal skill '$skill_name' from $repo_url"
-  local clone_dir="$TMP_DIR/personal-$skill_name"
-  git clone --depth 1 --quiet "$repo_url" "$clone_dir"
+  echo "==> Syncing personal skills from $repo_url"
+  [[ -d "$clone_dir" ]] || git clone --depth 1 --quiet "$repo_url" "$clone_dir"
 
-  local src="$clone_dir/$skill_subpath"
-  if [[ ! -d "$src" ]]; then
-    echo "    ! source path not found: $skill_subpath (skipping)" >&2
-    return 0
+  local skill_subpath skill_name target src
+  for skill_subpath in "$@"; do
+    skill_name="$(basename "$skill_subpath")"
+    target="$REPO_DIR/skills/personal/$skill_name"
+    src="$clone_dir/$skill_subpath"
+    if [[ ! -d "$src" ]]; then
+      echo "    ! source path not found: $skill_subpath (skipping)" >&2
+      continue
+    fi
+
+    rm -rf "$target"
+    cp -r "$src" "$target"
+    echo "    + skills/personal/$skill_name"
+  done
+}
+
+# Make a vendored skill user-invoked (see .agents/invocation.md): add
+# `disable-model-invocation: true` to its frontmatter and turn off
+# `allow_implicit_invocation` in agents/openai.yaml. Run after each sync,
+# since the sync re-copies the upstream files verbatim.
+make_user_invoked() {
+  local skill_dir="$REPO_DIR/skills/personal/$1"
+  local skill_md="$skill_dir/SKILL.md" openai_yaml="$skill_dir/agents/openai.yaml"
+  [[ -f "$skill_md" ]] || return 0
+
+  if ! grep -q '^disable-model-invocation:' "$skill_md"; then
+    perl -0pi -e 's/\A(---\n(?:.*\n)*?)---\n/$1disable-model-invocation: true\n---\n/' "$skill_md"
   fi
 
-  rm -rf "$target"
-  cp -r "$src" "$target"
-  echo "    + skills/personal/$skill_name"
+  if [[ -f "$openai_yaml" ]]; then
+    if grep -q 'allow_implicit_invocation:' "$openai_yaml"; then
+      perl -pi -e 's/allow_implicit_invocation:\s*true/allow_implicit_invocation: false/' "$openai_yaml"
+    else
+      printf '\npolicy:\n  allow_implicit_invocation: false\n' >> "$openai_yaml"
+    fi
+  fi
+  echo "    ~ skills/personal/$1 is user-invoked"
 }
 
 cd "$REPO_DIR"
@@ -256,6 +285,10 @@ sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
 
 sync_single_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
+
+EFFECTIVE_HTML_SKILLS=(html design-artifact html-wireframe html-prototype html-plan html-diagram)
+sync_single_skill "https://github.com/plannotator/effective-html.git" "${EFFECTIVE_HTML_SKILLS[@]/#/skills/}"
+for s in "${EFFECTIVE_HTML_SKILLS[@]}"; do make_user_invoked "$s"; done
 
 echo "==> Linking skills to ~/.claude/skills, ~/.agents/skills and ~/.cursor/skills..."
 bash "$REPO_DIR/scripts/link-skills.sh"

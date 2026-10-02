@@ -74,7 +74,7 @@ clash: name both, say which is blocked, and ask again.
 
 In your own library `implement`, `triage`, `to-tickets`, `wayfinder` and
 `thermo-nuclear-code-quality-review` all carry it. `tdd`, `code-review`, `diagnosing-bugs`,
-`research`, `prototype`, `fits-the-codebase` and `resolving-merge-conflicts` do not.
+`research`, `prototype` and `fits-the-codebase` do not.
 
 Later skills in a chain run as subagents told to invoke them. That path is designed but unproven, so
 put the weight of an Issue on the first driver rather than the tail of a chain.

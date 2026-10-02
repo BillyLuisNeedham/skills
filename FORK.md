@@ -4,7 +4,7 @@ This repo is Billy's fork of `mattpocock/skills` (`upstream`). These rules keep 
 
 ## Language
 
-**Upstream-owned**: a file whose path exists in `upstream/main` (`mattpocock/skills`). Examples: `skills/productivity/grilling/SKILL.md`, `CONTEXT.md`.
+**Upstream-owned**: a file whose path exists in `upstream/main` (`mattpocock/skills`). Examples: `skills/productivity/grilling/SKILL.md`, `GLOSSARY.md`.
 
 **Fork-owned**: a path that does not exist upstream. Merges never touch it. Examples: `skills/personal/`, `skills/personal/my-grilling/`.
 

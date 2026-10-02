@@ -1,7 +1,7 @@
 ---
 name: google-cloud-solution-architecture
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   category: MultiProductSolutions
 description: >-
   Interactively discovers requirements and designs holistic, multi-product
@@ -137,9 +137,9 @@ content by using the following resources:
 *   Google Developer Knowledge MCP server
     *   Server: https://developerknowledge.googleapis.com/mcp
     *   Tools:
-    *   `developerknowledge:search_documents`
-    *   `developerknowledge:get_documents`
-    *   `developerknowledge:answer_query`
+        *   `developerknowledge:search_documents`
+        *   `developerknowledge:get_documents`
+        *   `developerknowledge:answer_query`
 *   Relevant skills from https://github.com/google/skills
 *   Official Google Cloud documentation, including the following:
     *   Reference architectures and design guides that are relevant to the

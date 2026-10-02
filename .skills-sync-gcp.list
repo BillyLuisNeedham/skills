@@ -17,7 +17,9 @@ gcp-bigquery-ai-ml
 gcp-bigquery-basics
 gcp-bigquery-bigframes
 gcp-bigquery-observability
+gcp-bigquery-optimization
 gcp-bigquery-slot-cost-optimizer
+gcp-bigquery-troubleshooting
 gcp-bigtable-basics
 gcp-cloud-build-basics
 gcp-cloud-databases-onboarding

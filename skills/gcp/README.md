@@ -21,7 +21,9 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-bigquery-basics](./gcp-bigquery-basics/SKILL.md): Manages datasets, tables, and jobs in BigQuery.
 - [gcp-bigquery-bigframes](./gcp-bigquery-bigframes/SKILL.md): Generates Python code using BigQuery DataFrames (BigFrames).
 - [gcp-bigquery-observability](./gcp-bigquery-observability/SKILL.md): Provides data-retrieval best practices, tool selection guidance, and performant SQL query syntax for BigQuery telemetry across INFORMATION_SCHEMA, Cloud Monitoring, and the REST API.
+- [gcp-bigquery-optimization](./gcp-bigquery-optimization/SKILL.md): Provides workflows to optimize BigQuery environments (capacity planning, editions), storage assets (partitioning, clustering, storage lifecycles, billing models), and SQL queries.
 - [gcp-bigquery-slot-cost-optimizer](./gcp-bigquery-slot-cost-optimizer/SKILL.md): Analyzes Google Cloud BigQuery slot consumption, query costs, and execution bottlenecks using INFORMATION_SCHEMA.
+- [gcp-bigquery-troubleshooting](./gcp-bigquery-troubleshooting/SKILL.md): Provides diagnostic workflows and step-by-step root-cause analysis procedures for actively broken, failing, or slow BigQuery jobs, execution graph and query plan stage bottlenecks, system performan...
 - [gcp-bigtable-basics](./gcp-bigtable-basics/SKILL.md): Assists in provisioning instances/tables, designing performant schemas, and querying data in Bigtable.
 - [gcp-cloud-build-basics](./gcp-cloud-build-basics/SKILL.md): Teaches the fundamentals of Google Cloud Build (GCB).
 - [gcp-cloud-databases-onboarding](./gcp-cloud-databases-onboarding/SKILL.md): Guides users through discovering their database requirements, recommends a Google Cloud database based on a recommendation matrix, and assists in database creation.
@@ -48,7 +50,7 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-developing-genkit-js](./gcp-developing-genkit-js/SKILL.md): Develop AI-powered applications using Genkit in Node.js/TypeScript.
 - [gcp-developing-genkit-python](./gcp-developing-genkit-python/SKILL.md): Develop AI-powered applications using Genkit in Python.
 - [gcp-dpop-adoption](./gcp-dpop-adoption/SKILL.md): Implement and debug OAuth 2.0 DPoP (RFC 9449) refresh token sender-constraining for WebCrypto, Node.js ES6, and browser runtimes integrating with Google's OAuth platform.
-- [gcp-finding-google-skills](./gcp-finding-google-skills/SKILL.md): Locates and loads the right Google product skill on demand from a remote catalog index, instead of preloading every skill.
+- [gcp-finding-google-skills](./gcp-finding-google-skills/SKILL.md): Google platform decision and setup guidance, loaded on demand from Google's skill catalog.
 - [gcp-firebase-basics](./gcp-firebase-basics/SKILL.md): Provides foundational Firebase CLI setup, CLI installation, version checks (`firebase-tools@latest --version`), CLI login (including --no-localhost), project creation, project selection (`firebase...
 - [gcp-gcloud](./gcp-gcloud/SKILL.md): Provides safety-critical validation, guardrails, and data reduction for gcloud CLI operations across Google Cloud Platform (GCP) services and infrastructure.
 - [gcp-gemini-agents-api](./gcp-gemini-agents-api/SKILL.md): Manages custom Agent resources on Gemini Enterprise Agent Platform.
@@ -83,9 +85,9 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-gke-reliability](./gcp-gke-reliability/SKILL.md): Improves GKE workload reliability, using PDBs, health probes, and topology spread constraints.
 - [gcp-gke-service-networking](./gcp-gke-service-networking/SKILL.md): Configures GKE edge networking, traffic routing, load balancing, and private service endpoints.
 - [gcp-gke-storage-troubleshooting](./gcp-gke-storage-troubleshooting/SKILL.md): Diagnoses GKE persistent-storage failures — volume attach/mount errors (Regional PD on optimized VMs, fsGroup mount timeouts), disk-performance and node storage-pressure issues, slow-disk Pod-cre...
-- [gcp-gke-storage](./gcp-gke-storage/SKILL.md): Manages GKE storage, including PVCs, PersistentVolumes, Filestore, and GCS FUSE.
+- [gcp-gke-storage](./gcp-gke-storage/SKILL.md): Manages GKE storage, including PVCs, PersistentVolumes, and Filestore.
 - [gcp-gke-upgrades](./gcp-gke-upgrades/SKILL.md): Plans, executes, and validates Google Kubernetes Engine (GKE) cluster upgrades and maintenance operations for both Standard and Autopilot clusters.
-- [gcp-gke-workload-identity](./gcp-gke-workload-identity/SKILL.md): Diagnoses Workload Identity Federation for GKE authentication failures for Pods (403 "iam.serviceAccounts.getAccessToken" / permission denied, "could not find default credentials", or GKE metadata...
+- [gcp-gke-workload-identity](./gcp-gke-workload-identity/SKILL.md): Configures and diagnoses Workload Identity Federation for GKE authentication failures for Pods (403 "iam.serviceAccounts.getAccessToken" / permission denied, "could not find default credentials", o...
 - [gcp-gke-workload-scaling-troubleshooting](./gcp-gke-workload-scaling-troubleshooting/SKILL.md): Diagnoses GKE HorizontalPodAutoscaler (HPA) failures — metrics showing as <unknown>, FailedGetResourceMetric / FailedGetScale / FailedComputeMetricsReplicas events, missing Pod resource requests,...
 - [gcp-gke-workload-scaling](./gcp-gke-workload-scaling/SKILL.md): Manages scaling for GKE workloads using HPA and VPA.
 - [gcp-gke-workload-security](./gcp-gke-workload-security/SKILL.md): Audits, configures, and hardens workload-level security controls for Google Kubernetes Engine (GKE) applications and namespaces.
@@ -101,7 +103,7 @@ Skills synced from upstream (https://github.com/google/skills.git), not promoted
 - [gcp-google-cloud-filestore-log-troubleshooting](./gcp-google-cloud-filestore-log-troubleshooting/SKILL.md): Diagnoses and resolves Google Cloud Filestore client mount failures, permission errors (EACCES), and network timeouts (ETIMEDOUT).
 - [gcp-google-cloud-filestore-nfs-browser](./gcp-google-cloud-filestore-nfs-browser/SKILL.md): Inspects, searches, and reads files and POSIX metadata on Google Cloud Filestore (NFS) instances without local NFS client packages or root privileges.
 - [gcp-google-cloud-global-frontend-configuration](./gcp-google-cloud-global-frontend-configuration/SKILL.md): Guides agents through a 6-step discovery process to design and deploy Google Cloud global external Application Load Balancers with Cloud CDN, Cloud Armor, and Service Extensions, mapping workload r...
-- [gcp-google-cloud-networking-observability](./gcp-google-cloud-networking-observability/SKILL.md): Investigates Google Cloud networking issues by analyzing logs, metrics, and diagnostics.
+- [gcp-google-cloud-networking-observability](./gcp-google-cloud-networking-observability/SKILL.md): Investigates Google Cloud networking issues by analyzing GCP logs, metrics, and diagnostics.
 - [gcp-google-cloud-recipe-auth](./gcp-google-cloud-recipe-auth/SKILL.md): Provides expert guidance on authenticating and authorizing to Google Cloud services and APIs, covering human users, service identities, Application Default Credentials (ADC), and best practices for...
 - [gcp-google-cloud-recipe-foundation-builder](./gcp-google-cloud-recipe-foundation-builder/SKILL.md): Deploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing associatio...
 - [gcp-google-cloud-recipe-onboarding](./gcp-google-cloud-recipe-onboarding/SKILL.md): Guides a developer's first steps on Google Cloud, covering account creation, billing setup, project management, and deploying a first resource.

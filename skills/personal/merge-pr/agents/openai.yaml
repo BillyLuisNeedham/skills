@@ -1,0 +1,5 @@
+interface:
+  display_name: "Merge PR"
+  short_description: "Squash-merge a PR, Dev Complete the ticket, fill the build number"
+policy:
+  allow_implicit_invocation: false

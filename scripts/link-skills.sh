@@ -105,7 +105,7 @@ prune_stale() {
       # Plain readlink, not -f/-m: we link with absolute repo paths, so the
       # stored value is already what we want to match, and reading it does not
       # require the target to still exist. -f returns nothing once the target is
-      # gone, and -m is GNU-only (it fails outright on macOS) — either way
+      # gone, and -m is GNU-only (it fails outright on macOS). Either way,
       # `resolved` ends up empty and orphan links survive forever.
       resolved="$(readlink "$target" 2>/dev/null || true)"
       case "$resolved" in

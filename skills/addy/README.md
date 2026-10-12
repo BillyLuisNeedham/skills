@@ -4,10 +4,13 @@ Skills synced from upstream (https://github.com/addyosmani/agent-skills.git), no
 
 - [addy-api-and-interface-design](./addy-api-and-interface-design/SKILL.md): Guides stable API and interface design.
 - [addy-browser-testing-with-devtools](./addy-browser-testing-with-devtools/SKILL.md): Tests in real browsers via Chrome DevTools MCP.
+- [addy-build](./addy-build/SKILL.md): Implement tasks incrementally — build, test, verify, commit.
 - [addy-ci-cd-and-automation](./addy-ci-cd-and-automation/SKILL.md): Automates CI/CD pipeline setup.
 - [addy-code-review-and-quality](./addy-code-review-and-quality/SKILL.md): Conducts multi-axis code review.
 - [addy-code-simplification](./addy-code-simplification/SKILL.md): Simplifies code for clarity.
+- [addy-code-simplify](./addy-code-simplify/SKILL.md): Simplify code for clarity and maintainability — reduce complexity without changing behavior
 - [addy-constraint-driven-development](./addy-constraint-driven-development/SKILL.md): Establishes a project's quality bar as a written contract and stops agents quietly lowering it.
+- [addy-constraints](./addy-constraints/SKILL.md): Define and enforce this project's quality bar — interview, sane defaults, CONSTRAINTS.md
 - [addy-context-engineering](./addy-context-engineering/SKILL.md): Optimizes agent context setup.
 - [addy-debugging-and-error-recovery](./addy-debugging-and-error-recovery/SKILL.md): Guides systematic root-cause debugging.
 - [addy-deprecation-and-migration](./addy-deprecation-and-migration/SKILL.md): Manages deprecation and migration.
@@ -21,12 +24,18 @@ Skills synced from upstream (https://github.com/addyosmani/agent-skills.git), no
 - [addy-observability-and-instrumentation](./addy-observability-and-instrumentation/SKILL.md): Instruments code so production behavior is visible and diagnosable.
 - [addy-performance-optimization](./addy-performance-optimization/SKILL.md): Optimizes application performance across frontend, backend, queries, and databases.
 - [addy-planning-and-task-breakdown](./addy-planning-and-task-breakdown/SKILL.md): Breaks work into ordered tasks.
+- [addy-plan](./addy-plan/SKILL.md): Break work into small verifiable tasks with acceptance criteria and dependency ordering
+- [addy-review](./addy-review/SKILL.md): Conduct a five-axis code review — correctness, readability, architecture, security, performance
 - [addy-security-and-hardening](./addy-security-and-hardening/SKILL.md): Hardens code against vulnerabilities.
 - [addy-shipping-and-launch](./addy-shipping-and-launch/SKILL.md): Prepares production launches.
+- [addy-ship](./addy-ship/SKILL.md): Run the pre-launch checklist via parallel fan-out to specialist personas, then synthesize a go/no-go decision
 - [addy-source-driven-development](./addy-source-driven-development/SKILL.md): Grounds every implementation decision in official documentation.
 - [addy-spec-driven-development](./addy-spec-driven-development/SKILL.md): Creates specs before coding.
+- [addy-spec](./addy-spec/SKILL.md): Start spec-driven development — write a structured specification before writing code
 - [addy-test-driven-development](./addy-test-driven-development/SKILL.md): Drives development with tests using the red-green-refactor loop.
+- [addy-test](./addy-test/SKILL.md): Run TDD workflow — write failing tests, implement, verify.
 - [addy-using-agent-skills](./addy-using-agent-skills/SKILL.md): Discovers and invokes agent skills.
+- [addy-webperf](./addy-webperf/SKILL.md): Run a web performance audit via the addy-web-performance-auditor persona
 
 ## Agents
 

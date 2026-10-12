@@ -33,11 +33,12 @@ gcp-cloud-monitoring-promql-query
 gcp-cloud-run-alert-configuration
 gcp-cloud-run-basics
 gcp-cloud-sql-basics
+gcp-cloud-trace-querying
+gcp-datalineage-bigquery-asset-impact-analysis
+gcp-datalineage-summary
 gcp-data-manager-api-audience-ingestion
 gcp-data-manager-api-event-ingestion
 gcp-data-manager-api-setup
-gcp-datalineage-bigquery-asset-impact-analysis
-gcp-datalineage-summary
 gcp-dbt-sf-to-bq-translator
 gcp-detection-engineering-coverage-evaluation
 gcp-developer-device-platform-basics
@@ -55,8 +56,11 @@ gcp-gemini-interactions-api
 gcp-gemini-live-api
 gcp-gke-ai-troubleshooting-handle-disruption-gpu-tpu
 gcp-gke-ai-troubleshooting-jobset-interruption
+gcp-gke-ai-troubleshooting-node-unresponsive-timeout
 gcp-gke-ai-troubleshooting-tpu-dynamic-slices-monitoring
 gcp-gke-ai-troubleshooting-tpu-metrics-monitoring
+gcp-gke-ai-troubleshooting-tpu-mxla-hang
+gcp-gke-ai-troubleshooting-tpu-performance-degradation
 gcp-gke-ai-troubleshooting-tpu-vbar-oom
 gcp-gke-alert-configuration
 gcp-gke-app-onboarding
@@ -104,6 +108,7 @@ gcp-google-cloud-recipe-auth
 gcp-google-cloud-recipe-foundation-builder
 gcp-google-cloud-recipe-onboarding
 gcp-google-cloud-scc-query
+gcp-google-cloud-scc-remediation
 gcp-google-cloud-slo-alert-configuration
 gcp-google-cloud-solution-agentic-ai-bidirectional-streaming
 gcp-google-cloud-solution-agentic-ai-borderless-data-lakehouse
@@ -146,5 +151,6 @@ gcp-secops-detection-engineering
 gcp-secops-hunt
 gcp-secops-investigate
 gcp-secops-triage
+gcp-sign-in-with-google-web
 gcp-spanner-basics
 gcp-workload-manager-basics

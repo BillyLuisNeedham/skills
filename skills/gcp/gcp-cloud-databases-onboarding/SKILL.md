@@ -127,4 +127,4 @@ Limit your actions to creating and validating draft artifacts for user review.
 ## Supporting Resources & Documentation
 
 - [Google Cloud Databases Overview](https://cloud.google.com/products/databases.md.txt)
--   [gcloud CLI Skill](../gcloud/SKILL.md)
+-   [gcloud CLI Skill](../gcp-gcloud/SKILL.md)

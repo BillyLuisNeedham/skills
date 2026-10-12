@@ -14,7 +14,7 @@ Listing the callers is not the job. The agent can grep those in a second. The jo
 
 ## Don't trust your own writeup
 
-A blast-radius writeup that sounds right is worthless. It reads as convincing whether or not it's true. So don't hand back the writeup. Find the one or two facts the whole thing depends on and prove them by running code.
+A pstack-blast-radius writeup that sounds right is worthless. It reads as convincing whether or not it's true. So don't hand back the writeup. Find the one or two facts the whole thing depends on and prove them by running code.
 
 ### How sure are you
 

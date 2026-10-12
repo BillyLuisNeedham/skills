@@ -1,0 +1,5 @@
+interface:
+  display_name: "addy build"
+
+policy:
+  allow_implicit_invocation: false

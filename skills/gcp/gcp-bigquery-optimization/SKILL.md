@@ -1,7 +1,7 @@
 ---
 name: bigquery-optimization
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   category: BigDataAndAnalytics
 description: >-
   Provides workflows to optimize BigQuery environments (capacity planning,
@@ -9,8 +9,9 @@ description: >-
   billing models), and SQL queries. Use when optimizing cost, modeling Edition
   migrations, rightsizing reservations, evaluating logical vs. physical storage,
   designing table partitioning/clustering, generating table DDL, migrating
-  unpartitioned tables, managing partition expiration, or optimizing individual
-  SQL queries.
+  unpartitioned tables, managing partition expiration, optimizing individual SQL
+  queries, or evaluating acceleration structures (search indexes, materialized
+  views, BI Engine).
 
   Do not use for raw usage reporting (use bigquery-observability), query
   execution plan analysis, error troubleshooting, or diagnosing why a specific
@@ -78,7 +79,7 @@ workflow:
 
 -   **Telemetry & Observability Baseline:** For direct raw usage telemetry,
     `INFORMATION_SCHEMA` queries, and baseline metric calculations, consult
-    [bigquery-observability](../bigquery-observability)
+    [bigquery-observability](../gcp-bigquery-observability)
     (`bigquery_observability`). If the `bigquery-observability` companion skill
     is not available in the active environment, all optimization guidelines, DDL
     templates, and decision models across this skill and its reference guides
@@ -112,6 +113,18 @@ workflow:
         `references/storage_lifecycle_management.md` to pinpoint inactive data
         and define precise Time-to-Live (TTL) partition expirations, dataset
         expirations, and Time Travel window reductions.
+    *   *Acceleration Structures:* Read `references/search_indexes.md` to decide
+        when to propose a search index for selective lookups over `STRING` or
+        `JSON` data, write the `CREATE SEARCH INDEX` DDL, and tell the user how
+        to verify index coverage and usage. Read
+        `references/materialized_views.md` to decide when to propose a
+        materialized view for repeated aggregations or joins over large base
+        tables, write the `CREATE MATERIALIZED VIEW` DDL, and tell the user how
+        to verify that smart tuning uses it. Read `references/bi_engine.md` to
+        decide when to propose BI Engine vs. Materialized Views for BI dashboard
+        acceleration, diagnose `PARTIAL` or `DISABLED` BI Engine fallback
+        reasons (`bi_engine_statistics`), and combine BI Engine with
+        materialized views that pre-join or pre-aggregate the data.
 -   **SQL Optimization:** Optimize individual SQL queries to reduce slot-time
     and the amount of data read.
     *   *Instructions:* Follow the instructions in

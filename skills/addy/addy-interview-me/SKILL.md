@@ -222,7 +222,7 @@ Two questions in, the agent has discovered the actual ask isn't "a dashboard." I
 
 ## Verification
 
-After applying interview-me:
+After applying addy-interview-me:
 
 - [ ] An explicit hypothesis with a confidence number was stated in the first turn
 - [ ] Every confidence number below ~70% was accompanied by a one-line reason (what's still unresolved or missing)

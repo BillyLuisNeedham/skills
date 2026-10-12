@@ -1,0 +1,5 @@
+interface:
+  display_name: "addy code-simplify"
+
+policy:
+  allow_implicit_invocation: false

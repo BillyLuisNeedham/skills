@@ -13,7 +13,7 @@ The governing rule: **the user (or a slash command) is the orchestrator. Persona
 Single persona, single perspective, single artifact. The default and the cheapest option.
 
 ```
-user → code-reviewer → report → user
+user → addy-code-reviewer → report → user
 ```
 
 **Use when:** the work is one perspective on one artifact and you can describe it in one sentence.
@@ -32,12 +32,12 @@ user → code-reviewer → report → user
 A slash command that wraps one persona with the project's skills. Saves the user from re-explaining the workflow every time.
 
 ```
-/review → code-reviewer (with code-review-and-quality skill) → report
+/addy-review → addy-code-reviewer (with addy-code-review-and-quality skill) → report
 ```
 
 **Use when:** the same single-persona invocation happens repeatedly with the same setup.
 
-**Examples in this repo:** `/review`, `/test`, `/code-simplify`.
+**Examples in this repo:** `/addy-review`, `/addy-test`, `/addy-code-simplify`.
 
 **Cost:** same as direct invocation. The slash command is just a saved prompt.
 
@@ -50,9 +50,9 @@ A slash command that wraps one persona with the project's skills. Saves the user
 Multiple personas operate on the same input concurrently, each producing an independent report. A merge step (in the main agent's context) synthesizes them into a single decision.
 
 ```
-                    ┌─→ code-reviewer    ─┐
-/ship → fan out  ───┼─→ security-auditor ─┤→ merge → go/no-go + rollback
-                    └─→ test-engineer    ─┘
+                    ┌─→ addy-code-reviewer    ─┐
+/addy-ship → fan out  ───┼─→ addy-security-auditor ─┤→ merge → go/no-go + rollback
+                    └─→ addy-test-engineer    ─┘
 ```
 
 **Use when:**
@@ -61,7 +61,7 @@ Multiple personas operate on the same input concurrently, each producing an inde
 - The merge step is small enough to stay in the main context
 - Wall-clock latency matters
 
-**Examples in this repo:** `/ship`.
+**Examples in this repo:** `/addy-ship`.
 
 **Cost:** N parallel sub-agent contexts + one merge turn. Higher than direct invocation, but faster wall-clock and produces better reports because each sub-agent stays focused on its single perspective.
 
@@ -80,7 +80,7 @@ If any answer is "no," fall back to direct invocation or a single-persona comman
 The user runs slash commands in a defined order, carrying context (or commit history) between them. There is no orchestrator agent — the user IS the orchestrator.
 
 ```
-user runs:  /spec  →  /plan  →  /build  →  /test  →  /review  →  /ship
+user runs:  /addy-spec  →  /addy-plan  →  /addy-build  →  /addy-test  →  /addy-review  →  /addy-ship
 ```
 
 **Use when:** the workflow has dependencies (each step needs the previous step's output) and human judgment between steps adds value.
@@ -120,7 +120,7 @@ This catalog is harness-agnostic, but most readers will run it on Claude Code. H
 
 ### Where personas live
 
-Plugin subagents go in `agents/` at the plugin root. This repo is a plugin (`.claude-plugin/plugin.json`), so `agents/code-reviewer.md`, `agents/security-auditor.md`, and `agents/test-engineer.md` are auto-discovered when the plugin is enabled. No path configuration needed.
+Plugin subagents go in `agents/` at the plugin root. This repo is a plugin (`.claude-plugin/plugin.json`), so `agents/addy-code-reviewer.md`, `agents/addy-security-auditor.md`, and `agents/addy-test-engineer.md` are auto-discovered when the plugin is enabled. No path configuration needed.
 
 ### Subagents vs. Agent Teams
 
@@ -134,7 +134,7 @@ Claude Code has two parallelism primitives. Pattern 3 (parallel fan-out with mer
 | Status | Stable | Experimental — requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
 | Cost | Lower | Higher — each teammate is a separate Claude instance |
 
-**The personas in this repo work in both modes.** When spawned as subagents (e.g. by `/ship`), they report findings to the main session. When spawned as teammates (`Spawn a teammate using the security-auditor agent type…`), they can challenge each other's findings directly. The persona definition is the same; only the spawning context changes.
+**The personas in this repo work in both modes.** When spawned as subagents (e.g. by `/addy-ship`), they report findings to the main session. When spawned as teammates (`Spawn a teammate using the addy-security-auditor agent type…`), they can challenge each other's findings directly. The persona definition is the same; only the spawning context changes.
 
 One subtlety: the `skills` and `mcpServers` frontmatter fields in a persona are honored when it runs as a subagent but **ignored when it runs as a teammate** — teammates load skills and MCP servers from your project and user settings, the same as a regular session. If a persona depends on a specific skill or MCP server being loaded, configure it at the session level so it's available in both modes.
 
@@ -157,7 +157,7 @@ Before defining a custom subagent, check whether one of these covers the role:
 | `Plan` | Read-only research during plan mode. |
 | `general-purpose` | Multi-step tasks needing both exploration and modification. |
 
-Don't redefine these. Layer your specialist personas (code-reviewer, security-auditor, test-engineer) on top of them.
+Don't redefine these. Layer your specialist personas (addy-code-reviewer, addy-security-auditor, addy-test-engineer) on top of them.
 
 ### Frontmatter restrictions for plugin agents
 
@@ -167,13 +167,13 @@ The fields that DO work in plugin agents are: `name`, `description`, `tools`, `d
 
 ### Spawning multiple subagents in parallel
 
-In Claude Code, parallel fan-out (Pattern 3) requires issuing **multiple Agent tool calls in a single assistant turn**. Sequential turns serialize execution. `/ship` calls this out explicitly. Any new orchestrator command should do the same.
+In Claude Code, parallel fan-out (Pattern 3) requires issuing **multiple Agent tool calls in a single assistant turn**. Sequential turns serialize execution. `/addy-ship` calls this out explicitly. Any new orchestrator command should do the same.
 
 ---
 
 ## Worked example: Agent Teams for competing-hypothesis debugging
 
-This example shows when to reach for **Agent Teams** instead of `/ship`'s subagent fan-out. The two patterns look similar from a distance — both spawn the same three personas — but the value comes from a different place.
+This example shows when to reach for **Agent Teams** instead of `/addy-ship`'s subagent fan-out. The two patterns look similar from a distance — both spawn the same three personas — but the value comes from a different place.
 
 ### The scenario
 
@@ -186,19 +186,19 @@ Plausible root causes (mutually exclusive, all fit the symptoms):
 3. A missing index on a query that scales with cart size
 4. A flaky third-party API where the SDK retries silently before timing out
 
-A single agent will pick the first plausible theory and stop investigating. A `/ship`-style subagent fan-out would have each persona report independently — but their reports never meet, so nothing rules out the wrong theories.
+A single agent will pick the first plausible theory and stop investigating. A `/addy-ship`-style subagent fan-out would have each persona report independently — but their reports never meet, so nothing rules out the wrong theories.
 
 This is exactly the case the Agent Teams docs describe: *"With multiple independent investigators actively trying to disprove each other, the theory that survives is much more likely to be the actual root cause."*
 
-### Why this is *not* a `/ship` job
+### Why this is *not* a `/addy-ship` job
 
-| | `/ship` (subagents) | Agent Teams |
+| | `/addy-ship` (subagents) | Agent Teams |
 |--|--------------------|-------------|
 | Sub-agents see | The same diff, different lenses | A shared task list, each other's messages |
 | Output | Three independent reports → one merge | Adversarial debate → consensus root cause |
 | Right when | You want a verdict on a known artifact | You want to *find* the artifact among hypotheses |
 
-`/ship` is a verdict; Agent Teams is an investigation.
+`/addy-ship` is a verdict; Agent Teams is an investigation.
 
 ### Setup (one-time, per-environment)
 
@@ -225,11 +225,11 @@ week's release. No errors in logs.
 Create an agent team to debug this with competing hypotheses. Spawn
 three teammates using the existing agent types:
 
-  - code-reviewer  — investigate race conditions and blocking calls
+  - addy-code-reviewer  — investigate race conditions and blocking calls
                      in the checkout code path
-  - security-auditor — investigate auth checks, session handling,
+  - addy-security-auditor — investigate auth checks, session handling,
                        and any synchronous network calls added recently
-  - test-engineer  — propose tests that would distinguish between the
+  - addy-test-engineer  — propose tests that would distinguish between the
                      hypotheses and check coverage gaps in checkout
 
 Have them message each other directly to challenge each other's
@@ -262,7 +262,7 @@ Always cleanup through the lead, not a teammate (per the docs: teammates lack fu
 
 ### Cost expectation
 
-Three Sonnet teammates running for ~10–15 minutes of investigation costs noticeably more than the same three personas spawned as subagents by `/ship`. The justification is *quality of conclusion* — for production debugging where the wrong fix is expensive, the extra tokens are a bargain. For a routine PR review, stick with `/ship`.
+Three Sonnet teammates running for ~10–15 minutes of investigation costs noticeably more than the same three personas spawned as subagents by `/addy-ship`. The justification is *quality of conclusion* — for production debugging where the wrong fix is expensive, the extra tokens are a bargain. For a routine PR review, stick with `/addy-ship`.
 
 ### Anti-pattern in this scenario
 
@@ -270,7 +270,7 @@ Do **not** rebuild this as a `/debug` slash command that fans out subagents. Sub
 
 ### When *not* to use Agent Teams
 
-- Production-bound verdict on a known diff → use `/ship` (subagents).
+- Production-bound verdict on a known diff → use `/addy-ship` (subagents).
 - One specialist perspective on one artifact → direct persona invocation.
 - Sequential lifecycle (spec → plan → build) → user-driven slash commands (Pattern 4).
 - Read-heavy research with a small digest → built-in `Explore` subagent.
@@ -286,13 +286,13 @@ Reach for Agent Teams only when teammates **need** to challenge each other to pr
 A persona whose job is to decide which other persona to call.
 
 ```
-/work → router-persona → "this needs a review" → code-reviewer → router (paraphrases) → user
+/work → router-persona → "this needs a review" → addy-code-reviewer → router (paraphrases) → user
 ```
 
 **Why it fails:**
 - Pure routing layer with no domain value
 - Adds two paraphrasing hops → information loss + roughly 2× token cost
-- The user already knew they wanted a review; they could have called `/review` directly
+- The user already knew they wanted a review; they could have called `/addy-review` directly
 - Replicates the work that slash commands and intent mapping in `AGENTS.md` already do
 
 **What to do instead:** add or refine slash commands. Document intent → command mapping in `AGENTS.md`.
@@ -315,7 +315,7 @@ A `addy-code-reviewer` that internally invokes `addy-security-auditor` when it s
 
 ### C. Sequential orchestrator that paraphrases
 
-An agent that calls `/spec`, then `/plan`, then `/build`, etc. on the user's behalf.
+An agent that calls `/addy-spec`, then `/addy-plan`, then `/addy-build`, etc. on the user's behalf.
 
 **Why it fails:**
 - Loses the human checkpoints that catch wrong-direction work
@@ -329,7 +329,7 @@ An agent that calls `/spec`, then `/plan`, then `/build`, etc. on the user's beh
 
 ### D. Deep persona trees
 
-`/ship` calls a `pre-ship-coordinator` that calls a `quality-coordinator` that calls `addy-code-reviewer`.
+`/addy-ship` calls a `pre-ship-coordinator` that calls a `quality-coordinator` that calls `addy-code-reviewer`.
 
 **Why it fails:**
 - Each layer adds latency and tokens with no decision value

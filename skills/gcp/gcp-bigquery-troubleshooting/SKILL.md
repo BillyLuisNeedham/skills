@@ -1,7 +1,7 @@
 ---
 name: bigquery-troubleshooting
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   category: BigDataAndAnalytics
 description: >-
   Provides diagnostic workflows and step-by-step root-cause analysis
@@ -75,7 +75,7 @@ Before running diagnostic queries or investigating incident telemetry:
     incident diagnosis or asks for a sibling domain, follow **Routing
     Boundaries** below.
 2.  **Telemetry Tool Selection:** Follow the tool-selection guidance in
-    [bigquery-observability](../bigquery-observability)
+    [bigquery-observability](../gcp-bigquery-observability)
     (`bigquery_observability`) to select the appropriate telemetry interface
     (REST API `bq show --location={location} -j {project_id}:{job_id}` for
     single-job stage bottlenecks vs. `INFORMATION_SCHEMA` for system-wide
@@ -100,7 +100,7 @@ Before running diagnostic queries or investigating incident telemetry:
 4.  **Domain Deep Dive & Comparative Analysis:** Execute the step-by-step
     diagnostic workflow defined in the corresponding domain reference file
     listed under **Domain References** below, then run the corresponding query
-    from [bigquery-observability](../bigquery-observability) following its
+    from [bigquery-observability](../gcp-bigquery-observability) following its
     `INFORMATION_SCHEMA` best practices to isolate the root cause via
     comparative analysis against a normal baseline.
 
@@ -156,9 +156,11 @@ TiB Billed, GiB Stored) rather than fluctuating contract rates:
 -   **Execution Graph & Query Plan Troubleshooting**
     (`references/query_plan_execution_graph.md`): Diagnostic workflows for
     investigating single-job stage bottlenecks (`bq show` point-lookups),
-    isolating slowest stages (`end_ms - start_ms`), substep intermediate
-    variable disambiguation (`$1`, `$2`), mandatory bytes scanned vs records
-    read corrections, and UI execution graph grounding concepts.
+    isolating slowest stages (`end_ms - start_ms`), diagnosing join explosions
+    (`records_written >> records_read`, `high_cardinality_joins`), shuffle
+    spills (`shuffle_output_bytes_spilled`), and partition skew, substep
+    intermediate variable disambiguation (`$1`, `$2`), mandatory bytes scanned
+    vs records read corrections, and UI execution graph grounding concepts.
 
 ### Cost Troubleshooting
 

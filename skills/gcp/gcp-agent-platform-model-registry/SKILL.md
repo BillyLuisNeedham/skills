@@ -1,7 +1,7 @@
 ---
 name: agent-platform-model-registry
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   category: AiAndMachineLearning
 description: >-
   Agent Platform Model Registry Management. Use when you need to upload, list,
@@ -91,10 +91,52 @@ are known:
 Use this command to discover existing models in the registry and retrieve their
 numeric IDs. No confirmation is required.
 
+Always pass `--limit`. A project can hold thousands of models, and an unbounded
+list pages through every one of them, which can take over a minute and return
+hundreds of KB of output. Results come back most recently updated first, so
+`--limit=50` returns the newest models in a few seconds.
+
 ```bash
 gcloud ai models list \
     --region=$LOCATION_ID \
-    --project=$PROJECT_ID
+    --project=$PROJECT_ID \
+    --limit=50
+```
+
+*   Keep `--limit=50` when the user asks to list "all" models, and say the reply
+    shows the 50 most recently updated models. Do NOT page through the whole
+    registry (with gcloud or `Model.list()`) unless the user asks for a count or
+    the complete inventory; offer to look up a specific model by display name
+    instead.
+*   If the user pushes back and asks for the complete inventory, drop `--limit`
+    and print one compact line per model with
+    `--format="value(name.basename(),displayName)"`. Warn that this can take a
+    minute or more in a large project.
+*   If the user asks how many models there are, count the IDs without printing
+    the list. There is no count API, so this still pages through every model
+    (about a minute per 1,500 models); tell the user it may take a while. Do not
+    run a `--limit` list first.
+
+    ```bash
+    gcloud ai models list \
+        --region=$LOCATION_ID \
+        --project=$PROJECT_ID \
+        --format="value(name)" | wc -l
+    ```
+*   Do NOT use `--filter` or `--sort-by` to narrow the list. gcloud applies both
+    client-side after fetching every page, so they are as slow as an unbounded
+    list.
+*   To find a model by display name (e.g. to confirm an upload or deletion),
+    filter on the server with the Python SDK:
+
+```bash
+python3 - <<'PY'
+from google.cloud import aiplatform
+
+aiplatform.init(project='<PROJECT_ID>', location='<LOCATION_ID>')
+for m in aiplatform.Model.list(filter='display_name="<DISPLAY_NAME>"'):
+    print(m.name, m.display_name, m.create_time)
+PY
 ```
 
 ## 2. Describing a Model (Tier R)

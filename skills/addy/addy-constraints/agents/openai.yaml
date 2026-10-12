@@ -1,0 +1,5 @@
+interface:
+  display_name: "addy constraints"
+
+policy:
+  allow_implicit_invocation: false

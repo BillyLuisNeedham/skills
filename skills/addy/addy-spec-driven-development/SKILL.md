@@ -185,7 +185,7 @@ With the validated spec, generate a technical implementation plan:
 
 > Follow `addy-planning-and-task-breakdown` for the dependency-graph mapping and vertical-slicing mechanics behind these steps; it is the canonical source. The bullets above are a lightweight summary; if they ever diverge, `addy-planning-and-task-breakdown` takes precedence.
 >
-> **Output convention:** Save the plan to `tasks/plan.md` and record the task list in the task list target defined by `addy-planning-and-task-breakdown` (default `tasks/todo.md`; projects may designate an external tracker instead). Create `tasks/` if it does not exist. Downstream commands (`/build`, etc.) expect these defaults.
+> **Output convention:** Save the plan to `tasks/plan.md` and record the task list in the task list target defined by `addy-planning-and-task-breakdown` (default `tasks/todo.md`; projects may designate an external tracker instead). Create `tasks/` if it does not exist. Downstream commands (`/addy-build`, etc.) expect these defaults.
 
 The plan should be reviewable: the human should be able to read it and say "yes, that's the right approach" or "no, change X."
 
@@ -211,7 +211,7 @@ Break the plan into discrete, implementable tasks:
 
 ### Phase 4: Implement
 
-Execute tasks one at a time following `skills/incremental-implementation/SKILL.md` (`addy-incremental-implementation`) and `skills/test-driven-development/SKILL.md` (`addy-test-driven-development`). Use `skills/context-engineering/SKILL.md` (`addy-context-engineering`) to load the right spec sections and source files at each step rather than flooding the agent with the entire spec.
+Execute tasks one at a time following `skills/addy-incremental-implementation/SKILL.md` (`addy-incremental-implementation`) and `skills/addy-test-driven-development/SKILL.md` (`addy-test-driven-development`). Use `skills/addy-context-engineering/SKILL.md` (`addy-context-engineering`) to load the right spec sections and source files at each step rather than flooding the agent with the entire spec.
 
 ## Keeping the Spec Alive
 

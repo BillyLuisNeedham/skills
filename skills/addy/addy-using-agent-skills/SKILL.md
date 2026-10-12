@@ -16,30 +16,30 @@ When a task arrives, identify the development phase and apply the corresponding 
 ```
 Task arrives
     │
-    ├── Don't know what you want yet? ──────→ interview-me
-    ├── Have a rough concept, need variants? → idea-refine
-    ├── New project/feature/change? ──→ spec-driven-development
-    ├── No quality bar written down? ──→ constraint-driven-development
-    ├── Have a spec, need tasks? ──────→ planning-and-task-breakdown
-    ├── Implementing code? ────────────→ incremental-implementation
-    │   ├── UI work? ─────────────────→ frontend-ui-engineering
-    │   ├── API work? ────────────────→ api-and-interface-design
-    │   ├── Need better context? ─────→ context-engineering
-    │   ├── Need doc-verified code? ───→ source-driven-development
-    │   └── Stakes high / unfamiliar code? ──→ doubt-driven-development
-    ├── Writing/running tests? ────────→ test-driven-development
-    │   └── Browser-based? ───────────→ browser-testing-with-devtools
-    ├── Something broke? ──────────────→ debugging-and-error-recovery
-    ├── Reviewing code? ───────────────→ code-review-and-quality
-    │   ├── Too complex? ─────────────→ code-simplification
-    │   ├── Security concerns? ───────→ security-and-hardening
-    │   └── Performance concerns? ────→ performance-optimization
-    ├── Committing/branching? ─────────→ git-workflow-and-versioning
-    ├── CI/CD pipeline work? ──────────→ ci-cd-and-automation
-    ├── Deprecating/migrating? ────────→ deprecation-and-migration
-    ├── Writing docs/ADRs? ───────────→ documentation-and-adrs
-    ├── Adding logs/metrics/alerts? ───→ observability-and-instrumentation
-    └── Deploying/launching? ─────────→ shipping-and-launch
+    ├── Don't know what you want yet? ──────→ addy-interview-me
+    ├── Have a rough concept, need variants? → addy-idea-refine
+    ├── New project/feature/change? ──→ addy-spec-driven-development
+    ├── No quality bar written down? ──→ addy-constraint-driven-development
+    ├── Have a spec, need tasks? ──────→ addy-planning-and-task-breakdown
+    ├── Implementing code? ────────────→ addy-incremental-implementation
+    │   ├── UI work? ─────────────────→ addy-frontend-ui-engineering
+    │   ├── API work? ────────────────→ addy-api-and-interface-design
+    │   ├── Need better context? ─────→ addy-context-engineering
+    │   ├── Need doc-verified code? ───→ addy-source-driven-development
+    │   └── Stakes high / unfamiliar code? ──→ addy-doubt-driven-development
+    ├── Writing/running tests? ────────→ addy-test-driven-development
+    │   └── Browser-based? ───────────→ addy-browser-testing-with-devtools
+    ├── Something broke? ──────────────→ addy-debugging-and-error-recovery
+    ├── Reviewing code? ───────────────→ addy-code-review-and-quality
+    │   ├── Too complex? ─────────────→ addy-code-simplification
+    │   ├── Security concerns? ───────→ addy-security-and-hardening
+    │   └── Performance concerns? ────→ addy-performance-optimization
+    ├── Committing/branching? ─────────→ addy-git-workflow-and-versioning
+    ├── CI/CD pipeline work? ──────────→ addy-ci-cd-and-automation
+    ├── Deprecating/migrating? ────────→ addy-deprecation-and-migration
+    ├── Writing docs/ADRs? ───────────→ addy-documentation-and-adrs
+    ├── Adding logs/metrics/alerts? ───→ addy-observability-and-instrumentation
+    └── Deploying/launching? ─────────→ addy-shipping-and-launch
 ```
 
 ## Core Operating Behaviors
@@ -143,22 +143,22 @@ These are the subtle errors that look like productivity but create problems:
 For a complete feature, the typical skill sequence is:
 
 ```
-1.  interview-me                → Extract what the user actually wants
-2.  idea-refine                 → Refine vague ideas
-3.  spec-driven-development     → Define what we're building
-4.  planning-and-task-breakdown → Break into verifiable chunks
-5.  context-engineering         → Load the right context
-6.  source-driven-development   → Verify against official docs
-7.  incremental-implementation  → Build slice by slice
-8.  observability-and-instrumentation → Instrument as you build (runs parallel with 7-9, not after)
-9.  doubt-driven-development    → Cross-examine non-trivial decisions in-flight
-10. test-driven-development     → Prove each slice works
-11. code-review-and-quality     → Review before merge
-12. code-simplification         → Reduce unnecessary complexity while preserving behavior
-13. git-workflow-and-versioning → Clean commit history
-14. documentation-and-adrs      → Document decisions
-15. deprecation-and-migration   → Retire old systems and move users safely when needed
-16. shipping-and-launch         → Deploy safely
+1.  addy-interview-me                → Extract what the user actually wants
+2.  addy-idea-refine                 → Refine vague ideas
+3.  addy-spec-driven-development     → Define what we're building
+4.  addy-planning-and-task-breakdown → Break into verifiable chunks
+5.  addy-context-engineering         → Load the right context
+6.  addy-source-driven-development   → Verify against official docs
+7.  addy-incremental-implementation  → Build slice by slice
+8.  addy-observability-and-instrumentation → Instrument as you build (runs parallel with 7-9, not after)
+9.  addy-doubt-driven-development    → Cross-examine non-trivial decisions in-flight
+10. addy-test-driven-development     → Prove each slice works
+11. addy-code-review-and-quality     → Review before merge
+12. addy-code-simplification         → Reduce unnecessary complexity while preserving behavior
+13. addy-git-workflow-and-versioning → Clean commit history
+14. addy-documentation-and-adrs      → Document decisions
+15. addy-deprecation-and-migration   → Retire old systems and move users safely when needed
+16. addy-shipping-and-launch         → Deploy safely
 ```
 
 Not every task needs every skill. A bug fix might only need: `addy-debugging-and-error-recovery` → `addy-test-driven-development` → `addy-code-review-and-quality`.
@@ -167,26 +167,26 @@ Not every task needs every skill. A bug fix might only need: `addy-debugging-and
 
 | Phase | Skill | One-Line Summary |
 |-------|-------|-----------------|
-| Define | interview-me | Surface what the user actually wants before any plan, spec, or code exists |
-| Define | idea-refine | Refine ideas through structured divergent and convergent thinking |
-| Define | spec-driven-development | Requirements and acceptance criteria before code |
-| Plan | planning-and-task-breakdown | Decompose into small, verifiable tasks |
-| Build | incremental-implementation | Thin vertical slices, test each before expanding |
-| Build | source-driven-development | Verify against official docs before implementing |
-| Build | doubt-driven-development | Adversarial fresh-context review of every non-trivial decision |
-| Build | context-engineering | Right context at the right time |
-| Build | frontend-ui-engineering | Production-quality UI with accessibility |
-| Build | api-and-interface-design | Stable interfaces with clear contracts |
-| Verify | test-driven-development | Failing test first, then make it pass |
-| Verify | browser-testing-with-devtools | Chrome DevTools MCP for runtime verification |
-| Verify | debugging-and-error-recovery | Reproduce → localize → fix → guard |
-| Review | code-review-and-quality | Five-axis review with quality gates |
-| Review | code-simplification | Preserve behavior while reducing unnecessary complexity |
-| Review | security-and-hardening | OWASP prevention, input validation, least privilege |
-| Review | performance-optimization | Measure first, optimize only what matters |
-| Ship | git-workflow-and-versioning | Atomic commits, clean history |
-| Ship | ci-cd-and-automation | Automated quality gates on every change |
-| Ship | deprecation-and-migration | Remove old systems and migrate users safely |
-| Ship | documentation-and-adrs | Document the why, not just the what |
-| Ship | observability-and-instrumentation | Structured logs, RED metrics, traces, symptom-based alerts |
-| Ship | shipping-and-launch | Pre-launch checklist, monitoring, rollback plan |
+| Define | addy-interview-me | Surface what the user actually wants before any plan, spec, or code exists |
+| Define | addy-idea-refine | Refine ideas through structured divergent and convergent thinking |
+| Define | addy-spec-driven-development | Requirements and acceptance criteria before code |
+| Plan | addy-planning-and-task-breakdown | Decompose into small, verifiable tasks |
+| Build | addy-incremental-implementation | Thin vertical slices, test each before expanding |
+| Build | addy-source-driven-development | Verify against official docs before implementing |
+| Build | addy-doubt-driven-development | Adversarial fresh-context review of every non-trivial decision |
+| Build | addy-context-engineering | Right context at the right time |
+| Build | addy-frontend-ui-engineering | Production-quality UI with accessibility |
+| Build | addy-api-and-interface-design | Stable interfaces with clear contracts |
+| Verify | addy-test-driven-development | Failing test first, then make it pass |
+| Verify | addy-browser-testing-with-devtools | Chrome DevTools MCP for runtime verification |
+| Verify | addy-debugging-and-error-recovery | Reproduce → localize → fix → guard |
+| Review | addy-code-review-and-quality | Five-axis review with quality gates |
+| Review | addy-code-simplification | Preserve behavior while reducing unnecessary complexity |
+| Review | addy-security-and-hardening | OWASP prevention, input validation, least privilege |
+| Review | addy-performance-optimization | Measure first, optimize only what matters |
+| Ship | addy-git-workflow-and-versioning | Atomic commits, clean history |
+| Ship | addy-ci-cd-and-automation | Automated quality gates on every change |
+| Ship | addy-deprecation-and-migration | Remove old systems and migrate users safely |
+| Ship | addy-documentation-and-adrs | Document the why, not just the what |
+| Ship | addy-observability-and-instrumentation | Structured logs, RED metrics, traces, symptom-based alerts |
+| Ship | addy-shipping-and-launch | Pre-launch checklist, monitoring, rollback plan |

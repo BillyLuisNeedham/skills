@@ -98,5 +98,5 @@ Categorize every finding, using the same severity labels as the `addy-code-revie
 ## Composition
 
 - **Invoke directly when:** the user asks for a review of a specific change, file, or PR.
-- **Invoke via:** `/review` (single-perspective review) or `/ship` (parallel fan-out alongside `addy-security-auditor` and `addy-test-engineer`).
-- **Do not invoke from another persona.** If you find yourself wanting to delegate to `addy-security-auditor` or `addy-test-engineer`, surface that as a recommendation in your report instead — orchestration belongs to slash commands, not personas. See [docs/agents.md](../docs/agents.md).
+- **Invoke via:** `/addy-review` (single-perspective review) or `/addy-ship` (parallel fan-out alongside `addy-security-auditor` and `addy-test-engineer`).
+- **Do not invoke from another persona.** If you find yourself wanting to delegate to `addy-security-auditor` or `addy-test-engineer`, surface that as a recommendation in your report instead — orchestration belongs to slash commands, not personas. See [docs/agents.md](https://github.com/addyosmani/agent-skills/blob/main/docs/agents.md).

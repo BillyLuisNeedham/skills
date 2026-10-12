@@ -21,7 +21,12 @@ set -euo pipefail
 # prompt template and strip that directory context, dangling every references/…
 # path the skill depends on.
 #
-# Idempotent. Re-run after adding, renaming, or removing a skill.
+# Each stub holds the absolute path of this checkout (derived from this
+# script's location), so after the repo moves, re-running rewrites every stub
+# to the new path; marked stubs whose skill no longer exists here (including
+# ones left by an older checkout location) are pruned.
+#
+# Idempotent. Re-run after adding, renaming, or moving a skill or the repo.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 CONFIG_DIR="${OPENCODE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode}"

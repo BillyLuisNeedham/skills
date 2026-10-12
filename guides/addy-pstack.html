@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>addy and pstack guide</title>
+<style>
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --surface-2: #f3f1ec;
+  --text: #1f1d1a;
+  --muted: #6b665e;
+  --border: #e2ded6;
+  --accent: #b4532a;
+  --accent-soft: #f6e6dc;
+  --addy: #2f6f9f;
+  --addy-soft: #e2eef7;
+  --pstack: #7a4fa0;
+  --pstack-soft: #efe6f6;
+  --ok: #2e7d4f;
+  --ok-soft: #e1f2e7;
+  --warn: #9a6a00;
+  --warn-soft: #fbf0d4;
+  --bad: #b3261e;
+  --bad-soft: #fbe2df;
+  --code-bg: #f1eee8;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161514;
+    --surface: #1e1d1b;
+    --surface-2: #262422;
+    --text: #ece9e3;
+    --muted: #a39d93;
+    --border: #36332f;
+    --accent: #e38a5f;
+    --accent-soft: #3a2a21;
+    --addy: #7ab3dd;
+    --addy-soft: #1d2c38;
+    --pstack: #c09ae0;
+    --pstack-soft: #2c2236;
+    --ok: #6cc28f;
+    --ok-soft: #1c3025;
+    --warn: #e0b54f;
+    --warn-soft: #362c14;
+    --bad: #f08a80;
+    --bad-soft: #3a1f1c;
+    --code-bg: #262422;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161514;
+  --surface: #1e1d1b;
+  --surface-2: #262422;
+  --text: #ece9e3;
+  --muted: #a39d93;
+  --border: #36332f;
+  --accent: #e38a5f;
+  --accent-soft: #3a2a21;
+  --addy: #7ab3dd;
+  --addy-soft: #1d2c38;
+  --pstack: #c09ae0;
+  --pstack-soft: #2c2236;
+  --ok: #6cc28f;
+  --ok-soft: #1c3025;
+  --warn: #e0b54f;
+  --warn-soft: #362c14;
+  --bad: #f08a80;
+  --bad-soft: #3a1f1c;
+  --code-bg: #262422;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 80px; }
+header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.45rem; margin: 56px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+h3 { font-size: 1.12rem; margin: 28px 0 8px; }
+h4 { font-size: 1rem; margin: 18px 0 6px; }
+p { margin: 8px 0; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.small { font-size: .9rem; }
+code, kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .88em;
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-size: .88rem;
+  line-height: 1.5;
+  margin: 10px 0;
+}
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+.theme-btn, .reset {
+  font: inherit; font-size: .85rem;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; cursor: pointer;
+}
+.theme-btn:hover, .reset:hover { border-color: var(--accent); }
+nav.toc {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 16px; margin: 20px 0 8px; box-shadow: var(--shadow);
+}
+nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+nav.toc li { break-inside: avoid; }
+@media (max-width: 640px) { nav.toc ol { columns: 1; } }
+
+.tag { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; vertical-align: 1px; white-space: nowrap; }
+.tag.addy { background: var(--addy-soft); color: var(--addy); }
+.tag.pstack { background: var(--pstack-soft); color: var(--pstack); }
+.tag.pocock { background: var(--accent-soft); color: var(--accent); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.bad { background: var(--bad-soft); color: var(--bad); }
+.tag.auto { background: var(--surface-2); color: var(--muted); }
+
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+.callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+.callout.bad { border-color: var(--bad); background: var(--bad-soft); }
+.callout.ok { border-color: var(--ok); background: var(--ok-soft); }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; box-shadow: var(--shadow); min-width: 0;
+}
+.card.addy { border-top: 4px solid var(--addy); }
+.card.pstack { border-top: 4px solid var(--pstack); }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.card-head h3 { margin: 0; }
+.progress { font-size: .82rem; color: var(--muted); }
+
+ul.check { list-style: none; padding: 0; margin: 6px 0 0; }
+ul.check li { padding: 6px 0; border-bottom: 1px dashed var(--border); }
+ul.check li:last-child { border-bottom: 0; }
+ul.check label { display: grid; grid-template-columns: 22px 1fr; gap: 8px; cursor: pointer; align-items: start; }
+ul.check input { margin-top: 5px; width: 16px; height: 16px; accent-color: var(--accent); }
+ul.check input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+ul.check .gate { display: block; font-size: .86rem; color: var(--muted); margin-top: 2px; }
+ul.check input:checked + span .gate { text-decoration: none; }
+
+.table-wrap { overflow-x: auto; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+th { background: var(--surface-2); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.none { color: var(--muted); }
+
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin: 10px 0; }
+details > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style-position: inside; }
+details[open] > summary { border-bottom: 1px solid var(--border); }
+details > .body { padding: 6px 14px 12px; }
+dl.defs { margin: 6px 0; }
+dl.defs dt { font-weight: 600; margin-top: 10px; }
+dl.defs dd { margin: 2px 0 0 0; color: var(--text); }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 20px; }
+.pgrid div { padding: 4px 0; border-bottom: 1px dashed var(--border); font-size: .92rem; }
+ol.flow { padding-left: 22px; }
+ol.flow li { margin: 3px 0; }
+.side { color: var(--muted); font-size: .88rem; }
+footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>addy and pstack: how to use them</h1>
+    <p class="muted">Personal reference for running the <span class="tag addy">addy</span> and <span class="tag pstack">pstack</span> skill sets in Claude Code. Checklists come first; everything below them is depth for when you want it. Snapshot taken 2026-10-12 from the local buckets plus pstack's upstream guide.</p>
+  </div>
+  <button class="theme-btn" id="themeBtn" type="button">Theme: auto</button>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#switch">Step zero: turn a set on</a></li>
+    <li><a href="#compare">Which set for which job</a></li>
+    <li><a href="#checklists">Checklists</a></li>
+    <li><a href="#addy">addy deep dive</a></li>
+    <li><a href="#pstack">pstack deep dive</a></li>
+    <li><a href="#compat">pstack in Claude Code: what breaks</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="switch">0. Step zero: turn a set on</h2>
+<p>Only one switchable set is linked at a time. The default is <span class="tag pocock">pocock</span>, so neither addy nor pstack is loaded until you switch.</p>
+<pre><code>cd ~/repos/skills
+scripts/use-skills.sh            # print the active set
+scripts/use-skills.sh addy       # or: pstack | pocock | all
+# then restart Claude Code</code></pre>
+<ul>
+  <li><strong>What the switch does:</strong> writes the name to the git-ignored <code>.skill-set</code>, re-runs <code>scripts/link-skills.sh</code> (symlinks into <code>~/.claude/skills</code> and <code>~/.agents/skills</code>, copies into <code>~/.cursor/skills</code>, links the set's agents into <code>~/.claude/agents</code>), and regenerates OpenCode commands. It only removes links it owns.</li>
+  <li><strong>Always on, whatever the set:</strong> <code>gcp/</code>, <code>android/</code>, <code>personal/</code> and <code>peer-review/</code>.</li>
+  <li><strong>Invoke names carry the prefix.</strong> You type <code>/addy-spec</code> or <code>/pstack-poteto-mode</code>. The skill listing may show the upstream name in brackets, like <code>addy-spec (spec)</code>.</li>
+  <li><strong><code>all</code> is noisy.</strong> The three sets each bring their own TDD, review and planning flow, and pstack's <code>tdd</code> and <code>teach</code> share frontmatter names with pocock's. Use <code>all</code> only to compare.</li>
+</ul>
+<details>
+  <summary>Your personal skills under addy or pstack</summary>
+  <div class="body">
+    <p><span class="tag ok">works</span> <code>my-grill-me</code> / <code>my-grilling</code>, <code>show-me</code>, <code>/thermo-nuclear-code-quality-review</code>, <code>/merge-pr</code>, the <code>/html</code> family, <code>peer-review</code>.</p>
+    <p><span class="tag warn">partial</span> <code>my-grill-with-docs</code> (the docs half needs <code>domain-modeling</code>, which is pocock-only); <code>my-issue-runner</code> (runner works, but its default chains name pocock skills like <code>tdd</code>, <code>to-tickets</code>, <code>wayfinder</code>).</p>
+    <p><span class="tag bad">effectively broken</span> <code>/my-wayfinder</code>: it leans on <code>wayfinder</code>, <code>grilling</code>, <code>research</code>, <code>domain-modeling</code> and <code>/sitrep</code>, all in the pocock set.</p>
+  </div>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="compare">1. Which set for which job</h2>
+<p><code>/name</code> means user-invoked (you type it). <span class="tag auto">auto</span> means Claude loads it on its own when the situation matches.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Job</th><th><span class="tag pocock">pocock</span></th><th><span class="tag addy">addy</span></th><th><span class="tag pstack">pstack</span></th></tr></thead>
+  <tbody>
+    <tr><td>Interview / clarify an idea</td><td>/grill-me, /grill-with-docs</td><td>interview-me <span class="tag auto">auto</span>, idea-refine <span class="tag auto">auto</span></td><td class="none">none (interrogate reviews designs, not ideas)</td></tr>
+    <tr><td>Spec / PRD</td><td>/to-spec</td><td>/addy-spec</td><td class="none">none (figure-it-out covers part)</td></tr>
+    <tr><td>Plan / task breakdown</td><td>/to-tickets, /wayfinder</td><td>/addy-plan, then /addy-build</td><td>/pstack-figure-it-out, multi-phase-plan playbook</td></tr>
+    <tr><td>Architecture / module shape</td><td>codebase-design, domain-modeling <span class="tag auto">auto</span>, /improve-codebase-architecture</td><td>api-and-interface-design, documentation-and-adrs <span class="tag auto">auto</span></td><td>/pstack-architect, /pstack-how</td></tr>
+    <tr><td>TDD</td><td>tdd <span class="tag auto">auto</span></td><td>/addy-test</td><td>/pstack-tdd (only when a cheap test exists)</td></tr>
+    <tr><td>Bug fix</td><td>diagnosing-bugs <span class="tag auto">auto</span></td><td>debugging-and-error-recovery <span class="tag auto">auto</span>, then /addy-test</td><td>bug-fix playbook via /pstack-poteto-mode</td></tr>
+    <tr><td>Code review</td><td>code-review, fits-the-codebase <span class="tag auto">auto</span></td><td>/addy-review, doubt-driven-development <span class="tag auto">auto</span></td><td>/pstack-interrogate, /pstack-blast-radius, /pstack-no-comments</td></tr>
+    <tr><td>Simplify / refactor</td><td>/improve-codebase-architecture</td><td>/addy-code-simplify</td><td>refactoring playbook, laziness-protocol and subtract-before-you-add principles</td></tr>
+    <tr><td>Explain code</td><td>/teach</td><td class="none">none</td><td>/pstack-teach, /pstack-how, /pstack-why, /pstack-bro</td></tr>
+    <tr><td>Ship / PR</td><td>pr <span class="tag auto">auto</span></td><td>/addy-ship (GO / NO-GO)</td><td>shipping and opening-a-pr playbooks, /pstack-technical-writing</td></tr>
+    <tr><td>Issue tracking</td><td>/triage, /to-tickets</td><td class="none">none</td><td class="none">none</td></tr>
+    <tr><td>Parallel / multi-agent</td><td>/implement-spec, /chief-of-staff</td><td>/addy-ship fans out to 3 persona agents</td><td>/pstack-swarm, /pstack-arena</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="grid2">
+  <div class="card"><h4 style="margin-top:0"><span class="tag pocock">pocock</span></h4><p class="small">Grill to shared understanding, publish specs and tracer-bullet tickets, build deep modules test-first. <strong>Pick it</strong> when the work runs through the issue tracker.</p></div>
+  <div class="card addy"><h4 style="margin-top:0"><span class="tag addy">addy</span></h4><p class="small">A senior engineer's phase-by-phase playbook (spec, plan, build, test, review, ship). Most skills fire on their own; the commands are the steering wheel. <strong>Pick it</strong> for broad lifecycle coverage including security, perf, CI and launch checklists.</p></div>
+  <div class="card pstack"><h4 style="margin-top:0"><span class="tag pstack">pstack</span></h4><p class="small">poteto's opinionated style: named principles, prove-it-works, deliberate subagent fan-out, adversarial review, no AI-sounding prose. Everything goes through one front door. <strong>Pick it</strong> for long autonomous runs with strict verification, and when you are happy to drive with slash commands.</p></div>
+  <div class="card"><h4 style="margin-top:0">Cost note</h4><p class="small">pstack spends extra tokens on subagents and review panels by design. addy's <code>/addy-ship</code> spawns three agents too. Save both for work that needs the rigour.</p></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="checklists">2. Checklists</h2>
+<p class="muted small">Ticks are saved in this browser only. Each list has its own reset.</p>
+
+<div class="grid2">
+
+<div class="card addy" data-list="addy-feature">
+  <div class="card-head"><h3><span class="tag addy">addy</span> Build a feature</h3><button class="reset" type="button">Reset</button></div>
+  <div class="progress"></div>
+  <ul class="check">
+    <li><label><input type="checkbox" data-key="0"><span>addy set active (<code>use-skills.sh addy</code>, restarted)</span></label></li>
+    <li><label><input type="checkbox" data-key="1"><span>Fuzzy idea? Say "interview me" or "refine this idea"<span class="gate">Optional. Ends with an intent statement.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="2"><span><code>/addy-constraints</code> if the repo has no <code>CONSTRAINTS.md</code><span class="gate">Once per repo. Installs tools, edits package.json and CLAUDE.md. JS-centric.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="3"><span><code>/addy-spec</code> writes <code>SPEC.md</code>, then stops<span class="gate">Gate: 6 areas covered, testable success criteria, Always / Ask first / Never boundaries. Approve in a later turn.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="4"><span><code>/addy-plan</code> writes <code>tasks/plan.md</code> + <code>tasks/todo.md</code><span class="gate">Gate: each task has acceptance criteria and a verify step, ~5 files max per task, checkpoint every 2 to 3 tasks.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="5"><span><code>/addy-build</code> per task, or <code>/addy-build auto</code><span class="gate">Auto needs a clean tree and a clear "go". Each slice: red, green, full suite, build, commit. Red flag: 100+ lines without running tests.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="6"><span>At each checkpoint: tests pass, app builds, core flow works end to end, you review</span></label></li>
+    <li><label><input type="checkbox" data-key="7"><span>UI work: <code>/addy-test</code> with browser checks. Web perf: <code>/addy-webperf</code><span class="gate">Browser checks need the chrome-devtools MCP (not installed, see gotchas).</span></span></label></li>
+    <li><label><input type="checkbox" data-key="8"><span><code>/addy-review</code><span class="gate">Gate: Critical fixed, Important fixed or deferred with a reason. Aim for ~100-line diffs; ~1000 means split.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="9"><span><code>/addy-code-simplify</code><span class="gate">Gate: tests pass unchanged, no new warnings, no weakened error handling.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="10"><span><code>/addy-ship</code><span class="gate">Gate: GO verdict, rollback plan present, no unaccepted Critical. After deploy: health, errors, latency, logs.</span></span></label></li>
+  </ul>
+</div>
+
+<div class="card addy" data-list="addy-bug">
+  <div class="card-head"><h3><span class="tag addy">addy</span> Fix a bug</h3><button class="reset" type="button">Reset</button></div>
+  <div class="progress"></div>
+  <ul class="check">
+    <li><label><input type="checkbox" data-key="0"><span>addy set active</span></label></li>
+    <li><label><input type="checkbox" data-key="1"><span>Describe the failure with the raw error, logs and repro steps<span class="gate">This triggers debugging-and-error-recovery. Stop all feature work.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="2"><span>It reproduces reliably<span class="gate">If not: check timing, environment, state. Leave logging in place.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="3"><span>Failing layer located (UI, API, DB, build, external, or the test itself)<span class="gate">Regression? <code>git bisect run &lt;focused test&gt;</code>.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="4"><span>Reduced to the smallest failing case</span></label></li>
+    <li><label><input type="checkbox" data-key="5"><span><code>/addy-test</code> (Prove-It): repro test written and seen to fail<span class="gate">For tricky bugs, have a subagent write the test without knowing the fix.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="6"><span>Root cause fixed (not the symptom); repro test passes</span></label></li>
+    <li><label><input type="checkbox" data-key="7"><span>Full suite, build, manual spot check<span class="gate">Gate: root cause written down, regression test fails without the fix.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="8"><span><code>/addy-review</code> before merge</span></label></li>
+  </ul>
+</div>
+
+<div class="card pstack" data-list="pstack-feature">
+  <div class="card-head"><h3><span class="tag pstack">pstack</span> Build a feature</h3><button class="reset" type="button">Reset</button></div>
+  <div class="progress"></div>
+  <ul class="check">
+    <li><label><input type="checkbox" data-key="0"><span>pstack set active (<code>use-skills.sh pstack</code>, restarted)</span></label></li>
+    <li><label><input type="checkbox" data-key="1"><span>Send the prompt (template below). Goal + done check, no skill names<span class="gate">Include the "read skills from disk" line, see <a href="#compat">compat</a>.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="2"><span>Todo list opens with the 8 Feature steps verbatim; skips carry a reason</span></label></li>
+    <li><label><input type="checkbox" data-key="3"><span>Step 1 <em>how</em>: its model of the subsystem names the right files</span></label></li>
+    <li><label><input type="checkbox" data-key="4"><span>Step 2 <em>architect</em>: types, signatures, module shape<span class="gate">Add "with checkpoint" to review the design before any code.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="5"><span>Step 3 throughput checkpoint: blocking steps, independent streams, shared state, smallest split<span class="gate">Items that don't apply say <code>n/a: reason</code>.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="6"><span>Step 4: implementation delegated to <code>pstack-poteto-agent</code> with a named data shape<span class="gate">Mandatory. Goes through arena if several shapes are valid.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="7"><span>Step 5: verified on the real surface, real output shown<span class="gate">"Inconclusive" is not a pass.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="8"><span>Steps 6-7: small ordered commits; interrogate if the design is contested</span></label></li>
+    <li><label><input type="checkbox" data-key="9"><span>Step 8 opening-a-pr: no-comments, technical-writing, ready PR (Why / What / Scope / Blast Radius / Verification)<span class="gate"><code>/deslop</code> doesn't exist here. Substitute <code>/simplify</code> or <code>/pstack-unslop</code>.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="10"><span>Final reply covers what was built, choices, open decisions, principles cited</span></label></li>
+  </ul>
+</div>
+
+<div class="card pstack" data-list="pstack-bug">
+  <div class="card-head"><h3><span class="tag pstack">pstack</span> Fix a bug</h3><button class="reset" type="button">Reset</button></div>
+  <div class="progress"></div>
+  <ul class="check">
+    <li><label><input type="checkbox" data-key="0"><span>pstack set active</span></label></li>
+    <li><label><input type="checkbox" data-key="1"><span>Send the prompt: symptom, known facts, done check. Hold back your theory<span class="gate">Noisy report? Make "restate the issue, don't change code yet" the first step.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="2"><span>Step 1: agent reproduces it itself on the real surface, output shown<span class="gate">Cursor's control-ui / control-cli don't exist. Point it at claude-in-chrome, <code>/run</code>, or a project verify skill.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="3"><span>Step 2: cause binary-searched; mechanism confirmed with runtime evidence, not guessed</span></label></li>
+    <li><label><input type="checkbox" data-key="4"><span>Step 3: fix planned (architect if it crosses a function boundary), implementation delegated</span></label></li>
+    <li><label><input type="checkbox" data-key="5"><span>Step 4: the original repro passes on the same surface<span class="gate">Unit tests alone don't count.</span></span></label></li>
+    <li><label><input type="checkbox" data-key="6"><span>Step 5: failing repro / test committed before the fix</span></label></li>
+    <li><label><input type="checkbox" data-key="7"><span>Step 6 opening-a-pr: reply pastes failing-then-passing output verbatim</span></label></li>
+  </ul>
+</div>
+
+</div>
+
+<h3>pstack prompt templates</h3>
+<p class="small muted">Five parts: goal, done check, the proof you want to see, what you already know, real constraints. Leave out the "how". The last line works around the Claude Code invocation issue.</p>
+<pre><code>/pstack-poteto-mode add &lt;behaviour&gt;. &lt;X&gt; stays unchanged.
+done means &lt;pass/fail check&gt;. show me the real output.
+when a step names a pstack skill or principle, Read ~/.claude/skills/pstack-&lt;name&gt;/SKILL.md
+(principles are pstack-principle-&lt;name&gt;). models: opus for judgement, sonnet/haiku for helpers.</code></pre>
+<pre><code>/pstack-poteto-mode &lt;symptom&gt;. known: &lt;log line, job id, when it started&gt;.
+repro first, then fix and verify. done means &lt;repro passes on the same surface&gt;.
+when a step names a pstack skill or principle, Read ~/.claude/skills/pstack-&lt;name&gt;/SKILL.md.</code></pre>
+<p class="small">Mid-run steering: name a principle ("apply prove it works, show me the real output"). Short follow-ups are fine: "do it", "continue". Say "new task" to re-match a playbook.</p>
+
+<!-- ============================================================ -->
+<h2 id="addy">3. addy deep dive</h2>
+<p>Source: <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a>, synced into <code>skills/addy/</code>. 34 skills: 9 are commands you type, the rest fire on their own. The router is <code>addy-using-agent-skills</code>. Its standing rules: state assumptions, stop when confused, push back when warranted, keep it simple, stay in scope, verify rather than assume.</p>
+
+<h3>The 9 commands</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Command</th><th>What it does</th><th>Reads / writes</th><th>Auto twin</th></tr></thead>
+  <tbody>
+    <tr><td><code>/addy-spec</code></td><td>Clarifying questions, then a spec across 6 areas (objective, commands, structure, code style, testing, boundaries). Bundled asks get a capability map first. Stops for approval.</td><td>writes <code>SPEC.md</code></td><td>spec-driven-development</td></tr>
+    <tr><td><code>/addy-plan</code></td><td>Read-only planning: dependency graph, vertical slices, tasks with acceptance criteria and verify steps, checkpoints.</td><td>reads <code>SPEC.md</code>; writes <code>tasks/plan.md</code>, <code>tasks/todo.md</code></td><td>planning-and-task-breakdown</td></tr>
+    <tr><td><code>/addy-build</code></td><td>Next task only (red, green, suite, build, commit, stop). <code>auto</code> / <code>all</code>: one approval, then every task, one commit each. Stops on unfixable failures, ambiguous spec, or risky work (auth, payments, migrations, deletes, deploys, secrets).</td><td>reads the plan; auto needs a spec file and a clean tree</td><td>incremental-implementation + test-driven-development</td></tr>
+    <tr><td><code>/addy-test</code></td><td>TDD for features; Prove-It (failing repro, fix, pass, full suite) for bugs. Pulls in browser testing for browser issues.</td><td>test files</td><td>test-driven-development</td></tr>
+    <tr><td><code>/addy-review</code></td><td>Five-axis review of staged changes or recent commits: correctness, readability, architecture, security, performance.</td><td>report with <code>file:line</code>, Critical / Important / Suggestion</td><td>code-review-and-quality</td></tr>
+    <tr><td><code>/addy-code-simplify</code></td><td>Behaviour-preserving cleanup: guard clauses, split functions, kill nested ternaries, rename, dedupe, dead code. Reverts any change that breaks tests.</td><td>edits only; reads CLAUDE.md</td><td>code-simplification</td></tr>
+    <tr><td><code>/addy-constraints</code></td><td>Detects stack, asks up to 4 questions, writes the quality bar, installs tools (Semgrep, gitleaks, osv-scanner, axe, Lighthouse, size-limit, dependency-cruiser, Stryker). Subcommands <code>check</code>, <code>guard</code>, <code>ratchet</code>.</td><td>writes <code>CONSTRAINTS.md</code>, <code>package.json</code> scripts, a CLAUDE.md line</td><td>constraint-driven-development</td></tr>
+    <tr><td><code>/addy-ship</code></td><td>Spawns code-reviewer, security-auditor and test-engineer in parallel, merges results, checks a11y / infra / docs, gives GO or NO-GO with a mandatory rollback plan. Any Critical means NO-GO. Skips the fan-out for tiny, low-risk diffs.</td><td>"Ship Decision" report</td><td>shipping-and-launch</td></tr>
+    <tr><td><code>/addy-webperf</code></td><td>Web only. Quick mode scans source for anti-patterns. Deep mode uses Lighthouse / PSI / CrUX JSON, a trace, or the devtools MCP. Never invents numbers.</td><td>scorecard + ranked findings</td><td>performance-optimization (closest)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>The lifecycle</h3>
+<p class="small">Not every task needs every step. When in doubt, start with a spec.</p>
+<div class="grid2">
+  <div class="card addy">
+    <h4 style="margin-top:0">Feature (16 steps)</h4>
+    <ol class="flow small">
+      <li>interview-me</li>
+      <li>idea-refine</li>
+      <li>spec-driven-development <span class="side">/addy-spec</span></li>
+      <li>planning-and-task-breakdown <span class="side">/addy-plan</span></li>
+      <li>context-engineering</li>
+      <li>source-driven-development</li>
+      <li>incremental-implementation <span class="side">/addy-build</span></li>
+      <li>observability-and-instrumentation <span class="side">alongside 7 to 9</span></li>
+      <li>doubt-driven-development</li>
+      <li>test-driven-development <span class="side">/addy-test</span></li>
+      <li>code-review-and-quality <span class="side">/addy-review</span></li>
+      <li>code-simplification <span class="side">/addy-code-simplify</span></li>
+      <li>git-workflow-and-versioning</li>
+      <li>documentation-and-adrs</li>
+      <li>deprecation-and-migration <span class="side">only if needed</span></li>
+      <li>shipping-and-launch <span class="side">/addy-ship</span></li>
+    </ol>
+  </div>
+  <div class="card addy">
+    <h4 style="margin-top:0">Bug fix</h4>
+    <ol class="flow small">
+      <li>debugging-and-error-recovery</li>
+      <li>test-driven-development (Prove-It) <span class="side">/addy-test</span></li>
+      <li>code-review-and-quality <span class="side">/addy-review</span></li>
+    </ol>
+    <h4>Definition of Done</h4>
+    <p class="small">Correctness, quality, integration, documentation, ship-readiness. Full text in <code>addy-using-agent-skills/references/definition-of-done.md</code>.</p>
+  </div>
+</div>
+
+<details>
+  <summary>Decision tree: situation to skill</summary>
+  <div class="body">
+    <div class="table-wrap"><table>
+      <tbody>
+        <tr><td>Don't know what you want yet</td><td>interview-me</td></tr>
+        <tr><td>Rough concept, want variants</td><td>idea-refine</td></tr>
+        <tr><td>New project, feature or change</td><td>spec-driven-development</td></tr>
+        <tr><td>No written quality bar</td><td>constraint-driven-development</td></tr>
+        <tr><td>Have a spec, need tasks</td><td>planning-and-task-breakdown</td></tr>
+        <tr><td>Implementing</td><td>incremental-implementation, plus frontend-ui-engineering (UI), api-and-interface-design (API), context-engineering (poor context), source-driven-development (doc-verified), doubt-driven-development (high stakes)</td></tr>
+        <tr><td>Tests</td><td>test-driven-development; browser-testing-with-devtools for browser work</td></tr>
+        <tr><td>Something broke</td><td>debugging-and-error-recovery</td></tr>
+        <tr><td>Reviewing</td><td>code-review-and-quality, plus code-simplification, security-and-hardening, performance-optimization as needed</td></tr>
+        <tr><td>Commit / branch / release</td><td>git-workflow-and-versioning</td></tr>
+        <tr><td>CI/CD</td><td>ci-cd-and-automation</td></tr>
+        <tr><td>Deprecate / migrate</td><td>deprecation-and-migration</td></tr>
+        <tr><td>Docs / ADRs</td><td>documentation-and-adrs</td></tr>
+        <tr><td>Logs, metrics, alerts</td><td>observability-and-instrumentation</td></tr>
+        <tr><td>Deploying</td><td>shipping-and-launch</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>All auto skills: when each one fires</summary>
+  <div class="body">
+    <p class="small muted">The command twins above also fire on their own. You never need to type these.</p>
+    <dl class="defs small">
+      <dt>api-and-interface-design</dt><dd>Designing APIs, module boundaries, endpoints, type contracts.</dd>
+      <dt>browser-testing-with-devtools</dt><dd>Anything in a browser: DOM, console, network, perf. Needs chrome-devtools MCP.</dd>
+      <dt>ci-cd-and-automation</dt><dd>Setting up or changing pipelines and quality gates.</dd>
+      <dt>context-engineering</dt><dd>Session start, output quality dropping, switching tasks, writing rules files.</dd>
+      <dt>debugging-and-error-recovery</dt><dd>Failing tests, broken builds, regressions, unexpected errors.</dd>
+      <dt>deprecation-and-migration</dt><dd>Removing systems or APIs, migrating users, expand/contract schema changes.</dd>
+      <dt>documentation-and-adrs</dt><dd>Architecture decisions, public API changes, recording context.</dd>
+      <dt>doubt-driven-development</dt><dd>High stakes or unfamiliar code. A fresh-context subagent attacks the work, then it offers a cross-model second opinion (Gemini / Codex CLI if installed).</dd>
+      <dt>frontend-ui-engineering</dt><dd>Building or changing UI, components, layout, WCAG.</dd>
+      <dt>git-workflow-and-versioning</dt><dd>Commits, branches, conflicts, PRs, releases, semver.</dd>
+      <dt>idea-refine</dt><dd>"Ideate", "refine this idea", "stress-test my plan".</dd>
+      <dt>interview-me</dt><dd>Underspecified asks, "interview me", "are we sure?".</dd>
+      <dt>observability-and-instrumentation</dt><dd>Adding logs, metrics, traces, alerts; unexplained prod issues.</dd>
+      <dt>performance-optimization</dt><dd>Perf requirements, suspected regressions, Core Web Vitals, N+1s, profiling.</dd>
+      <dt>security-and-hardening</dt><dd>Untrusted input, auth, sessions, storage, third parties, OWASP, dependency audits.</dd>
+      <dt>source-driven-development</dt><dd>When correctness against official framework docs matters. Produces cited code.</dd>
+      <dt>using-agent-skills</dt><dd>The router. Session start or picking a skill.</dd>
+    </dl>
+  </div>
+</details>
+
+<details>
+  <summary>The 4 agents</summary>
+  <div class="body small">
+    <dl class="defs">
+      <dt>addy-code-reviewer</dt><dd>Five-axis staff-engineer review, APPROVE or REQUEST CHANGES. Spawned by <code>/addy-ship</code> (not by <code>/addy-review</code>, despite its own text).</dd>
+      <dt>addy-security-auditor</dt><dd>OWASP Top 10, LLM Top 10, STRIDE. Proof of concept for Critical and High, which become launch blockers. Spawned by <code>/addy-ship</code>.</dd>
+      <dt>addy-test-engineer</dt><dd>Test strategy and coverage gaps (happy, empty, boundary, error, concurrency). Spawned by <code>/addy-ship</code>.</dd>
+      <dt>addy-web-performance-auditor</dt><dd>Core Web Vitals audit; marks the scorecard "not measured" without tool data. Spawned by <code>/addy-webperf</code>.</dd>
+    </dl>
+    <p>Personas never call each other; the commands orchestrate. A same-named agent in <code>.claude/agents/</code> overrides these.</p>
+  </div>
+</details>
+
+<h3>addy gotchas</h3>
+<div class="callout warn">
+<ul>
+  <li><strong>chrome-devtools MCP isn't configured.</strong> You have claude-in-chrome, which is a different server. Browser testing, the browser half of <code>/addy-test</code> and deep <code>/addy-webperf</code> expect <code>npx -y chrome-devtools-mcp@latest --isolated</code> in <code>.mcp.json</code>. Avoid <code>--autoConnect</code>: it exposes your logged-in browser.</li>
+  <li><strong>Severity labels differ by file.</strong> Read them as one scale: <em>Critical</em> = must fix; <em>Important / Required</em> = fix or defer with reason; <em>Suggestion / Optional / Nit / FYI</em> = your call.</li>
+  <li><strong>Repo-touching commands.</strong> <code>/addy-constraints</code> installs tools and edits <code>package.json</code> and your project CLAUDE.md. <code>/addy-build</code> commits per task.</li>
+  <li><strong>JS/TS-flavoured examples.</strong> The TDD skill says to discover the repo's own commands first, so Gradle / Android works, but the examples won't match.</li>
+  <li><strong>idea-refine</strong> points at a script path that doesn't resolve here (it only does <code>mkdir -p docs/ideas</code>) and asks via AskUserQuestion pickers.</li>
+  <li><strong>"Plan mode" in /addy-plan</strong> just means read-only. It isn't Claude Code's plan mode.</li>
+  <li><strong>Cross-model doubt</strong> must run in the main session (subagents can't spawn subagents) and needs <code>gemini</code> or <code>codex</code> on PATH.</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="pstack">4. pstack deep dive</h2>
+<p>Source: the <code>pstack/</code> plugin of <a href="https://github.com/cursor/plugins">cursor/plugins</a> by poteto, built for Cursor. Guide pages: <a href="https://github.com/cursor/plugins/tree/main/pstack/docs/guide">pstack/docs/guide</a>. 52 skills: 28 workflow skills and 24 principles. All of them are user-invoked except <code>pstack-setup-pstack</code>, so <strong>nothing in pstack fires on its own</strong>.</p>
+
+<div class="callout">
+  <p><strong>The one rule:</strong> start every non-trivial task with <code>/pstack-poteto-mode &lt;goal&gt;</code>. Give it a goal and a way to check it. Don't list skills: a hand-written sequence drops or reorders steps. Ask <code>/pstack-poteto-help</code> if unsure; it answers and hands you a prompt but never starts work.</p>
+</div>
+
+<h3>How poteto-mode runs</h3>
+<ol class="flow">
+  <li>Reads the principles index; it may only cite principles whose skill it actually read.</li>
+  <li>Matches your task to one of 23 playbooks. Large, cross-cutting or "step away" work goes to <code>figure-it-out</code>; multi-day programs go to orchestrate.</li>
+  <li>Opens a todo list whose first items are the playbook steps copied verbatim. Skipped steps stay as <code>skip: &lt;reason&gt;</code>.</li>
+  <li>Calls other skills as triggers fire: non-trivial change → how; crosses a function boundary → architect; fan-out → swarm or arena; contested design → interrogate; prose → unslop; docs/PRs → technical-writing; before review → no-comments; perf numbers → benchmark-checklist; long or unattended → show-me-your-work.</li>
+  <li>Delegates code to background <code>pstack-poteto-agent</code> subagents with file pointers, not pasted context. The parent reviews every diff.</li>
+</ol>
+<div class="grid2">
+  <div class="card pstack"><h4 style="margin-top:0">Autonomy</h4><p class="small">Acts on reversible work without asking. Always pauses for force-push, deploys, data deletion, customer messages. "No" is an allowed answer.</p></div>
+  <div class="card pstack"><h4 style="margin-top:0">Reply style</h4><p class="small">Short declarative sentences. Every claim tagged measured, inferred or guess. Impact framed for the user and the next maintainer.</p></div>
+</div>
+
+<h3>Upstream guide, distilled</h3>
+<ul>
+  <li><strong>Design ladder:</strong> interrogate alone for small changes; architect for boundary-crossing; arena for standalone decisions; swarm for coverage; prototype instead of debating; plan only after the design settles.</li>
+  <li><strong>Earn trust before looping:</strong> do the task once by hand, give the agent your tools, make every stage prove its work, read some transcripts.</li>
+  <li><strong><code>/loop</code> needs a predicate,</strong> not a duration. Ask for real output, not a green build.</li>
+  <li><strong>Parallel agents get their own worktree.</strong></li>
+  <li><strong>The verification skill pays off most:</strong> <code>/pstack-create-verification-skill</code> once per app (tell it to write to <code>.claude/skills/</code>, not <code>.cursor/skills/</code>).</li>
+  <li>Fix a broken skill in its own PR.</li>
+</ul>
+
+<details>
+  <summary>All 23 playbooks</summary>
+  <div class="body">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Playbook</th><th>Use when</th><th>Claude Code</th></tr></thead>
+      <tbody>
+        <tr><td>investigation</td><td>Read-only how / why / should-we questions</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>bug-fix</td><td>Reproduce, root-cause and fix with runtime evidence</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>perf-issue</td><td>One-off fix for measured slowness against a baseline</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>hillclimb</td><td>Sustained improvement of one metric, decision log, one commit per win</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>runtime-forensics</td><td>Diagnose a live symptom (leak, spin) from instrumentation</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>trace-forensics</td><td>Diagnose a captured profile, trace or heap snapshot</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>feature</td><td>New or changed behaviour from a named data shape</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>refactoring</td><td>Behaviour-preserving structural change</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>prototype</td><td>Throwaway sketch to settle a design fork by observation</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>visual-parity</td><td>Pixel-exact UI equivalence or styling migration</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>authoring-a-skill</td><td>Write or edit a SKILL.md</td><td><span class="tag warn">degraded</span> needs Cursor's create-skill; use writing-for-agents</td></tr>
+        <tr><td>eval</td><td>Blind-test a skill or prompt change</td><td><span class="tag warn">degraded</span> no cross-family judge</td></tr>
+        <tr><td>babysit</td><td>Drive a PR to merge-ready, then stop</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>shipping</td><td>Verify a green stack, land bottom-up</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>autonomous-run</td><td>One task to a checkable exit without stopping</td><td><span class="tag warn">minor</span> use Claude's /loop</td></tr>
+        <tr><td>orchestrate</td><td>Multi-day program, many PRs, fleets of subagents</td><td><span class="tag bad">heavy</span> assumes Cursor cloud agents</td></tr>
+        <tr><td>autopilot-full</td><td>Queue of independent PRs run to merged</td><td><span class="tag warn">degraded</span> cloud swarms</td></tr>
+        <tr><td>autopilot-stack</td><td>Queue built into one verified linear stack</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>session-pickup</td><td>Resume prior work from a transcript or branch</td><td><span class="tag warn">degraded</span> branch pickup works</td></tr>
+        <tr><td>pause-safely</td><td>Clean, resumable stop (wip commit + resume note)</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>multi-phase-plan</td><td>Write (not implement) a phased or multi-PR plan</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>worktree-cleanup</td><td>Prune merged worktrees and simulators</td><td><span class="tag bad">unsafe</span> see compat</td></tr>
+        <tr><td>opening-a-pr</td><td>PR conventions, run at the end of every playbook</td><td><span class="tag warn">minor</span> no /deslop; gh fallback</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>All 28 workflow skills</summary>
+  <div class="body">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Skill</th><th>Use for</th><th>Claude Code</th></tr></thead>
+      <tbody>
+        <tr><td>/pstack-poteto-mode</td><td>Front door for any non-trivial task</td><td><span class="tag warn">degraded</span> see compat A</td></tr>
+        <tr><td>/pstack-poteto-help</td><td>Questions about using pstack; doesn't do work</td><td><span class="tag warn">degraded</span> Cursor UX advice</td></tr>
+        <tr><td>/pstack-how</td><td>How code works, where new code should live</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>/pstack-why</td><td>Why code is shaped this way, regressions, where a number came from</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>/pstack-teach</td><td>Plain explanation weaving how and why</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-bro</td><td>Restate the last reply plainly</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-ketchup</td><td>Catch up on this chat since your last message</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-recall</td><td>Rebuild recent context across chats</td><td><span class="tag warn">degraded</span> Cursor transcript path</td></tr>
+        <tr><td>/pstack-blast-radius</td><td>What a small diff could break outside itself</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-architect</td><td>Types and module shape before code</td><td><span class="tag warn">degraded</span> no model diversity</td></tr>
+        <tr><td>/pstack-arena</td><td>N attempts at one brief, pick a base, graft the best</td><td><span class="tag warn">degraded</span> no cross-family judge</td></tr>
+        <tr><td>/pstack-swarm</td><td>Parallel slices or races, one report</td><td><span class="tag warn">degraded</span> local worktrees, not cloud VMs</td></tr>
+        <tr><td>/pstack-interrogate</td><td>Multi-model adversarial review of a diff</td><td><span class="tag warn">degraded</span> Claude-only reviewers</td></tr>
+        <tr><td>/pstack-tdd</td><td>Failing test first, only when a cheap test exists</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-typescript-best-practices</td><td>Rules for .ts / .tsx work</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-no-comments</td><td>Comment Sicko agent strips comments</td><td><span class="tag ok">works</span> once agent linked</td></tr>
+        <tr><td>/pstack-unslop</td><td>Remove AI tells from prose</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-technical-writing</td><td>Docs, RFCs, PR descriptions, commits</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-benchmark-checklist</td><td>Vet a perf number before acting on it</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-figure-it-out</td><td>Bespoke rigorous playbook for big or unattended work</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-show-me-your-work</td><td>TSV decision log for long runs</td><td><span class="tag warn">minor</span></td></tr>
+        <tr><td>/pstack-correct</td><td>Make repeated agent mistakes structurally impossible</td><td><span class="tag ok">works</span></td></tr>
+        <tr><td>/pstack-reflect</td><td>Turn session lessons into skill edits</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>/pstack-create-verification-skill</td><td>Generate a project verify-&lt;app&gt; skill</td><td><span class="tag warn">degraded</span> say .claude/skills</td></tr>
+        <tr><td>/pstack-maintain-verification-skill</td><td>Re-sync that verify skill</td><td><span class="tag warn">degraded</span> same</td></tr>
+        <tr><td>/pstack-automate-me</td><td>Draft a personal -mode skill from your history</td><td><span class="tag warn">degraded</span></td></tr>
+        <tr><td>pstack-setup-pstack <span class="tag auto">auto</span></td><td>Per-role model and budget rule</td><td><span class="tag bad">broken</span> writes a Cursor .mdc rule</td></tr>
+        <tr><td>/pstack-make-bot-ui</td><td>Web UI that wakes a Grok bot via webhook</td><td><span class="tag bad">broken</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>The 24 principles (steer with these by name)</summary>
+  <div class="body">
+    <p class="small muted">Folders are <code>pstack-principle-&lt;name&gt;</code>. All plain prose, so they work, but must be Read rather than invoked.</p>
+    <div class="pgrid">
+      <div><strong>laziness-protocol</strong>: bias to deletion, smallest change</div>
+      <div><strong>foundational-thinking</strong>: types and data before logic</div>
+      <div><strong>redesign-from-first-principles</strong>: fold new needs in as if always there</div>
+      <div><strong>attack-the-premise</strong>: repeated fixes fail, question the premise</div>
+      <div><strong>subtract-before-you-add</strong>: delete dead weight first</div>
+      <div><strong>minimize-reader-load</strong>: fewer layers, collapse one-caller wrappers</div>
+      <div><strong>outcome-oriented-execution</strong>: skip throwaway compat states</div>
+      <div><strong>experience-first</strong>: user delight over convenience</div>
+      <div><strong>exhaust-the-design-space</strong>: 2-3 prototypes for novel calls</div>
+      <div><strong>build-the-lever</strong>: script or codemod that does the work</div>
+      <div><strong>model-the-domain</strong>: state machines over scattered ifs</div>
+      <div><strong>boundary-discipline</strong>: validate at edges, pure internals</div>
+      <div><strong>type-system-discipline</strong>: illegal states unrepresentable</div>
+      <div><strong>make-operations-idempotent</strong>: retries converge</div>
+      <div><strong>migrate-callers-then-delete-legacy-apis</strong>: one wave</div>
+      <div><strong>separate-before-serializing-shared-state</strong>: remove sharing before locks</div>
+      <div><strong>prove-it-works</strong>: verify the real artifact</div>
+      <div><strong>fix-root-causes</strong>: repro first, no silencing guards</div>
+      <div><strong>sequence-verifiable-units</strong>: small units, each checked</div>
+      <div><strong>test-behavior-not-implementation</strong>: assert what callers see</div>
+      <div><strong>explain-the-number</strong>: find what limits a measurement</div>
+      <div><strong>guard-the-context-window</strong>: bulk to subagents, keep summaries</div>
+      <div><strong>never-block-on-the-human</strong>: do reversible work, let human correct</div>
+      <div><strong>encode-lessons-in-structure</strong>: repeated instruction becomes a check</div>
+    </div>
+  </div>
+</details>
+
+<details>
+  <summary>The 2 agents</summary>
+  <div class="body small">
+    <dl class="defs">
+      <dt>pstack-poteto-agent</dt><dd>The delegate for code-writing inside a playbook step. Reads poteto-mode in full, never runs the playbook itself. You can spawn it directly too.</dd>
+      <dt>pstack-comment-sicko</dt><dd>Aggressive comment remover; keeps only legal headers, vendor gotchas, API docs, issue links. Reports only. Spawned by <code>/pstack-no-comments</code>.</dd>
+    </dl>
+  </div>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="compat">5. pstack in Claude Code: what breaks</h2>
+<p>pstack was written for Cursor. Most of it still runs, but five things cut across everything.</p>
+
+<div class="callout bad">
+  <p><strong>A. Skills can't call each other.</strong> Upstream marks every skill <code>disable-model-invocation: true</code>, which in Claude Code blocks the model from loading them with the Skill tool. poteto-mode refers to how, architect, interrogate and the principles by name only, so it can't "run" them.</p>
+  <p><strong>Workaround:</strong> the last line of the prompt templates above tells it to Read <code>~/.claude/skills/pstack-&lt;name&gt;/SKILL.md</code> instead. You can also invoke a sub-skill yourself (<code>/pstack-architect</code>) when it reaches that step.</p>
+</div>
+
+<div class="callout warn">
+  <p><strong>B. No model diversity.</strong> Defaults are Cursor slugs (Grok, Opus xhigh). Claude Code's Agent tool takes only sonnet / opus / haiku, so everything runs on Claude. Tiering still works: opus for judgement, sonnet or haiku for helpers. interrogate, arena, architect and eval lose most of their cross-model independence.</p>
+  <p><strong>C. Cursor-only tools.</strong> <code>/deslop</code> → <code>/simplify</code> or <code>/pstack-unslop</code>. <code>control-ui</code> / <code>control-cli</code> → claude-in-chrome, <code>/run</code>, or a project verify skill. <code>create-skill</code> → <code>writing-for-agents</code> or <code>anthropic-skills:skill-creator</code>. <code>AskQuestion</code> → plain questions.</p>
+  <p><strong>D. Transcripts.</strong> Skills look in <code>~/.cursor/projects/&lt;slug&gt;/agent-transcripts/</code>. Claude Code keeps them at <code>~/.claude/projects/&lt;slug&gt;/*.jsonl</code>. Affects recall, reflect, automate-me, session-pickup, eval, show-me-your-work.</p>
+  <p><strong>E. Agents need linking.</strong> <code>pstack-poteto-agent</code> and <code>pstack-comment-sicko</code> work once <code>use-skills.sh pstack</code> has run. Their <code>is_background</code> flag is ignored.</p>
+</div>
+
+<div class="callout bad">
+  <p><strong>Don't run worktree-cleanup unattended.</strong> Its audit script reads Cursor transcripts and uses BSD <code>stat -f</code>, which fails on Linux, so the "a recent chat still uses this worktree" signal is always empty and live worktrees can look prunable. It still pauses on uncommitted work. The simulator step is macOS-only.</p>
+</div>
+
+<p><strong>Broken outright:</strong> <code>pstack-setup-pstack</code> (writes a Cursor <code>.mdc</code> rule Claude Code never loads) and <code>/pstack-make-bot-ui</code> (needs Cursor's <code>update_state</code> and a Grok bot). <strong>Heavy:</strong> orchestrate assumes Cursor cloud workers; the <code>bun scripts/orch</code> part runs, but "hundreds of subagents" doesn't.</p>
+<p><strong>Clean:</strong> investigation, prototype, runtime-forensics, trace-forensics, pause-safely, babysit, shipping; teach, bro, ketchup, blast-radius, correct, tdd, unslop, technical-writing, benchmark-checklist, typescript-best-practices, figure-it-out, no-comments; all principles (read, not invoked).</p>
+
+<footer>
+  Fork-owned file, outside the sync's reach. Rebuild by hand after a big upstream change to either bucket.
+  Sources: <code>skills/addy/</code>, <code>skills/pstack/</code>, <code>FORK.md</code>, <code>scripts/use-skills.sh</code>, and the pstack upstream guide. Snapshot 2026-10-12.
+</footer>
+
+</div>
+<script>
+(function () {
+  function load(key) { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; } }
+  function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+
+  document.querySelectorAll("[data-list]").forEach(function (card) {
+    var key = "guide-addy-pstack:" + card.dataset.list;
+    var boxes = Array.prototype.slice.call(card.querySelectorAll('input[type="checkbox"]'));
+    var progress = card.querySelector(".progress");
+    var state = load(key) || {};
+    function render() {
+      var done = boxes.filter(function (b) { return b.checked; }).length;
+      progress.textContent = done + " of " + boxes.length + " done";
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!state[b.dataset.key];
+      b.addEventListener("change", function () { state[b.dataset.key] = b.checked; save(key, state); render(); });
+    });
+    card.querySelector(".reset").addEventListener("click", function () {
+      state = {}; save(key, state); boxes.forEach(function (b) { b.checked = false; }); render();
+    });
+    render();
+  });
+
+  var btn = document.getElementById("themeBtn");
+  var modes = ["auto", "light", "dark"];
+  var mode = load("guide-addy-pstack:theme") || "auto";
+  function apply() {
+    if (mode === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", mode);
+    btn.textContent = "Theme: " + mode;
+  }
+  btn.addEventListener("click", function () { mode = modes[(modes.indexOf(mode) + 1) % modes.length]; save("guide-addy-pstack:theme", mode); apply(); });
+  apply();
+})();
+</script>
+</body>
+</html>

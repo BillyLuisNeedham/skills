@@ -5,8 +5,9 @@ set -euo pipefail
 # It is not a supported installer. Modifications to it, or requests for
 # modifications, will not be approved.
 #
-# Links every skill in this repo (SKILL.md, excluding deprecated/ and misc/)
-# into the local skill directories used by each agent harness:
+# Links every skill in the active skill set (see scripts/skill-sets.sh and
+# scripts/use-skills.sh), plus the always-on buckets, into the local skill
+# directories used by each agent harness:
 #   - ~/.claude/skills: Claude Code (symlink)
 #   - ~/.agents/skills: Codex and other Agent Skills-compatible harnesses (symlink)
 #   - ~/.cursor/skills: Cursor (real copy, because its picker won't follow symlinks)
@@ -14,30 +15,48 @@ set -euo pipefail
 # needed to keep those installed skills up to date. Cursor's copies are
 # refreshed by re-running this script.
 #
+# Vendored agents of the active set (skills/addy/agents/, skills/pstack/agents/)
+# are symlinked into ~/.claude/agents the same way.
+#
+# Entries this script owns that belong to an inactive set are removed: symlinks
+# pointing into this repo, and Cursor copies stamped with a .linked-from marker
+# naming this repo (or, for older unstamped copies, named after a repo skill).
+# Anything else in those directories is left alone.
+#
 # `deprecated/` is retired and `misc/` is kept around but rarely used and not
 # promoted (see each bucket's own README): neither belongs in a daily-driver
 # skill directory, so both are skipped, same as everywhere else non-promoted
-# skills are kept out. `in-progress/` IS still linked: it's public on purpose,
-# feedback wanted, and this local install is exactly where that loop runs.
-# The find is deliberately rooted at $REPO, not $REPO/skills: assess-tech-test/
-# and peer-review/ hold a SKILL.md at the repo root and must stay linked.
+# skills are kept out. `in-progress/` IS still linked under the `pocock` set:
+# it's public on purpose, feedback wanted, and this local install is exactly
+# where that loop runs.
+# The find is deliberately rooted at $REPO, not $REPO/skills: peer-review/
+# holds a SKILL.md at the repo root and must stay linked (it is always on).
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=skill-sets.sh
+. "$REPO/scripts/skill-sets.sh"
+
 CURSOR_DEST="$HOME/.cursor/skills"
 DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills" "$CURSOR_DEST")
+AGENTS_DEST="$HOME/.claude/agents"
+ACTIVE_SKILL_SET="$(active_skill_set)"
 
-# Names of current (non-deprecated) repo skills, one per line.
-repo_skill_names() {
-  find "$REPO" -name SKILL.md \
-    -not -path '*/node_modules/*' \
-    -not -path '*/.git/*' \
-    -not -path '*/deprecated/*' \
-    -not -path '*/misc/*' \
-    -print0 | while IFS= read -r -d '' skill_md; do
-      basename "$(dirname "$skill_md")"
-    done
-}
-VALID_NAMES="$(repo_skill_names)"
+# Active repo skills as NUL-delimited SKILL.md paths, and their names (all repo
+# skill names too, so stale Cursor copies can be told apart from user ones).
+ACTIVE_SKILL_MDS=()
+ALL_NAMES=""
+ACTIVE_NAMES=""
+while IFS= read -r -d '' skill_md; do
+  dir="$(dirname "$skill_md")"
+  name="$(basename "$dir")"
+  ALL_NAMES="$ALL_NAMES$name"$'\n'
+  if skill_path_active "$dir"; then
+    ACTIVE_SKILL_MDS+=("$skill_md")
+    ACTIVE_NAMES="$ACTIVE_NAMES$name"$'\n'
+  fi
+done < <(all_skill_mds)
+
+echo "skill set: $ACTIVE_SKILL_SET"
 
 guard_dest() {
   local dest="$1"
@@ -64,6 +83,7 @@ link_skill() {
       # dirs. Drop any prior symlink/dir and copy so the picker sees the skill.
       rm -rf "$target"
       cp -R "$src" "$target"
+      printf '%s\n' "$REPO" > "$target/.linked-from"
       echo "copied $name -> $src ($dest)"
     else
       if [ -e "$target" ] && [ ! -L "$target" ]; then
@@ -101,27 +121,33 @@ prune_stale() {
           if [[ ! -f "$resolved/SKILL.md" ]]; then
             rm "$target"
             echo "removed orphan $name ($dest)"
+          elif ! skill_path_active "$resolved"; then
+            rm "$target"
+            echo "removed inactive $name ($dest)"
           fi
           ;;
       esac
     elif [[ "$dest" = "$CURSOR_DEST" && -d "$target" && -f "$target/SKILL.md" ]]; then
-      # Cursor copies are real dirs, not symlinks: stale if the name is no
-      # longer a current repo skill. Restrict to dirs holding a SKILL.md so we
-      # never touch unrelated Cursor content. Dirs stamped with a .linked-from
-      # marker pointing outside this repo belong to another repo's linker
-      # (e.g. agent-console's scripts/link-skills.sh) and are left alone.
-      local from=""
+      # Cursor copies are real dirs, not symlinks: stale if the name is not an
+      # active repo skill. Restrict to dirs holding a SKILL.md that this script
+      # owns: stamped with a .linked-from marker naming this repo, or (older
+      # copies made before the marker existed) unstamped but named after a repo
+      # skill. Dirs whose marker points outside this repo belong to another
+      # repo's linker (e.g. agent-console's scripts/link-skills.sh), and
+      # unstamped dirs with unknown names are the user's own: both are left
+      # alone.
+      local from="" owned=0
       if [ -f "$target/.linked-from" ]; then
         from="$(cat "$target/.linked-from")"
       fi
       case "$from" in
-        ""|"$REPO"|"$REPO"/*)
-          if ! grep -qxF "$name" <<<"$VALID_NAMES"; then
-            rm -rf "$target"
-            echo "removed stale $name ($dest)"
-          fi
-          ;;
+        "$REPO"|"$REPO"/*) owned=1 ;;
+        "") grep -qxF "$name" <<<"$ALL_NAMES" && owned=1 ;;
       esac
+      if (( owned )) && ! grep -qxF "$name" <<<"$ACTIVE_NAMES"; then
+        rm -rf "$target"
+        echo "removed stale $name ($dest)"
+      fi
     fi
   done
   for name in github-triage triage-issue; do
@@ -138,15 +164,35 @@ for dest in "${DESTS[@]}"; do
   prune_stale "$dest"
 done
 
-while IFS= read -r -d '' skill_md; do
+for skill_md in "${ACTIVE_SKILL_MDS[@]}"; do
   src="$(dirname "$skill_md")"
   name="$(basename "$src")"
   link_skill "$src" "$name"
-done < <(
-  find "$REPO" -name SKILL.md \
-    -not -path '*/node_modules/*' \
-    -not -path '*/.git/*' \
-    -not -path '*/deprecated/*' \
-    -not -path '*/misc/*' \
-    -print0
-)
+done
+
+# Agents: symlink the active set's vendored agents into ~/.claude/agents and
+# drop symlinks into this repo that are inactive or dangling. Regular files
+# there are the user's own and are never touched.
+mkdir -p "$AGENTS_DEST"
+for target in "$AGENTS_DEST"/*; do
+  [[ -L "$target" ]] || continue
+  resolved="$(readlink "$target" 2>/dev/null || true)"
+  case "$resolved" in
+    "$REPO"/*)
+      if [[ ! -f "$resolved" ]] || ! skill_path_active "$resolved"; then
+        rm "$target"
+        echo "removed agent $(basename "$target") ($AGENTS_DEST)"
+      fi
+      ;;
+  esac
+done
+while IFS= read -r -d '' agent_md; do
+  skill_path_active "$agent_md" || continue
+  target="$AGENTS_DEST/$(basename "$agent_md")"
+  if [[ -e "$target" && ! -L "$target" ]]; then
+    echo "skipped agent $(basename "$agent_md"): $target is not a symlink ($AGENTS_DEST)" >&2
+    continue
+  fi
+  ln -sfn "$agent_md" "$target"
+  echo "linked agent $(basename "$agent_md") -> $agent_md ($AGENTS_DEST)"
+done < <(all_agent_mds)

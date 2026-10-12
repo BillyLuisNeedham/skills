@@ -3,3 +3,5 @@ assess-tech-test/
 skills/engineering/write-ticket/
 node_modules
 .claude
+# Active skill set chosen with scripts/use-skills.sh (per-machine state)
+.skill-set

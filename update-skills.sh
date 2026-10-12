@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Sync skills from mattpocock + android + gcp + vendored third-party skills into this fork.
+# Sync skills from mattpocock + android + gcp + addy + pstack + vendored
+# third-party skills into this fork.
 # Idempotent: re-run any time to refresh.
 #
 # What it does:
@@ -8,20 +9,28 @@
 #      `android-` prefix.
 #   3. Clones google/skills and copies each skill dir into skills/gcp/ with
 #      `gcp-` prefix.
-#   4. Vendors individual third-party skills into skills/personal/, overwriting
+#   4. Clones addyosmani/agent-skills into skills/addy/ (`addy-` prefix) and the
+#      pstack plugin from cursor/plugins into skills/pstack/ (`pstack-` prefix),
+#      copying each one's agents into skills/<bucket>/agents/ and rewriting
+#      references to the bucket's own skills and agents to the prefixed names.
+#      Shared docs addy's skills link to outside their own dir (its top-level
+#      references/) are copied into each linking skill and the links rewritten.
+#   5. Vendors individual third-party skills into skills/personal/, overwriting
 #      each one every run: thermo-nuclear-code-quality-review from cursor/plugins,
 #      and the six Effective HTML skills from plannotator/effective-html (patched
 #      to be user-invoked after each copy).
-#   5. Removes any previously-synced skill that no longer exists upstream, plus
+#   6. Removes any previously-synced skill that no longer exists upstream, plus
 #      legacy flat gcp-*/android-* dirs left at the repo root by older syncs.
-#   6. Regenerates skills/gcp/README.md and skills/android/README.md.
-#   7. On a directory collision that we don't recognise as previously-synced,
+#   7. Regenerates each synced bucket's README.md (gcp, android, addy, pstack).
+#   8. On a directory collision that we don't recognise as previously-synced,
 #      prompts (o)verwrite / (s)kip / (a)bort.
-#   8. Links every skill in the repo (except deprecated/) into ~/.claude/skills,
-#      ~/.agents/skills and ~/.cursor/skills via scripts/link-skills.sh.
-#   9. Generates an OpenCode slash-command stub per skill via
+#   9. Links the active skill set (see scripts/use-skills.sh) plus the always-on
+#      buckets into ~/.claude/skills, ~/.agents/skills and ~/.cursor/skills, and
+#      the active set's agents into ~/.claude/agents, via scripts/link-skills.sh.
+#      Inactive sets stay unlinked.
+#  10. Generates an OpenCode slash-command stub per active skill via
 #      scripts/link-opencode-commands.sh (no-op if OpenCode isn't installed).
-#  10. Commits and pushes to origin.
+#  11. Commits and pushes to origin.
 
 set -euo pipefail
 
@@ -66,9 +75,19 @@ prompt_collision() {
   done
 }
 
+# sync_source <prefix> <repo_url> [subpath] [agents_subpath] [shared_refs_subpath]
+# Copies every skill dir (one holding a SKILL.md) under <subpath> of the repo
+# into skills/<prefix>/<prefix>-<name>/. With [agents_subpath], also copies
+# each <agents_subpath>/*.md into skills/<prefix>/agents/<prefix>-<name>.md,
+# rewriting its frontmatter `name:` to the prefixed name (an agent is
+# addressed by that field, not its file name). The agents/ dir holds no
+# SKILL.md, so the manifest, stale sweep, README skill list and link-skills.sh
+# all pass over it; it is wiped and re-copied every run. With
+# [shared_refs_subpath], pulls the shared docs skills link to there into each
+# skill (see vendor_shared_refs).
 sync_source() {
   local prefix="$1" repo_url="$2"
-  local subpath="${3:-}"
+  local subpath="${3:-}" agents_subpath="${4:-}" shared_refs_subpath="${5:-}"
 
   echo "==> Syncing '$prefix' skills from $repo_url"
   local clone_dir="$TMP_DIR/$prefix"
@@ -134,6 +153,133 @@ sync_source() {
 
   write_manifest "$prefix" "${newly_synced[@]+"${newly_synced[@]}"}"
 
+  if [[ -n "$agents_subpath" ]]; then
+    sync_agents "$prefix" "$clone_dir/$agents_subpath"
+  fi
+
+  if [[ -n "$shared_refs_subpath" ]]; then
+    vendor_shared_refs "$prefix" "$clone_dir/$shared_refs_subpath" "$shared_refs_subpath"
+  fi
+
+  regenerate_bucket_readme "$prefix" "$repo_url"
+}
+
+# vendor_shared_refs <prefix> <src_dir> <subpath>
+# Upstream skills sit at <repo>/skills/<name>/ and link to shared docs at the
+# repo's top level as ../../<subpath>/<file> (one more ../ per level deeper the
+# linking file sits). A skill is installed as a symlink to, or a copy of, its
+# own dir, so a link out of that dir dangles. For each skill, copies every such
+# file it actually links to into its own references/ dir and rewrites the link
+# to resolve from the file holding it (`references/<file>` from SKILL.md,
+# `<file>` from inside references/). Upstream's own references/ files are left
+# alone: a name clash with one that differs is reported and its link kept.
+# Idempotent: a rewritten link no longer escapes the skill dir, so never
+# matches again.
+vendor_shared_refs() {
+  local prefix="$1" src_dir="$2" subpath="$3"
+  local skill_dir md slashes up name src dest rel
+  for skill_dir in "$REPO_DIR/skills/$prefix"/"$prefix"-*/; do
+    skill_dir="${skill_dir%/}"
+    while IFS= read -r -d '' md; do
+      slashes="${md#"$skill_dir"/}"
+      slashes="${slashes//[!\/]/}"
+      up="$(printf '../%.0s' $(seq 1 $(( ${#slashes} + 2 ))))$subpath/"
+      while IFS= read -r name; do
+        [[ -n "$name" ]] || continue
+        src="$src_dir/$name"
+        dest="$skill_dir/references/$name"
+        if [[ ! -f "$src" ]]; then
+          echo "    ! $(basename "$skill_dir"): $up$name not found upstream (link kept)" >&2
+          continue
+        fi
+        if [[ -e "$dest" ]] && ! cmp -s "$src" "$dest"; then
+          echo "    ! $(basename "$skill_dir"): references/$name already exists and differs (link kept)" >&2
+          continue
+        fi
+        mkdir -p "$skill_dir/references"
+        cp "$src" "$dest"
+        rel="$(realpath -m --relative-to="$(dirname "$md")" "$dest")"
+        UP="$up" NAME="$name" REL="$rel" perl -pi -e \
+          's{(?<![./])\Q$ENV{UP}$ENV{NAME}\E(?![A-Za-z0-9._-])}{$ENV{REL}}g' "$md"
+        echo "    ~ $(basename "$skill_dir"): vendored $subpath/$name"
+      done < <(UP="$up" perl -ne \
+        'print "$1\n" while m{(?<![./])\Q$ENV{UP}\E([A-Za-z0-9._-]+\.md)(?![A-Za-z0-9._-])}g' "$md" | sort -u)
+    done < <(find "$skill_dir" -type f -name '*.md' -print0)
+  done
+}
+
+# Copies <src_dir>/*.md into skills/<prefix>/agents/ as <prefix>-<name>.md with
+# the frontmatter `name:` prefixed to match. Replaces the whole agents/ dir, so
+# an agent dropped upstream disappears here too.
+sync_agents() {
+  local prefix="$1" src_dir="$2"
+  local dest="$REPO_DIR/skills/$prefix/agents"
+  rm -rf "$dest"
+  if [[ ! -d "$src_dir" ]]; then
+    echo "    ! agents path not found: $src_dir (skipping)" >&2
+    return 0
+  fi
+  mkdir -p "$dest"
+  local src name target
+  for src in "$src_dir"/*.md; do
+    [[ -e "$src" ]] || continue
+    name="$(basename "$src" .md)"
+    target="$dest/$prefix-$name.md"
+    cp "$src" "$target"
+    PREFIX="$prefix" perl -0pi -e \
+      's/\A(---\n(?:.*\n)*?)name:[ \t]*(?!\Q$ENV{PREFIX}\E-)(\S+)[ \t]*\n/$1name: $ENV{PREFIX}-$2\n/' "$target"
+    echo "    + agents/$prefix-$name.md"
+  done
+}
+
+# Rewrites references to a bucket's own skills and agents to their prefixed
+# names, across every .md file in skills/<prefix>/ (SKILL.md, playbooks,
+# references, agents). Run after each sync, since the sync re-copies the
+# upstream files verbatim. Only these forms are touched, so plain prose words
+# that happen to be skill names (pstack has `how`, `why`, `bro`, `tdd`) stay:
+#   - `/name` as a slash command: preceded by start of line, whitespace, or one
+#     of ( [ ` " ' and followed by anything but [A-Za-z0-9_/-], so paths like
+#     `skills/tdd/` or `a/b` never match
+#   - `name` wrapped in backticks, exactly
+#   - ../name/ in a relative link, since the target dir was renamed
+#   - bare principle-* tokens that are skill names (pstack's principle skills)
+# Frontmatter `name:` lines are skipped: skill names stay unprefixed, as for
+# gcp/ and android/, and sync_agents already prefixed the agents' ones.
+# Idempotent: a prefixed reference is never a match for the bare name.
+# Regenerates the bucket README afterwards so its descriptions match.
+rewrite_bucket_refs() {
+  local prefix="$1" repo_url="$2"
+  local bucket_dir="$REPO_DIR/skills/$prefix"
+  local -a names=()
+  local entry
+  for entry in "$bucket_dir"/"$prefix"-*/SKILL.md "$bucket_dir"/agents/"$prefix"-*.md; do
+    [[ -e "$entry" ]] || continue
+    if [[ "$(basename "$entry")" == SKILL.md ]]; then
+      entry="$(basename "$(dirname "$entry")")"
+    else
+      entry="$(basename "$entry" .md)"
+    fi
+    names+=("${entry#"$prefix"-}")
+  done
+  (( ${#names[@]} > 0 )) || return 0
+
+  find "$bucket_dir" -type f -name '*.md' -not -path "$bucket_dir/README.md" -print0 \
+    | PREFIX="$prefix" NAMES="${names[*]}" xargs -0 perl -pi -e '
+        BEGIN {
+          my @n = sort { length($b) <=> length($a) } split / /, $ENV{NAMES};
+          my $all = join "|", map { quotemeta } @n;
+          my $principles = join "|", map { quotemeta } grep { /^principle-/ } @n;
+          $p = $ENV{PREFIX};
+          $any = qr/(?:$all)/;
+          $pr = $principles eq "" ? qr/(?!)/ : qr/(?:$principles)/;
+        }
+        next if /^name:\s/;
+        s{(?<![^\s(\[`"\x27])/($any)(?![A-Za-z0-9_/-])}{/$p-$1}g;
+        s{`($any)`}{`$p-$1`}g;
+        s{(?<=\.\./)($any)(?=/)}{$p-$1}g;
+        s{(?<![A-Za-z0-9_/-])($pr)(?![A-Za-z0-9_-])}{$p-$1}g;
+      '
+  echo "    ~ rewrote own skill and agent references in skills/$prefix/"
   regenerate_bucket_readme "$prefix" "$repo_url"
 }
 
@@ -197,6 +343,7 @@ regenerate_bucket_readme() {
   case "$label" in
     gcp) title="GCP" ;;
     android) title="Android" ;;
+    addy) title="Addy Osmani agent" ;;
     *) title="$label" ;;
   esac
 
@@ -216,6 +363,23 @@ regenerate_bucket_readme() {
         echo "- [$name](./$name/SKILL.md): $desc"
       fi
     done
+    if compgen -G "$bucket_dir/agents/*.md" >/dev/null; then
+      echo ""
+      echo "## Agents"
+      echo ""
+      echo "Subagents synced alongside the skills into \`agents/\`; \`scripts/link-skills.sh\` links them into \`~/.claude/agents\` while this bucket's skill set is active."
+      echo ""
+      local agent_md
+      for agent_md in "$bucket_dir"/agents/*.md; do
+        name="$(basename "$agent_md" .md)"
+        desc="$(skill_first_sentence "$agent_md")"
+        if [[ -z "$desc" ]]; then
+          echo "- [$name](./agents/$name.md)"
+        else
+          echo "- [$name](./agents/$name.md): $desc"
+        fi
+      done
+    fi
   } > "$readme"
   echo "    wrote skills/$label/README.md"
 }
@@ -283,6 +447,12 @@ git merge --no-edit upstream/main
 
 sync_source "android" "https://github.com/android/skills.git"
 sync_source "gcp"     "https://github.com/google/skills.git" "skills"
+ADDY_URL="https://github.com/addyosmani/agent-skills.git"
+PSTACK_URL="https://github.com/cursor/plugins.git"
+sync_source "addy"    "$ADDY_URL"   "skills"        "agents"        "references"
+rewrite_bucket_refs "addy" "$ADDY_URL"
+sync_source "pstack"  "$PSTACK_URL" "pstack/skills" "pstack/agents"
+rewrite_bucket_refs "pstack" "$PSTACK_URL"
 
 sync_single_skill "https://github.com/cursor/plugins.git" "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
 
@@ -290,7 +460,7 @@ EFFECTIVE_HTML_SKILLS=(html design-artifact html-wireframe html-prototype html-p
 sync_single_skill "https://github.com/plannotator/effective-html.git" "${EFFECTIVE_HTML_SKILLS[@]/#/skills/}"
 for s in "${EFFECTIVE_HTML_SKILLS[@]}"; do make_user_invoked "$s"; done
 
-echo "==> Linking skills to ~/.claude/skills, ~/.agents/skills and ~/.cursor/skills..."
+echo "==> Linking the active skill set ($(cat "$REPO_DIR/.skill-set" 2>/dev/null || echo pocock)) to ~/.claude/skills, ~/.agents/skills, ~/.cursor/skills and ~/.claude/agents..."
 bash "$REPO_DIR/scripts/link-skills.sh"
 
 echo "==> Generating OpenCode slash commands..."
@@ -301,7 +471,7 @@ git add -A
 if git diff --cached --quiet; then
   echo "    (no changes to commit)"
 else
-  git commit -m "Sync skills: mattpocock + android + gcp + cursor + humanlayer"
+  git commit -m "Sync skills: mattpocock + android + gcp + addy + pstack + cursor + effective-html"
   git push origin main
 fi
 

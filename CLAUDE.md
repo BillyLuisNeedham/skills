@@ -15,7 +15,7 @@ Skills are organized into bucket folders under `skills/`:
 
 Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array (the Claude Code plugin ships exactly the promoted set). Skills in the non-promoted buckets (`misc/`, `in-progress/`, `deprecated/`, `personal/`, `gcp/`, `android/`, `addy/`, `pstack/`) must not appear in either.
 
-Install commands are copied verbatim from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` makes the repo its own single-plugin marketplace (a fallback the install block explains, not the documented route). Run `claude plugin validate . --strict` after touching either manifest. Why a Claude plugin but not (yet) a Codex one lives in [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+Install commands are copied verbatim from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` is the repo's own marketplace. Every agent except Claude Code installs from it to get automatic updates, and Claude Code uses `claude-plugins-official`. Run `claude plugin validate . --strict` after touching either manifest. [ADR 0002](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) records why.
 
 Each skill entry in the top-level `README.md` must link the skill name to its `SKILL.md`.
 
@@ -34,3 +34,9 @@ Which skills are active is a **skill set**, switched with `scripts/use-skills.sh
 OpenCode needs a second step, `scripts/link-opencode-commands.sh`. It finds skills on its own by globbing `~/.claude/skills` and `~/.agents/skills`, but it builds its `/` palette only from its own config dir and never reads `~/.claude/commands`, so without this a user-invoked skill (`disable-model-invocation: true`) is unreachable there, not merely unlisted. The script writes one pointer stub per active skill into `~/.config/opencode/command/`, and no-ops when OpenCode isn't installed. `update-skills.sh` runs both scripts.
 
 No em-dashes anywhere in this repo's prose (`SKILL.md` files, docs, `README.md`, `CHANGELOG.md`, ADRs, changesets, code comments). Where a sentence reaches for one, rewrite it instead with a comma, colon, period, parentheses, or a conjunction, whichever the sentence actually wants; never do a blind character substitution.
+
+## Agent skills
+
+### Triage labels
+
+Canonical names, unchanged. See `docs/agents/triage-labels.md`. Issues are judged against [`SCOPE.md`](./SCOPE.md).

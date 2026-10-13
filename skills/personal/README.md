@@ -8,6 +8,7 @@ Skills tied to my own setup, not promoted in the plugin. Fork-owned — upstream
 - **[merge-pr](./merge-pr/SKILL.md)**: Squash-merge an Android PR, move its Jira ticket to Dev Complete, and fill the Jenkins build number into the ticket's testing notes.
 - **[my-wayfinder](./my-wayfinder/SKILL.md)** — Wayfinder, plus a sitrep opening every human-in-the-loop session — the map's position and the claimed ticket, built by a subagent and opened in the browser.
 - **[thermo-nuclear-code-quality-review](./thermo-nuclear-code-quality-review/SKILL.md)** — Extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Vendored from cursor/plugins.
+- **[my-verify](./my-verify/SKILL.md)**: Verify a branch's work end to end and write an HTML evidence report with video, captioned screenshots and logs.
 - **[show-me](./show-me/SKILL.md)** — Help the user understand the current topic visually with concise ASCII diagrams, code-shape sketches, and focused HTML artifacts.
 
 Vendored from [plannotator/effective-html](https://github.com/plannotator/effective-html) (MIT), patched to be user-invoked on every sync. Start at `/html`, which routes to the others by reading their `SKILL.md` files.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "My Verify"
+  short_description: "Verify work end to end with an evidence report"
+  default_prompt: "Use $my-verify to verify the work on this branch."

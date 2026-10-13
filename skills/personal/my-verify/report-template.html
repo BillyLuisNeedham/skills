@@ -1,0 +1,236 @@
+<!doctype html>
+<!--
+  my-verify report template.
+  Fill every {{placeholder}}. Repeat each block marked REPEAT once per item; delete a whole
+  section only when it has nothing to say. Keep the section order: reviewers learn it.
+  Verdict classes: pass, fail, flaky, unverified (claims); verified, gaps, failed (overall).
+  All asset paths are relative to this file.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify {{branch}}</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --ink: #1b1b1a; --muted: #62625e; --line: #e2e2dc;
+    --pass: #1f7a3d; --pass-bg: #e6f4ea; --fail: #b3261e; --fail-bg: #fbe9e7;
+    --warn: #8a5a00; --warn-bg: #fff4d6; --info: #3b4a6b; --info-bg: #eaeef6;
+    --code-bg: #f0f0ec; --radius: 10px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --surface: #1d1d1b; --ink: #ececea; --muted: #a3a39e; --line: #33332f;
+      --pass: #6fcf8e; --pass-bg: #16301f; --fail: #f28b82; --fail-bg: #3a1714;
+      --warn: #f2c35b; --warn-bg: #3a2c0b; --info: #a9b8da; --info-bg: #1e2638; --code-bg: #262624;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --surface: #1d1d1b; --ink: #ececea; --muted: #a3a39e; --line: #33332f;
+    --pass: #6fcf8e; --pass-bg: #16301f; --fail: #f28b82; --fail-bg: #3a1714;
+    --warn: #f2c35b; --warn-bg: #3a2c0b; --info: #a9b8da; --info-bg: #1e2638; --code-bg: #262624;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
+  main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 44px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 0; }
+  a { color: var(--info); }
+  code, pre { font-family: var(--mono); font-size: 13px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; max-height: 420px; }
+  .muted { color: var(--muted); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin: 12px 0; }
+
+  .banner { border-radius: var(--radius); padding: 20px 22px; margin: 18px 0 8px; border: 1px solid; }
+  .banner .label { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .banner .line { font-size: 18px; margin-top: 4px; }
+  .banner .counts { margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .banner.verified { background: var(--pass-bg); border-color: var(--pass); }
+  .banner.verified .label { color: var(--pass); }
+  .banner.gaps { background: var(--warn-bg); border-color: var(--warn); }
+  .banner.gaps .label { color: var(--warn); }
+  .banner.failed { background: var(--fail-bg); border-color: var(--fail); }
+  .banner.failed .label { color: var(--fail); }
+
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.pass { color: var(--pass); background: var(--pass-bg); }
+  .pill.fail { color: var(--fail); background: var(--fail-bg); }
+  .pill.flaky, .pill.unverified { color: var(--warn); background: var(--warn-bg); }
+
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 24px; }
+  .meta div span { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+
+  .claim-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+  .claim-head .id { font-family: var(--mono); color: var(--muted); }
+  .reason { border-left: 3px solid var(--fail); padding: 6px 12px; margin: 10px 0; background: var(--fail-bg); border-radius: 0 6px 6px 0; }
+  ol.steps { padding-left: 20px; margin: 8px 0; }
+
+  .media { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 12px 0; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+  @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+  .compare .side-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  figure { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  figure img, figure video { display: block; width: 100%; height: auto; background: #000; }
+  figure a { display: block; }
+  figcaption { padding: 8px 10px; font-size: 13px; }
+
+  .risks { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: var(--radius); padding: 14px 18px; }
+  .risks li { margin: 6px 0; }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 8px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  nav.toc { font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Verification: {{branch}}</h1>
+  <div class="muted">{{one-line description of the change}}</div>
+
+  <!-- Overall verdict. Class: verified | gaps | failed -->
+  <section class="banner {{overall-class}}">
+    <div class="label">{{VERIFIED | VERIFIED WITH GAPS | FAILED}}</div>
+    <div class="line">{{One sentence: what holds, and the most important thing that does not.}}</div>
+    <div class="counts">{{n}} claims: {{p}} pass, {{f}} fail, {{fl}} flaky, {{u}} unverified. <a href="#risks">Not verified and risks</a></div>
+  </section>
+
+  <nav class="toc">
+    <a href="#scope">Scope</a><a href="#claims">Claims</a><a href="#evidence">Evidence</a>
+    <a href="#edges">Edge cases and regressions</a><a href="#tests">Tests</a><a href="#risks">Not verified and risks</a>
+    <a href="#reproduce">Reproduce</a><a href="#logs">Raw logs</a>
+  </nav>
+</header>
+
+<h2 id="scope">What was verified</h2>
+<div class="card meta">
+  <div><span>Branch</span><code>{{branch}}</code></div>
+  <div><span>Base</span><code>{{base}}</code> at <code>{{merge-base short sha}}</code></div>
+  <div><span>Head</span><code>{{head short sha}}</code>{{ + " (dirty tree: uncommitted changes included)" when dirty}}</div>
+  <div><span>Commits</span>{{count}}</div>
+  <div><span>Intent source</span>{{ticket link | spec path | PR | commits only | derived from diff}}</div>
+  <div><span>Strategies</span>{{web, api, ...}}</div>
+  <div><span>Verified at</span>{{YYYY-MM-DD HH:MM}}</div>
+  <div><span>Environment</span>{{browser, device, versions, accounts}}</div>
+</div>
+
+<h2 id="claims">Claims</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Claim</th><th>Verdict</th><th>Summary</th></tr></thead>
+  <tbody>
+    <!-- REPEAT per claim -->
+    <tr>
+      <td><a href="#{{id}}"><code>{{id}}</code></a></td>
+      <td>{{claim text}}</td>
+      <td><span class="pill {{pass|fail|flaky|unverified}}">{{PASS|FAIL|FLAKY|UNVERIFIED}}</span></td>
+      <td>{{one-sentence summary}}</td>
+    </tr>
+    <!-- /REPEAT -->
+  </tbody>
+</table>
+</div>
+
+<h2 id="evidence">Evidence</h2>
+
+<!-- REPEAT per claim -->
+<article class="card" id="{{id}}">
+  <div class="claim-head">
+    <span class="id">{{id}}</span>
+    <h3>{{claim text}}</h3>
+    <span class="pill {{pass|fail|flaky|unverified}}">{{VERDICT}}</span>
+  </div>
+  <p>{{summary}}</p>
+
+  <!-- Only for FAIL, FLAKY, UNVERIFIED -->
+  <div class="reason"><strong>Why:</strong> {{reason}}</div>
+
+  <ol class="steps">
+    <!-- REPEAT per step --><li>{{step}}</li><!-- /REPEAT -->
+  </ol>
+
+  <!-- Only for before and after claims -->
+  <div class="compare">
+    <div>
+      <div class="side-label">Before ({{base}})</div>
+      <figure><video controls preload="metadata" src="{{path}}"></video><figcaption>{{what it shows}}</figcaption></figure>
+    </div>
+    <div>
+      <div class="side-label">After ({{head short sha}})</div>
+      <figure><video controls preload="metadata" src="{{path}}"></video><figcaption>{{what it shows}}</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="media">
+    <!-- REPEAT per clip -->
+    <figure><video controls preload="metadata" src="{{path}}"></video><figcaption>{{what it proves}}</figcaption></figure>
+    <!-- REPEAT per screenshot -->
+    <figure><a href="{{path}}"><img src="{{path}}" alt="{{caption}}" loading="lazy"></a><figcaption>{{what it proves}}</figcaption></figure>
+  </div>
+
+  <!-- REPEAT per log, request/response or transcript excerpt -->
+  <p class="muted">{{what this excerpt proves}} (<a href="{{full log path}}">full</a>)</p>
+  <pre>{{excerpt, HTML-escaped}}</pre>
+</article>
+<!-- /REPEAT -->
+
+<h2 id="edges">Edge cases and regressions</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Claim / area</th><th>Case</th><th>Verdict</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <!-- REPEAT per edge case and regression check -->
+    <tr><td><code>{{id or area}}</code></td><td>{{case}}</td><td><span class="pill {{class}}">{{VERDICT}}</span></td><td><a href="{{path}}">{{label}}</a></td></tr>
+    <!-- /REPEAT -->
+  </tbody>
+</table>
+</div>
+
+<h2 id="tests">Test suite</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Command</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Output</th></tr></thead>
+  <tbody>
+    <!-- REPEAT per command -->
+    <tr><td><code>{{command}}</code></td><td>{{n}}</td><td>{{n}}</td><td>{{n}}</td><td><a href="{{path}}">log</a></td></tr>
+    <!-- /REPEAT -->
+  </tbody>
+</table>
+</div>
+
+<h2 id="risks">Not verified and risks</h2>
+<div class="risks">
+  <ul>
+    <!-- REPEAT: every UNVERIFIED and FLAKY claim with its reason, every risk a verifier raised,
+         every cleanup it could not finish, and "claims derived from the diff" when no intent source existed -->
+    <li><strong>{{id or topic}}:</strong> {{what was not proven, and why}}</li>
+    <!-- /REPEAT -->
+  </ul>
+</div>
+
+<h2 id="reproduce">How to reproduce</h2>
+<div class="card">
+  <!-- REPEAT per strategy -->
+  <p><strong>{{strategy}}</strong>: {{one-line setup}}</p>
+  <pre>{{commands, script paths, show-trace commands}}</pre>
+  <!-- /REPEAT -->
+</div>
+
+<h2 id="logs">Raw logs</h2>
+<!-- REPEAT per log file -->
+<details><summary>{{log name}}</summary><p><a href="{{path}}">{{path}}</a></p><pre>{{tail of log, HTML-escaped}}</pre></details>
+<!-- /REPEAT -->
+
+</main>
+</body>
+</html>

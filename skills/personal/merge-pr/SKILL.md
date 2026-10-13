@@ -53,4 +53,4 @@ Use the Atlassian MCP with cloud id `hostelworld.atlassian.net`.
 
 Give the user: the merge commit, the build number with its Jenkins URL (still running at this point, so say it has not passed yet), and the new Jira status.
 
-Then name each stacked PR from preflight. GitHub retargets them onto `baseRefName` when the merged head branch is deleted, but the squash leaves the merged commits in their history, so their diffs show this PR's changes again until rebased with `git rebase --onto origin/<baseRefName> <headRefOid> <branch>`. Offer that rebase.
+Then name each stacked PR from preflight. GitHub retargets them onto `baseRefName` when the merged head branch is deleted, but the squash leaves the merged commits in their history, so their diffs show this PR's changes again until the base is merged into them. Offer `stack-forward <baseRefName>` to bring the stacked PRs up to date without rewriting history.

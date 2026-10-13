@@ -6,6 +6,7 @@ Skills tied to my own setup, not promoted in the plugin. Fork-owned — upstream
 - **[my-grill-me](./my-grill-me/SKILL.md)** — Billy's relentless interview to sharpen a plan or design — rounds of questions, voice-typed replies.
 - **[my-grill-with-docs](./my-grill-with-docs/SKILL.md)** — Billy's relentless interview to sharpen a plan or design, which also creates docs (ADRs and glossary) as we go.
 - **[merge-pr](./merge-pr/SKILL.md)**: Squash-merge an Android PR, move its Jira ticket to Dev Complete, and fill the Jenkins build number into the ticket's testing notes.
+- **[stack-forward](./stack-forward/SKILL.md)**: Merge forward through stacked PR branches without rewriting history, gating at each tip before pushing.
 - **[my-wayfinder](./my-wayfinder/SKILL.md)** — Wayfinder, plus a sitrep opening every human-in-the-loop session — the map's position and the claimed ticket, built by a subagent and opened in the browser.
 - **[thermo-nuclear-code-quality-review](./thermo-nuclear-code-quality-review/SKILL.md)** — Extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Vendored from cursor/plugins.
 - **[my-verify](./my-verify/SKILL.md)**: Verify a branch's work end to end and write an HTML evidence report with video, captioned screenshots and logs.

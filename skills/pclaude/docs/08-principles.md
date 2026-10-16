@@ -1,6 +1,6 @@
 # Steer with principle names
 
-pclaude ships 24 principles as individual skills. `/pclaude-poteto-mode` reads their index at the start of every multi-step task, applies the ones the task triggers, and names each applied principle in its reply along with the decision it changed.
+pclaude ships 24 principles as leaf files in [`pclaude-principles`](../pclaude-principles/SKILL.md). `/pclaude-poteto-mode` reads their index at the start of every run, applies the ones the task triggers, and names each applied principle in its reply along with the decision it changed.
 
 You don't invoke principles. You use their names to steer. Each name points at a complete rule the agent has already read, so one phrase redirects the work more precisely than a paragraph of instructions.
 
@@ -65,7 +65,7 @@ The delegation principles keep parallel work sane:
 
 And one meta principle:
 
-- [Encode Lessons in Structure](../pclaude-principles/encode-lessons-in-structure.md) turns advice you've repeated twice into a lint, check, or script. [`/pclaude-correct`](../pclaude-correct/SKILL.md) applies it to a whole repo, as shown in [Make it yours](./09-make-it-yours.md#fix-the-environment-with-correct).
+- [Encode Lessons in Structure](../pclaude-principles/encode-lessons-in-structure.md) turns advice you've repeated twice into a lint, check, or script. [`/pclaude-correct`](../pclaude-correct/SKILL.md) applies it to a whole repo, as shown in [Make it yours](./09-make-it-yours.md#fix-the-environment-with-pclaude-correct).
 
 Don't memorize the list. Skim it now, then come back when you catch the agent doing something a name here would have prevented. That's how the vocabulary sticks.
 

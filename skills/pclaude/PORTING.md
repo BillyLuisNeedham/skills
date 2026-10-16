@@ -390,70 +390,70 @@ Rewrite docs/guide for Claude Code.
 
 ### docs/01-setup.md
 
-- [ ] L7 [cursor:Cursor] `Cursor` in `In a Cursor chat, run:`
-- [ ] L13 [cursor:Cursor] `Cursor` in `Cursor confirms the plugin is instal…`
-- [ ] L20 [pstack] `pstack` in `/setup-pstack`
-- [ ] L20 [unported-skill] `setup-pstack` in `/setup-pstack`
-- [ ] L23 [cursor:.cursor] `.cursor` in `` …r the questions. It writes `~/.cursor/rules/pclaude-models.mdc`, a… ``
-- [ ] L23 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`, a small rule every pclaude… ``
-- [ ] L23 [pstack] `pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L23 [pstack] `pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L23 [unported-skill] `setup-pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L23 [unported-skill] `setup-pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L23 [dangling-link] `../../skills/setup-pstack/SKILL.md` in `` [`/setup-pstack`](../../skills/setup-pstack/SKILL.md) detects the models you have… ``
-- [ ] L23 [unknown-skill] `pclaude-models` in `` …s. It writes `~/.cursor/rules/pclaude-models.mdc`, a small rule every pcla… ``
-- [ ] L25 [cursor:grok] `Grok` in `` …to `max`. Opus goes to `max`. Grok tops out at `xhigh`, so it st… ``
-- [ ] L27 [pstack] `pstack` in `` …le's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
-- [ ] L27 [pstack] `pstack` in `` …le's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
-- [ ] L27 [unported-skill] `setup-pstack` in `` …hat role's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
-- [ ] L27 [unported-skill] `setup-pstack` in `` …hat role's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
-- [ ] L33 [pstack] `pstack` in `` At the end of setup, `/setup-pstack` looks for a way to prove app… ``
-- [ ] L33 [unported-skill] `setup-pstack` in `` At the end of setup, `/setup-pstack` looks for a way to prove app… ``
-- [ ] L35 [cursor:.cursor] `.cursor` in `` Say yes and it writes `.cursor/skills/verify-<app>/`, a proj… ``
-- [ ] L45 [pstack] `pstack` in `` - Rerun `/setup-pstack` and pick a smaller reasoning… ``
-- [ ] L45 [unported-skill] `setup-pstack` in `` - Rerun `/setup-pstack` and pick a smaller reasoning… ``
-- [ ] L60 [cursor:cursor.com] `cursor.com` in `…es it a [Custom Mode](https://cursor.com/docs/skills), which stays in…`
+- [x] L7 [cursor:Cursor] `Cursor` in `In a Cursor chat, run:`
+- [x] L13 [cursor:Cursor] `Cursor` in `Cursor confirms the plugin is instal…`
+- [x] L20 [pstack] `pstack` in `/setup-pstack`
+- [x] L20 [unported-skill] `setup-pstack` in `/setup-pstack`
+- [x] L23 [cursor:.cursor] `.cursor` in `` …r the questions. It writes `~/.cursor/rules/pclaude-models.mdc`, a… ``
+- [x] L23 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`, a small rule every pclaude… ``
+- [x] L23 [pstack] `pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L23 [pstack] `pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L23 [unported-skill] `setup-pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L23 [unported-skill] `setup-pstack` in `` [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L23 [dangling-link] `../../skills/setup-pstack/SKILL.md` in `` [`/setup-pstack`](../../skills/setup-pstack/SKILL.md) detects the models you have… ``
+- [x] L23 [unknown-skill] `pclaude-models` in `` …s. It writes `~/.cursor/rules/pclaude-models.mdc`, a small rule every pcla… ``
+- [x] L25 [cursor:grok] `Grok` in `` …to `max`. Opus goes to `max`. Grok tops out at `xhigh`, so it st… ``
+- [x] L27 [pstack] `pstack` in `` …le's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
+- [x] L27 [pstack] `pstack` in `` …le's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
+- [x] L27 [unported-skill] `setup-pstack` in `` …hat role's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
+- [x] L27 [unported-skill] `setup-pstack` in `` …hat role's line. A rerun of `/setup-pstack` keeps any role whose model d… ``
+- [x] L33 [pstack] `pstack` in `` At the end of setup, `/setup-pstack` looks for a way to prove app… ``
+- [x] L33 [unported-skill] `setup-pstack` in `` At the end of setup, `/setup-pstack` looks for a way to prove app… ``
+- [x] L35 [cursor:.cursor] `.cursor` in `` Say yes and it writes `.cursor/skills/verify-<app>/`, a proj… ``
+- [x] L45 [pstack] `pstack` in `` - Rerun `/setup-pstack` and pick a smaller reasoning… ``
+- [x] L45 [unported-skill] `setup-pstack` in `` - Rerun `/setup-pstack` and pick a smaller reasoning… ``
+- [x] L60 [cursor:cursor.com] `cursor.com` in `…es it a [Custom Mode](https://cursor.com/docs/skills), which stays in…`
 
 ### docs/02-poteto-mode.md
 
-- [ ] L99 [cursor:cursor.com] `cursor.com` in `…is a [cloud subagent](https://cursor.com/docs/subagents#cloud-subagent…`
+- [x] L99 [cursor:cursor.com] `cursor.com` in `…is a [cloud subagent](https://cursor.com/docs/subagents#cloud-subagent…`
 
 ### docs/04-design.md
 
-- [ ] L47 [pstack] `pstack` in `` …anel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L47 [pstack] `pstack` in `` …anel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L47 [unported-skill] `setup-pstack` in `` The panel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L47 [unported-skill] `setup-pstack` in `` The panel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
-- [ ] L47 [dangling-link] `../../skills/setup-pstack/SKILL.md` in `` …s from your [`/setup-pstack`](../../skills/setup-pstack/SKILL.md) configuration, and you can a… ``
+- [x] L47 [pstack] `pstack` in `` …anel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L47 [pstack] `pstack` in `` …anel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L47 [unported-skill] `setup-pstack` in `` The panel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L47 [unported-skill] `setup-pstack` in `` The panel comes from your [`/setup-pstack`](../../skills/setup-pstack/S… ``
+- [x] L47 [dangling-link] `../../skills/setup-pstack/SKILL.md` in `` …s from your [`/setup-pstack`](../../skills/setup-pstack/SKILL.md) configuration, and you can a… ``
 
 ### docs/05-build-and-clean.md
 
-- [ ] L59 [cursor:deslop] `deslop` in `` …books/opening-a-pr.md) runs `/deslop` on the diff before each comm… ``
-- [ ] L59 [cursor:deslop] `deslop` in `` …books/opening-a-pr.md) runs `/deslop` on the diff before each comm… ``
-- [ ] L59 [cursor:cursor-team-kit] `cursor-team-kit` in `` …dies. `/deslop` ships in the `cursor-team-kit` plugin, not in pclaude. If y… ``
-- [ ] L79 [cursor:deslop] `deslop` in `` …is worth keeping straight. `/deslop` cleans slop out of the code,… ``
-- [ ] L81 [cursor:deslop] `deslop` in `` …f the diff feels padded, say `deslop it` before you commit, not af… ``
+- [x] L59 [cursor:deslop] `deslop` in `` …books/opening-a-pr.md) runs `/deslop` on the diff before each comm… ``
+- [x] L59 [cursor:deslop] `deslop` in `` …books/opening-a-pr.md) runs `/deslop` on the diff before each comm… ``
+- [x] L59 [cursor:cursor-team-kit] `cursor-team-kit` in `` …dies. `/deslop` ships in the `cursor-team-kit` plugin, not in pclaude. If y… ``
+- [x] L79 [cursor:deslop] `deslop` in `` …is worth keeping straight. `/deslop` cleans slop out of the code,… ``
+- [x] L81 [cursor:deslop] `deslop` in `` …f the diff feels padded, say `deslop it` before you commit, not af… ``
 
 ### docs/06-verify-and-ship.md
 
-- [ ] L61 [cursor:.cursor] `.cursor` in `` It writes `.cursor/skills/verify-<app>/`, agent-… ``
+- [x] L61 [cursor:.cursor] `.cursor` in `` It writes `.cursor/skills/verify-<app>/`, agent-… ``
 
 ### docs/07-overnight.md
 
-- [ ] L35 [cursor:Cursor] `Cursor` in `` - `/loop` is Cursor's built-in wake mechanism, no… ``
-- [ ] L40 [cursor:Cursor] `Cursor` in `…bout to go offline or restart Cursor. The [Pause safely playbook](…`
-- [ ] L94 [cursor:Cursor] `Cursor` in `A [Cursor Project](https://cursor.com/b…`
-- [ ] L94 [cursor:cursor.com] `cursor.com` in `A [Cursor Project](https://cursor.com/blog/projects) gives one coor…`
-- [ ] L116 [dangling-link] `../../automations/benny/README.md` in `…s a dormant [automation pack](../../automations/benny/README.md) for Slack issue reports. One…`
-- [ ] L116 [dangling-link] `../../automations/benny/FOR_AGENTS.md` in `` …gent at its [`FOR_AGENTS.md`](../../automations/benny/FOR_AGENTS.md) and name the target reposito… ``
+- [x] L35 [cursor:Cursor] `Cursor` in `` - `/loop` is Cursor's built-in wake mechanism, no… ``
+- [x] L40 [cursor:Cursor] `Cursor` in `…bout to go offline or restart Cursor. The [Pause safely playbook](…`
+- [x] L94 [cursor:Cursor] `Cursor` in `A [Cursor Project](https://cursor.com/b…`
+- [x] L94 [cursor:cursor.com] `cursor.com` in `A [Cursor Project](https://cursor.com/blog/projects) gives one coor…`
+- [x] L116 [dangling-link] `../../automations/benny/README.md` in `…s a dormant [automation pack](../../automations/benny/README.md) for Slack issue reports. One…`
+- [x] L116 [dangling-link] `../../automations/benny/FOR_AGENTS.md` in `` …gent at its [`FOR_AGENTS.md`](../../automations/benny/FOR_AGENTS.md) and name the target reposito… ``
 
 ### docs/09-make-it-yours.md
 
-- [ ] L13 [cursor:.cursor] `.cursor` in `` …ns are really you. It drafts `.cursor/skills/<your-name>-mode/SKILL… ``
-- [ ] L13 [cursor:Cursor] `Cursor` in `` …-name>-mode/SKILL.md` through Cursor's built-in `create-skill` flo… ``
-- [ ] L60 [cursor:Cursor] `Cursor` in `` …ill.md), which routes through Cursor's built-in `create-skill`, va… ``
-- [ ] L94 [unported-skill] `make-bot-ui` in `` ## Build a bot UI with `/make-bot-ui` ``
-- [ ] L96 [cursor:grok] `Grok` in `` One situational skill is for Grok Bot users. [`/make-bot-ui`](.… ``
-- [ ] L96 [unported-skill] `make-bot-ui` in `` …ill is for Grok Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SK… ``
-- [ ] L96 [unported-skill] `make-bot-ui` in `` …ill is for Grok Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SK… ``
-- [ ] L96 [dangling-link] `../../skills/make-bot-ui/SKILL.md` in `` …k Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SKILL.md) builds a small page whose bu… ``
+- [x] L13 [cursor:.cursor] `.cursor` in `` …ns are really you. It drafts `.cursor/skills/<your-name>-mode/SKILL… ``
+- [x] L13 [cursor:Cursor] `Cursor` in `` …-name>-mode/SKILL.md` through Cursor's built-in `create-skill` flo… ``
+- [x] L60 [cursor:Cursor] `Cursor` in `` …ill.md), which routes through Cursor's built-in `create-skill`, va… ``
+- [x] L94 [unported-skill] `make-bot-ui` in `` ## Build a bot UI with `/make-bot-ui` ``
+- [x] L96 [cursor:grok] `Grok` in `` One situational skill is for Grok Bot users. [`/make-bot-ui`](.… ``
+- [x] L96 [unported-skill] `make-bot-ui` in `` …ill is for Grok Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SK… ``
+- [x] L96 [unported-skill] `make-bot-ui` in `` …ill is for Grok Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SK… ``
+- [x] L96 [dangling-link] `../../skills/make-bot-ui/SKILL.md` in `` …k Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SKILL.md) builds a small page whose bu… ``

@@ -1,16 +1,18 @@
 # Make it yours
 
-pclaude-poteto-mode is one person's style. The machinery underneath, playbooks, routing, model roles, works just as well wearing yours. This page covers generating a personal mode, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
+pclaude-poteto-mode is one person's style. The machinery underneath, playbooks, routing, model roles, works just as well wearing yours. This page covers generating a personal skill in your own style, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
 
-Start smaller than you think. You don't need many skills on day one, or even this whole plugin. Prompt plainly, watch where agents fail, and add a skill or a check when the same failure shows up twice.
+Start smaller than you think. You don't need many skills on day one, or even this whole skill set. Prompt plainly, watch where agents fail, and add a skill or a check when the same failure shows up twice.
 
-## Generate your own mode with `/pclaude-automate-me`
+## Generate your own skill with `/pclaude-automate-me`
 
 ```text
 /pclaude-automate-me
 ```
 
-You don't describe your style, because [`/pclaude-automate-me`](../pclaude-automate-me/SKILL.md) reads it out of your history. It mines your recent transcripts in the active workspace for repeated preferences, in how you like replies, delegation, verification, code, prose, and process, then asks you which patterns are really you. It drafts `.cursor/skills/<your-name>-mode/SKILL.md` through Cursor's built-in `create-skill` flow, runs the draft through [`/pclaude-unslop`](../pclaude-unslop/SKILL.md), and opens a PR from a worktree so you review it like any other change.
+You don't describe your style, because [`/pclaude-automate-me`](../pclaude-automate-me/SKILL.md) reads it out of your history. It mines the active project's recent transcripts in `~/.claude/projects` for repeated preferences, in how you like replies, delegation, verification, code, prose, and process, then asks you numbered questions about which patterns are really you. It drafts a `<your-name>-mode` skill with the `writing-for-agents` skill, runs the draft through [`/pclaude-unslop`](../pclaude-unslop/SKILL.md), and opens a PR from a worktree so you review it like any other change.
+
+The result is shaped like [`/pclaude-poteto-mode`](../pclaude-poteto-mode/SKILL.md). It is a user-invoked skill (`disable-model-invocation: true`), so it loads only when you type `/<your-name>-mode <task>`. It lands in the project's `.claude/skills/<your-name>-mode/` by default, or in `~/.claude/skills/<your-name>-mode/` if you want it everywhere.
 
 Run it again whenever your habits drift:
 
@@ -18,7 +20,7 @@ Run it again whenever your habits drift:
 /pclaude-automate-me update my mode skill with everything since its last edit
 ```
 
-Update mode mines only the history since the skill last changed. It keeps rules you haven't contradicted, revises the ones with new evidence, and adds sections only for genuinely new patterns.
+An update mines only the history since the skill last changed. It keeps rules you haven't contradicted, revises the ones with new evidence, and adds sections only for genuinely new patterns.
 
 ## Capture a session's lessons with `/pclaude-reflect`
 
@@ -45,7 +47,7 @@ Human review isn't on the list. A reviewer who must catch the same mistake on ev
 /pclaude-correct agents keep calling the database client directly instead of going through the repository layer
 ```
 
-It reads recent commits, reverts, review comments, and comments that explain workarounds, then groups the mistakes into classes. A class counts once it has happened twice. It fixes the most frequent classes one commit each, at the highest level that works, and proves each new check fails on a real past mistake. It also keeps a table in the agent instruction file that pairs each rule with what enforces it, so a rule that nothing enforces shows up as a repeat. The reply lists each class with its evidence, the level chosen, and why a higher level didn't work.
+It reads recent commits, reverts, review comments, and comments that explain workarounds, then groups the mistakes into classes. A class counts once it has happened twice. It fixes the most frequent classes one commit each, at the highest level that works, and proves each new check fails on a real past mistake. It also keeps a table in the agent instruction file (`CLAUDE.md` or `AGENTS.md`) that pairs each rule with what enforces it, so a rule that nothing enforces shows up as a repeat. The reply lists each class with its evidence, the level chosen, and why a higher level didn't work.
 
 Run it with no argument and it finds the classes from history on its own. `/pclaude-reflect` and `/pclaude-correct` split the work. `/pclaude-reflect` improves skills from one session. `/pclaude-correct` changes the repo so a mistake class can't come back. Pair it with `/pclaude-architect` when the fix is a new boundary. [Run many projects in parallel](./07-overnight.md#run-many-projects-in-parallel) has a prompt that does both across a whole repo.
 
@@ -57,7 +59,7 @@ When you already know the workflow you want to capture:
 /pclaude-poteto-mode write a skill for verifying database migrations in this repo
 ```
 
-Writing a skill matches the [Authoring or modifying a skill playbook](../pclaude-poteto-mode/playbooks/authoring-a-skill.md), which routes through Cursor's built-in `create-skill`, validates the frontmatter and links, and ships the result through the Opening a PR playbook. Agent-facing prose has a higher bar than human prose, because an unhelpful sentence becomes an instruction some future agent follows. Let the playbook hold that bar rather than writing a `SKILL.md` freehand.
+Writing a skill matches the [Authoring or modifying a skill playbook](../pclaude-poteto-mode/playbooks/authoring-a-skill.md), which loads the `writing-for-agents` skill, follows [`CONVENTIONS.md`](../CONVENTIONS.md) for a pclaude skill, validates the frontmatter and links, and ships the result through the [Opening a PR playbook](../pclaude-poteto-mode/playbooks/opening-a-pr.md). Agent-facing prose has a higher bar than human prose, because an unhelpful sentence becomes an instruction some future agent follows. Let the playbook hold that bar rather than writing a `SKILL.md` freehand.
 
 One special case has its own generator. A skill that must drive your app and prove behavior is a verification skill, so use [`/pclaude-create-verification-skill`](../pclaude-create-verification-skill/SKILL.md) and [`/pclaude-maintain-verification-skill`](../pclaude-maintain-verification-skill/SKILL.md) instead. [Verify and ship](./06-verify-and-ship.md#create-a-project-verification-skill) covers both.
 
@@ -90,10 +92,6 @@ Asking for the eval up front keeps the edit honest. A fix written from one bad s
 The [Eval playbook](../pclaude-poteto-mode/playbooks/eval.md) is built around one failure mode, the observer effect. An agent that knows it's being evaluated behaves differently. So candidate agents get an organic-looking task in sanitized directories, never the words "eval" or "candidate", and never each other's existence. One judge scores all outputs under neutral labels, and chain-following gets graded from which files each candidate actually read, not from what it claims.
 
 Read every output yourself before accepting the verdict. If you disagree with the judge, suspect the rubric before you suspect your judgment.
-
-## Build a bot UI with `/make-bot-ui`
-
-One situational skill is for Grok Bot users. [`/make-bot-ui`](../../skills/make-bot-ui/SKILL.md) builds a small page whose buttons wake a bot over a webhook routine. For example, you could swipe through a review queue and have each swipe ask the bot to act on that item. A server on your machine holds the webhook's sender key, so the key never reaches the browser or the chat. The skill also covers exposing the page on Tailscale.
 
 **Pitfall:** don't edit a skill mid-task because it's misbehaving. Fix it in its own PR and keep the task moving. A skill edit that ships tangled into feature work is invisible to review and impossible to evaluate.
 

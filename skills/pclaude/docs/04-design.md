@@ -1,10 +1,10 @@
 # Design before you write code
 
-One attempt at a hard design locks in the first shape the model thought of. `/pclaude-architect` settles types and boundaries before implementation. `/pclaude-arena` runs several attempts at the same brief and merges the best parts. `/pclaude-interrogate` has other models try to break the result. When the job is coverage rather than design synthesis, `/pclaude-swarm` fans out slices or races and aggregates their results.
+One attempt at a hard design locks in the first shape the model thought of. `/pclaude-architect` settles types and boundaries before implementation. `/pclaude-arena` runs several attempts at the same brief and merges the best parts. `/pclaude-interrogate` has a panel of fresh reviewers try to break the result. When the job is coverage rather than design synthesis, `/pclaude-swarm` fans out slices or races and aggregates their results.
 
 The two most common design mistakes are taking the agent's first design and polishing a plan that no code has tested. This page fixes both. You plan through code: prototypes answer the open questions, a README or tutorial sets the target, and the written plan comes last.
 
-![Three robots draft competing bridge models at their own tables under /pclaude-architect, /pclaude-arena, and /pclaude-interrogate panels, while a judge robot with a clipboard inspects skeptically.](./images/design.jpg)
+![Three robots draft competing bridge models at their own tables under three labelled banners, while a judge robot with a clipboard inspects skeptically.](./images/design.jpg)
 
 ## Settle the shape with `/pclaude-architect`
 
@@ -28,7 +28,7 @@ The design isn't sacred once code starts. If implementation shows the same worka
 /pclaude-arena take my prompt to the arena verbatim. i want to compare their proposals with yours.
 ```
 
-[`/pclaude-arena`](../pclaude-arena/SKILL.md) is the general tool underneath. N subagents attempt the same design or code brief in parallel, each writing to its own worktree or directory. A read-only judge, on a different model family when your configuration allows one, scores every candidate against a rubric. The coordinator reads each candidate end to end, picks a base, grafts in the best ideas from the losers, and verifies the result.
+[`/pclaude-arena`](../pclaude-arena/SKILL.md) is the general tool underneath. N subagents attempt the same design or code brief in parallel, each writing to its own git worktree or scratch directory. A read-only judge in a fresh context scores every candidate against a rubric. It sees the candidates and the rubric, never a candidate's reasoning, and that fresh context is what makes it independent. The coordinator reads each candidate end to end, picks a base, grafts in the best ideas from the losers, and verifies the result.
 
 ```mermaid
 flowchart LR
@@ -44,7 +44,7 @@ flowchart LR
     H --> I[Verify]
 ```
 
-The panel comes from your [`/setup-pstack`](../../skills/setup-pstack/SKILL.md) configuration, and you can adjust it per task. Ask for more candidates when the decision matters, fewer when it doesn't:
+The panel is the `arena runners` role in [models.md](../models.md). The role's value is a list, one runner per entry, so the list length sets the panel size. Edit that line to change the default, or adjust it per task. Ask for more candidates when the decision matters, fewer when it doesn't:
 
 ```text
 /pclaude-arena this, 5 candidates. the cache key format is expensive to change later.
@@ -66,7 +66,7 @@ Reach for it when parallelism buys coverage or lets independent checks race. `/p
 /pclaude-interrogate the whole branch, but skeptically. no nitpicks unless it's an actual bug or regression.
 ```
 
-[`/pclaude-interrogate`](../pclaude-interrogate/SKILL.md) sends the same diff, intent, and rubric to reviewers on different model families. Model diversity is the point. Different models have different blind spots, so a finding two models raise independently is high-confidence signal. The lead sorts everything into `Act on`, `Consider`, `Noted`, and `Dismissed`, with a reason for each dismissal, and applies nothing automatically.
+[`/pclaude-interrogate`](../pclaude-interrogate/SKILL.md) sends the same diff, intent, and rubric to one reviewer per entry in the `interrogate reviewers` role in [models.md](../models.md). Model diversity is the point. Different models have different blind spots, so a finding two models raise independently is high-confidence signal. The lead sorts everything into `Act on`, `Consider`, `Noted`, and `Dismissed`, with a reason for each dismissal, and applies nothing automatically.
 
 Read the dismissals too. The lead is a pragmatic senior engineer, not an oracle, and you can override it.
 

@@ -2,14 +2,14 @@
 
 `/pclaude-poteto-mode` is the front door. You give it a goal, it matches one of twenty-three playbooks, copies that playbook's steps into the todo list, and calls the other skills as the steps need them. In this page you learn what a good prompt looks like, and how little of one you actually need.
 
-![A dispatcher pulls a switch lever to route robots on rail handcars toward lit gates, under a /pclaude-poteto-mode departure board listing BUG FIX, FEATURE, and INVESTIGATION.](./images/router.jpg)
+![A dispatcher pulls a switch lever to route robots on rail handcars toward lit gates, under a departure board listing BUG FIX, FEATURE, and INVESTIGATION.](./images/router.jpg)
 
 ## What happens to your prompt
 
 ```mermaid
 flowchart TD
     A[Your prompt] --> B[pclaude-poteto-mode]
-    B --> C[Read the Principles section]
+    B --> C[Read principles, conventions and models]
     C --> D{Match the task}
     D -->|Read-only question| E[Investigation]
     D -->|Defect| F[Bug fix]
@@ -82,7 +82,7 @@ continue
 keep going until done
 ```
 
-Short works because the playbook holds the structure, and a Custom Mode keeps `/pclaude-poteto-mode` in context on every turn. [Set up pclaude](./01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
+Short works because the playbook holds the structure, and `/pclaude-poteto-mode` stays in the conversation's context once you've typed it. A bare `continue` rides on that context. When the chat has drifted far from the task, type `/pclaude-poteto-mode` again. [Set up pclaude](./01-setup.md#run-your-first-task) covers this. Your words carry the intent, and the skill carries the rigor.
 
 ## Switch tasks with "new task"
 
@@ -92,19 +92,19 @@ A long chat accumulates context from the last task. When you change subjects, sa
 /pclaude-poteto-mode new task. figure out why the cache entry survives logout. don't change any code yet.
 ```
 
-"new task" tells `/pclaude-poteto-mode` to re-match rather than continue the prior playbook. "don't change any code yet" pins this one to Investigation. Without those two phrases, a mode mid-Feature tends to treat your question as the next feature step.
+"new task" tells `/pclaude-poteto-mode` to re-match rather than continue the prior playbook. "don't change any code yet" pins this one to Investigation. Without those two phrases, a session mid-Feature tends to treat your question as the next feature step.
 
-## Give parallel work its own machine
+## Give parallel work its own worktree
 
-If you run several agents against one repository on one computer, they will fight over the working tree, the ports, and the build output. The cleanest isolation is a [cloud subagent](https://cursor.com/docs/subagents#cloud-subagents). Each one gets its own VM and branch, so it can install dependencies, run your app, and record video of the result without touching your machine. Type `/in-cloud` before the task, or ask the parent chat to hand work to cloud subagents.
+If you run several agents against one repository in one checkout, they will fight over the working tree, the ports, and the build output. The playbooks that fan out (autopilots, orchestrate, swarm) already avoid this. Each delegate runs as a background agent in its own git worktree, so no agent stomps another's files. When you want a delegate on a remote machine instead, with its own environment for installing dependencies and running your app, say so in the prompt. Remote is opt-in. Local worktrees are the default.
 
-When the work has to stay local, ask for a worktree up front:
+For your own task, ask for a worktree up front:
 
 ```text
 /pclaude-poteto-mode new task. branch off <base> in a fresh worktree, then port the parser change there.
 ```
 
-Each task in its own branch and worktree means no agent stomps another's files. Worktrees cost disk and machine resources, so a laptop runs only a handful at once. The [Opening a PR playbook](../pclaude-poteto-mode/playbooks/opening-a-pr.md) already works from a worktree for code changes, so mostly you only say this when a specific base or location matters.
+Each task in its own branch and worktree keeps it clear of the others. Worktrees cost disk and machine resources, so a laptop runs only a handful at once. The [Opening a PR playbook](../pclaude-poteto-mode/playbooks/opening-a-pr.md) already works from a worktree for code changes, so mostly you only say this when a specific base or location matters.
 
 Worktrees accumulate. When disk gets tight, ask:
 

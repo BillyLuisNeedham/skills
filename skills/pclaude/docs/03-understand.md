@@ -4,7 +4,7 @@ Editing code you don't understand is how subtle regressions ship, and that's as 
 
 pclaude gives you four ways in. `/pclaude-how` explains what the code does now. `/pclaude-why` digs up the reasons it's shaped that way. `/pclaude-teach` blends both into one explanation. `/pclaude-recall` rebuilds your own recent context on a topic. Each one also makes the agent explain itself in words you can check. That's how you supervise an agent that may know the code better than you do.
 
-![A detective studies a machine blueprint with a magnifying glass while robots fetch case files; the evidence board behind her links clues under /pclaude-how and /pclaude-why.](./images/understanding.jpg)
+![A detective studies a machine blueprint with a magnifying glass while robots fetch case files. The evidence board behind her links clues under two labelled columns.](./images/understanding.jpg)
 
 ## Start with a read-only investigation
 
@@ -56,7 +56,7 @@ Teaching helps the agent as much as you. An agent that has to explain its work m
 /pclaude-recall catch me up on the export work from last week
 ```
 
-[`/pclaude-recall`](../pclaude-recall/SKILL.md) mines your own recent chats plus the shared record (issues, prior fixes, errors still firing) and hands back a brief on where things stand and what's next. Your old chats hold context that a fresh agent lacks, so start new work on an old topic by loading it first, then hand over the new input:
+[`/pclaude-recall`](../pclaude-recall/SKILL.md) mines your own recent Claude Code chats in this project plus the shared record (issues, prior fixes, errors still firing) and hands back a brief on where things stand and what's next. Your old chats hold context that a fresh agent lacks, so start new work on an old topic by loading it first, then hand over the new input:
 
 ```text
 /pclaude-recall my work on the virtualized list from yesterday, then read this bug report.

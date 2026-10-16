@@ -58,7 +58,7 @@ The UI bullet above hides a real requirement. The agent needs a scripted way to 
 
 [`/pclaude-create-verification-skill`](../pclaude-create-verification-skill/SKILL.md) interviews the repository, not you. It works out what a user touches, how the app launches locally, what can drive it (an existing harness first, otherwise browser and CDP, a PTY, or plain HTTP), what evidence proves behavior, and whether two instances can run side by side. It asks you only what the code can't answer.
 
-It writes `.cursor/skills/verify-<app>/`, agent-facing instructions with exact Launch, Doctor, Drive, Evidence, and Cleanup sections, plus a feature map under `features/` that indexes what the app does and what result proves each feature works. The skill ships a [worked feature-map example](../pclaude-create-verification-skill/references/feature-map-example/) with a README index and one file per feature using the four required H2s. Before handing it over, the generator proves the skill once end to end: launch, doctor check, drive one feature, capture evidence, clean up. If that proof fails, don't use the output.
+It writes `.claude/skills/verify-<app>/` in your project, agent-facing instructions with exact Launch, Doctor, Drive, Evidence, and Cleanup sections, plus a feature map under `features/` that indexes what the app does and what result proves each feature works. The skill ships a [worked feature-map example](../pclaude-create-verification-skill/references/feature-map-example/) with a README index and one file per feature using the four required H2s. Before handing it over, the generator proves the skill once end to end: launch, doctor check, drive one feature, capture evidence, clean up. If that proof fails, don't use the output.
 
 From then on, "verify it in the app" is a step any agent can execute, in this repo, with no setup conversation. Name it in the prompt when you want the proof in a specific form:
 
@@ -85,7 +85,7 @@ While you're there, make the dev setup repeatable too: seeded data, test users, 
 
 ## Keep the verification skill honest
 
-Apps change and feature maps rot. Run this at least once a day, ideally from a scheduled automation so nobody has to remember:
+Apps change and feature maps rot. Run this at least once a day, ideally on a schedule so nobody has to remember:
 
 ```text
 /pclaude-maintain-verification-skill
@@ -109,7 +109,7 @@ An open PR starts collecting blockers immediately. Checks fail, reviewers commen
 /pclaude-poteto-mode babysit this pr. get it green.
 ```
 
-Babysit watches the PR with a bundled watcher and takes blockers in order: conflicts, then review threads, then CI. Every known fix batches into one push, so the checks restart once instead of after every fix. The comment triage is skeptical, because humans and bots file real catches and noise in the same list. A real finding gets a fix, and noise gets dismissed with the disproof posted on the thread. When all you want is status, ask smaller and Babysit answers without starting the loop:
+Babysit watches the PR with a bundled watcher over `gh` and takes blockers in order: conflicts, then comments, then CI. It reports a conflict for the branch owner to rebase instead of resolving it. Every known fix batches into one push, so the checks restart once instead of after every fix. The watcher sees every comment from every author, review threads and conversation comments alike, and a new comment always wakes it. Triage is skeptical toward bots and open toward humans. A real finding gets a fix. Bot noise gets dismissed with the disproof posted on the thread. A human's comment is never dismissed. Babysit fixes it, or holds it for you to answer. When all you want is status, ask smaller and Babysit answers without starting the loop:
 
 ```text
 /pclaude-poteto-mode check on pr 123. anything outstanding?
@@ -125,6 +125,6 @@ Green is not the same as safe. When you're ready to land, say so:
 /pclaude-poteto-mode land the stack.
 ```
 
-The [Shipping playbook](../pclaude-poteto-mode/playbooks/shipping.md) verifies each PR independently before it arms anything. One fresh agent per PR proves the behavior live, and the agent that judges a change is never the one that wrote it. Then Shipping lands only the contiguous verified run from the bottom, one PR at a time through GitHub by default or Origin when its CLI is available, and reports the first PR that breaks the chain. A verified PR sitting above an unverified one waits, because merging it would pull the gap in underneath.
+The [Shipping playbook](../pclaude-poteto-mode/playbooks/shipping.md) verifies each PR independently before it arms anything. One fresh agent per PR, each in its own worktree, proves the behavior live, and the agent that judges a change is never the one that wrote it. Then Shipping lands only the contiguous verified run from the bottom, one PR at a time through `gh`, and reports the first PR that breaks the chain. A comment that arrives mid-run stops the landing until it is triaged, because a human may be asking you to hold. A verified PR sitting above an unverified one waits, because merging it would pull the gap in underneath.
 
 Next: [Run work while you sleep](./07-overnight.md).

@@ -2,7 +2,7 @@
 
 Prompts worth copying, then the mistakes everyone makes once. Swap in your own paths and finish conditions. The recipes are deliberately informal. That's how they get typed in practice, and the skills read intent fine.
 
-![She tastes a finished dish while robots cook from a recipe box, with pinned cards reading /pclaude-how, /pclaude-tdd, and /loop above the counter.](./images/recipes.jpg)
+![She tastes a finished dish while robots cook from a recipe box, with recipe cards pinned above the counter.](./images/recipes.jpg)
 
 ## Understand an unfamiliar subsystem
 
@@ -95,7 +95,7 @@ The fix lands in the repo as architecture, a type, a lint, or a test, so the nex
 ## Ask how without starting the work
 
 ```text
-/pclaude-help how do i get pclaude-poteto-mode to stay on every turn?
+/pclaude-help how do i make pclaude runs cheaper?
 ```
 
 You get an answer, a prompt to send, and a link to the source. Nothing runs until you send that prompt.
@@ -141,13 +141,13 @@ That's the whole prompt. [`/pclaude-bro`](../pclaude-bro/SKILL.md) restates the 
 - **Leading with your theory of the cause.** The agent searches wherever you pointed. Ask it to restate the problem first, then share your hunch.
 - **Taking the first design.** One attempt locks in the first shape the model thought of. Ask for prototypes or `/pclaude-architect` and pick from evidence.
 - **Polishing an abstract plan.** Adversarial review of a plan with no code behind it invents risks that will never happen. Settle the open questions with prototypes, then review what got built.
-- **Parallel agents in one worktree.** They overwrite each other and the diff becomes archaeology. Run them as cloud agents, or say "own worktree per attempt".
+- **Parallel agents in one worktree.** They overwrite each other and the diff becomes archaeology. Say "own worktree per attempt" so each agent runs in an isolated git worktree.
 - **Looping before you trust the loop.** A loop that can't verify its own work only makes unchecked work faster. Get the verification skill working first.
 - **Trusting an unvetted number.** A warm cache or a skipped code path can fake a speedup. Run `/pclaude-benchmark-checklist` before the number goes anywhere.
 - **Correcting the same mistake by hand.** A correction in chat helps one run. `/pclaude-correct` fixes the repo so no later run repeats it.
 - **Using `/pclaude-arena` for coverage.** `/pclaude-arena` repeats one design or code brief, then picks a base and grafts the best parts. `/pclaude-swarm` partitions slices or declared race arms and aggregates one report.
 - **Accepting every review comment.** Bots and humans both file real catches and noise in one list. `/pclaude-interrogate` sorts findings into act-on and dismissed buckets with reasons, and you can override either way.
-- **Treating `auto` as a model slug.** `auto` and `inherit-parent` mean "omit the model field so the subagent inherits the parent chat model." [Setup](./01-setup.md) covers the roles.
+- **Writing a model slug into a prompt or skill.** Every skill reads its model from a role in [`models.md`](../models.md). Change the role's line there instead. `inherit` means "omit the model so the subagent runs on the session's model." [Setup](./01-setup.md) covers the roles.
 - **Reporting success off a green build.** A build proves it compiles. Ask for the real command, flow, stored value, or profile, and expect the evidence in the reply.
 - **Writing a `SKILL.md` freehand.** Route it through the [Authoring or modifying a skill playbook](../pclaude-poteto-mode/playbooks/authoring-a-skill.md) so validation and review happen.
 

@@ -1,0 +1,16 @@
+# Allowlist for scripts/pclaude-check.sh. It lists text the check would flag
+# in skills/pclaude/ but that is meant to be there.
+#
+# One entry per line:
+#   <path glob, relative to skills/pclaude/><TAB><exact text on the flagged line>
+# A hit is allowed only when the text it matched lies inside an occurrence of
+# that exact text, on a line of a file the glob matches. `*` matches within a
+# path segment and `**/` matches any number of directories.
+#
+# Every entry must sit in a block that opens with a `#` comment saying why it
+# is allowed. A blank line ends a block. An entry without a comment fails the
+# check, and an entry that no longer matches anything is printed as a warning
+# so it can be deleted.
+
+# The footer spec section 4 puts on every SKILL.md credits upstream by name.
+**/SKILL.md	Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

@@ -2,10 +2,11 @@
 set -euo pipefail
 
 # Generates one OpenCode slash-command stub per skill in this repo that is in
-# the active skill set or an always-on bucket (see scripts/skill-sets.sh;
-# deprecated/ is excluded, misc/ is included), so `/<skill-name>` works in
-# OpenCode the way it does in Claude Code. Stubs this script wrote for skills
-# in an inactive set are pruned along with stale ones.
+# an active skill set or an always-on path (see scripts/skill-sets.sh;
+# deprecated/ and the Cursor-only pstack/ are excluded, misc/ is included), so
+# `/<skill-name>` works in OpenCode the way it does in Claude Code. A name held
+# by two active sets gets the later set's copy, with a warning. Stubs this
+# script wrote for skills in an inactive set are pruned along with stale ones.
 #
 # OpenCode already discovers the skills themselves: it globs
 # ~/.claude/skills/**/SKILL.md and ~/.agents/skills/**/SKILL.md (both populated
@@ -33,7 +34,7 @@ CONFIG_DIR="${OPENCODE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode}"
 COMMAND_DIR="$CONFIG_DIR/command"
 # shellcheck source=skill-sets.sh
 . "$REPO/scripts/skill-sets.sh"
-ACTIVE_SKILL_SET="$(active_skill_set)"
+ACTIVE_SKILL_SETS="$(active_skill_sets | tr '\n' ' ')"
 
 # Stamped into every generated file so pruning only ever deletes our own stubs
 # and leaves hand-written commands alone.
@@ -124,9 +125,9 @@ EOF
 mkdir -p "$COMMAND_DIR"
 
 WRITTEN=""
-while IFS= read -r -d '' skill_md; do
-  src="$(dirname "$skill_md")"
-  skill_path_active "$src" include-misc || continue
+while IFS= read -r src; do
+  [ -n "$src" ] || continue
+  skill_md="$src/SKILL.md"
   name="$(basename "$src")"
   desc="$(skill_description "$skill_md")"
   [ -n "$desc" ] || desc="Run the $name skill."
@@ -138,7 +139,7 @@ while IFS= read -r -d '' skill_md; do
     echo "wrote $name -> $src ($COMMAND_DIR)"
   fi
   WRITTEN="$WRITTEN$name"$'\n'
-done < <(all_skill_mds)
+done < <(winning_skill_dirs opencode)
 
 for f in "$COMMAND_DIR"/*.md; do
   [ -e "$f" ] || continue

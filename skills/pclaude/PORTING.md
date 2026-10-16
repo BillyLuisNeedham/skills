@@ -366,23 +366,23 @@ Autopilots and orchestrate.
 
 ### pclaude-poteto-mode/playbooks/autopilot-full.md
 
-- [ ] L8 [cursor:Cursor] `Cursor` in `` …phite (`gt`). Each owner is a Cursor cloud agent that builds, open… ``
-- [ ] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
-- [ ] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
-- [ ] L10 [cursor:cursor-team-kit] `cursor-team-kit` in `` …(the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`)) and the… ``
-- [ ] L14 [cursor:control-ui] `control-ui` in `` …h its control skill (such as `control-ui` or `control-cli` from `curso… ``
-- [ ] L14 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`) or a… ``
-- [ ] L14 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`) or a named driver, and audi… ``
+- [x] L8 [cursor:Cursor] `Cursor` in `` …phite (`gt`). Each owner is a Cursor cloud agent that builds, open… ``
+- [x] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
+- [x] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
+- [x] L10 [cursor:cursor-team-kit] `cursor-team-kit` in `` …(the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`)) and the… ``
+- [x] L14 [cursor:control-ui] `control-ui` in `` …h its control skill (such as `control-ui` or `control-cli` from `curso… ``
+- [x] L14 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`) or a… ``
+- [x] L14 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`) or a named driver, and audi… ``
 
 ### pclaude-poteto-mode/playbooks/orchestrate.md
 
-- [ ] L15 [cursor:Task-tool] `the Task` in `…med, and drained only through the Task tool. Pick each subagent's re…`
-- [ ] L16 [cursor:Task-tool] `Task schema` in `` …d a nested spawn has the full Task schema including `environment`). Rol… ``
-- [ ] L17 [cursor:control-ui] `control-ui` in `` …the task needs this machine: `control-ui` or `control-cli` runtime ver… ``
-- [ ] L17 [cursor:control-cli] `control-cli` in `` …his machine: `control-ui` or `control-cli` runtime verification (from `… ``
-- [ ] L17 [cursor:cursor-team-kit] `cursor-team-kit` in `` …` runtime verification (from `cursor-team-kit`). Reading local transcripts… ``
-- [ ] L96 [cursor:Cursor] `Cursor` in `…e cloud agent's status in the Cursor dashboard. Transcript mtime i…`
-- [ ] L102 [cursor:Cursor] `Cursor` in `- After a Cursor restart: local agents are dea…`
+- [x] L15 [cursor:Task-tool] `the Task` in `…med, and drained only through the Task tool. Pick each subagent's re…`
+- [x] L16 [cursor:Task-tool] `Task schema` in `` …d a nested spawn has the full Task schema including `environment`). Rol… ``
+- [x] L17 [cursor:control-ui] `control-ui` in `` …the task needs this machine: `control-ui` or `control-cli` runtime ver… ``
+- [x] L17 [cursor:control-cli] `control-cli` in `` …his machine: `control-ui` or `control-cli` runtime verification (from `… ``
+- [x] L17 [cursor:cursor-team-kit] `cursor-team-kit` in `` …` runtime verification (from `cursor-team-kit`). Reading local transcripts… ``
+- [x] L96 [cursor:Cursor] `Cursor` in `…e cloud agent's status in the Cursor dashboard. Transcript mtime i…`
+- [x] L102 [cursor:Cursor] `Cursor` in `- After a Cursor restart: local agents are dea…`
 
 ## Ticket 15
 

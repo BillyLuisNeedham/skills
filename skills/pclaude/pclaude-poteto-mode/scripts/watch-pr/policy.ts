@@ -1,7 +1,10 @@
 import {
   WatcherQueryError,
+  buildReviewThreads,
+  readConversation,
+  readReviewThreads,
   resolveChecks,
-  resolveReviewThreads,
+  selectNewComments,
 } from "./github.ts";
 import type * as T from "./types.ts";
 import { nonEmpty } from "./types.ts";
@@ -61,13 +64,20 @@ export async function readSnapshot(args: {
   readonly context: T.PrContext;
   readonly pendingHistory: "include" | "omit";
   readonly allowDraft: boolean;
+  readonly commentsSince: string | null;
 }): Promise<T.PrSnapshot> {
   const facts = await args.reader.pullRequest(args.context);
   if (facts.state === "MERGED" || facts.mergedAt !== null)
     return { kind: "merged", context: args.context, facts };
   if (facts.state === "CLOSED")
     return { kind: "closed", context: args.context, facts };
-  const threads = await resolveReviewThreads(args.reader, args.context);
+  const rawThreads = await readReviewThreads(args.reader, args.context);
+  const threads = buildReviewThreads(rawThreads);
+  const comments = selectNewComments({
+    threads: rawThreads,
+    conversation: await readConversation(args.reader, args.context),
+    since: args.commentsSince,
+  });
   const checks = await resolveChecks(args.reader, args.context);
   const failed = nonEmpty(
     checks.checks.filter(
@@ -128,6 +138,7 @@ export async function readSnapshot(args: {
     context: args.context,
     facts,
     threads,
+    comments,
     ci,
     reviewAutomationRunning: checks.checks.some(
       (check) =>
@@ -151,6 +162,18 @@ function threadBlocker(row: T.PrSnapshot): T.MergeBlocker | null {
   return threads === null
     ? null
     : { kind: "review-threads", pr: row.context, threads };
+}
+function commentBlocker(row: T.PrSnapshot): T.MergeBlocker | null {
+  if (row.kind !== "open") return null;
+  const comments = nonEmpty(row.comments);
+  return comments === null
+    ? null
+    : {
+        kind: "pr-comments",
+        pr: row.context,
+        comments,
+        commentsCursor: comments[comments.length - 1].createdAt,
+      };
 }
 const ciBlocker = (row: T.PrSnapshot): T.MergeBlocker | null =>
   row.kind === "open" &&
@@ -194,6 +217,7 @@ function readyContribution(
     row.kind !== "open" ||
     row.ci.kind !== "ci-clean" ||
     row.threads.length !== 0 ||
+    row.comments.length !== 0 ||
     conflictBlocker(row) !== null ||
     gateReason(row, allowDraft) !== null
   )
@@ -206,6 +230,7 @@ function readyContribution(
     proof: {
       mergeability: "clear",
       threads: [],
+      comments: [],
       ci: row.ci,
       gate: {
         state: "OPEN",
@@ -222,6 +247,7 @@ export function classifyPr(
   for (const blocker of [
     conflictBlocker(row),
     threadBlocker(row),
+    commentBlocker(row),
     ciBlocker(row),
     gateBlocker(row, allowDraft),
   ])
@@ -238,7 +264,12 @@ export function selectTierMajorStackDecision(
   rows: T.NonEmpty<T.PrSnapshot>,
   allowDraft = false
 ): T.StackDecision {
-  for (const tier of [conflictBlocker, threadBlocker, ciBlocker])
+  for (const tier of [
+    conflictBlocker,
+    threadBlocker,
+    commentBlocker,
+    ciBlocker,
+  ])
     for (const row of rows) {
       const blocker = tier(row);
       if (blocker !== null) return { kind: "blocker", blocker };
@@ -317,6 +348,8 @@ function blockerVerdict(
       return stamp({ kind: "BLOCKER", terminal: true, exitCode: 2, blocker });
     case "review-threads":
       return stamp({ kind: "BLOCKER", terminal: true, exitCode: 3, blocker });
+    case "pr-comments":
+      return stamp({ kind: "BLOCKER", terminal: true, exitCode: 8, blocker });
     case "failing-checks":
       return stamp({ kind: "BLOCKER", terminal: true, exitCode: 4, blocker });
     case "merge-gate":
@@ -431,6 +464,7 @@ export async function runSimple(args: {
           context,
           pendingHistory: "include",
           allowDraft: args.options.allowDraft,
+          commentsSince: args.options.commentsSince,
         })
       );
     const complete = nonEmpty(rows);
@@ -744,6 +778,7 @@ export async function runQueued(args: {
       context,
       pendingHistory: "omit",
       allowDraft: args.options.allowDraft,
+      commentsSince: args.options.commentsSince,
     });
     const applied = applyQueueSnapshot(
       state,

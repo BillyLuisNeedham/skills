@@ -332,33 +332,33 @@ babysit, shipping and watch-pr over every PR comment.
 
 ### pclaude-poteto-mode/playbooks/babysit.md
 
-- [ ] L3 [cursor:Cursor] `Cursor` in `…ins.** This playbook replaces Cursor's built-in babysit skill for…`
+- [x] L3 [cursor:Cursor] `Cursor` in `…ins.** This playbook replaces Cursor's built-in babysit skill for…`
 
 ### pclaude-poteto-mode/playbooks/shipping.md
 
-- [ ] L5 [cursor:control-ui] `control-ui` in `` …ching control skill (such as `control-ui` or `control-cli` from `curso… ``
-- [ ] L5 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`), par… ``
-- [ ] L5 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`), parent against head, and p… ``
-- [ ] L5 [cursor:Cursor] `Cursor` in `…. One verifier per PR, each a Cursor cloud agent, runs the change…`
+- [x] L5 [cursor:control-ui] `control-ui` in `` …ching control skill (such as `control-ui` or `control-cli` from `curso… ``
+- [x] L5 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`), par… ``
+- [x] L5 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`), parent against head, and p… ``
+- [x] L5 [cursor:Cursor] `Cursor` in `…. One verifier per PR, each a Cursor cloud agent, runs the change…`
 
 ### pclaude-poteto-mode/scripts/bun.lock
 
-- [ ] L6 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
+- [x] L6 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
 
 ### pclaude-poteto-mode/scripts/package.json
 
-- [ ] L2 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
+- [x] L2 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
 
 ### pclaude-poteto-mode/scripts/watch-pr/github.test.ts
 
-- [ ] L258 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `body: "CURSOR_AUTOMATION_ID: run-2 severity high",`
-- [ ] L262 [cursor:cursor-name] `"cursor"` in `…author: { login: "cursor" },`
+- [x] L258 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `body: "CURSOR_AUTOMATION_ID: run-2 severity high",`
+- [x] L262 [cursor:cursor-name] `"cursor"` in `…author: { login: "cursor" },`
 
 ### pclaude-poteto-mode/scripts/watch-pr/github.ts
 
-- [ ] L335 [cursor:cursor-name] `"cursor"` in `(author === "cursor" &&`
-- [ ] L338 [cursor:cursor-name] `cursor_automation_id` in `"cursor_automation_id",`
-- [ ] L349 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `/CURSOR_AUTOMATION_ID:\s*([a-zA-Z0-9_.:-]+)/,`
+- [x] L335 [cursor:cursor-name] `"cursor"` in `(author === "cursor" &&`
+- [x] L338 [cursor:cursor-name] `cursor_automation_id` in `"cursor_automation_id",`
+- [x] L349 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `/CURSOR_AUTOMATION_ID:\s*([a-zA-Z0-9_.:-]+)/,`
 
 ## Ticket 14
 

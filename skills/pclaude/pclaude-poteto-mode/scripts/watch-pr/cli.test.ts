@@ -48,6 +48,7 @@ describe("parseArgs", () => {
         timeout: 0,
         maxQueryErrors: 5,
         allowDraft: false,
+        commentsSince: null,
       },
     });
   });
@@ -79,6 +80,7 @@ describe("parseArgs", () => {
       timeout: 0,
       maxQueryErrors: 3,
       allowDraft: true,
+      commentsSince: null,
     });
     expect(parsed.pretty).toBe(true);
   });
@@ -211,6 +213,52 @@ describe("main", () => {
         kind: "failing-checks",
         ci: { kind: "ci-github-rejected" },
       },
+    });
+  });
+
+  describe("a human's conversation comment on an otherwise green PR", () => {
+    const human = {
+      id: "h1",
+      databaseId: 1,
+      source: "issue-comment" as const,
+      thread: null,
+      url: "https://github.com/owner/repo/pull/1#issuecomment-1",
+      authorLogin: "billy",
+      authorKind: "human" as const,
+      body: "Please keep the old flag working.",
+      createdAt: "2026-10-02T00:00:00Z",
+    };
+    const argv = ["--owner", "owner", "--repo", "repo", "--pr", "1"];
+
+    it("blocks with exit 8 and hands back a cursor instead of READY", async () => {
+      const harness = testRuntime(fakeReader({ comments: [human] }));
+      expect(await main(argv, harness.runtime)).toBe(8);
+      expect(JSON.parse(harness.stdout[0])).toMatchObject({
+        kind: "BLOCKER",
+        exitCode: 8,
+        blocker: {
+          kind: "pr-comments",
+          commentsCursor: "2026-10-02T00:00:00Z",
+          comments: [{ authorLogin: "billy", authorKind: "human" }],
+        },
+      });
+    });
+
+    it("reads READY once the cursor covers it", async () => {
+      const harness = testRuntime(fakeReader({ comments: [human] }));
+      const code = await main(
+        [...argv, "--comments-since", "2026-10-02T00:00:00Z"],
+        harness.runtime
+      );
+      expect(code).toBe(0);
+      expect(JSON.parse(harness.stdout[0])).toMatchObject({ kind: "READY" });
+    });
+
+    it("rejects a cursor that is not a timestamp", async () => {
+      const harness = testRuntime(fakeReader());
+      expect(
+        await main([...argv, "--comments-since", "yesterday"], harness.runtime)
+      ).toBe(64);
     });
   });
 

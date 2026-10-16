@@ -33,7 +33,7 @@ ts	phase	decision	why	evidence	result
 
 ## Logging a row
 
-Write each entry the way you'd tell a teammate what you did. Plain words, concrete actions, no AI speak or abstract jargon (`~/.claude/skills/pclaude-unslop/SKILL.md` applies to log text too).
+Write each entry the way you'd tell a teammate what you did. Plain words, concrete actions, no AI speak or abstract jargon (`pclaude-unslop` applies to log text too: Read `~/.claude/skills/pclaude-unslop/SKILL.md`).
 
 Use the helper `scripts/log.sh <logfile> <phase> <decision> <why> <evidence> <result>`. It stamps `ts`, writes the header on first use, strips stray tabs/newlines, and prefixes any cell starting with `=`, `+`, `-`, or `@` with a single quote. A bare `printf` appending a row works too, but mind those same bytes if cells come from generated or user-supplied text.
 
@@ -50,7 +50,7 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 ## Rules
 
 - Append-only. A wrong call gets a new row that supersedes it. Never edit or delete history.
-- Prefer evidence produced by committed scripts over hand-made one-offs (the Encode Lessons in Structure principle, `~/.claude/skills/pclaude-principles/encode-lessons-in-structure.md`).
+- Prefer evidence produced by committed scripts over hand-made one-offs (the encode-lessons-in-structure principle, `~/.claude/skills/pclaude-principles/encode-lessons-in-structure.md`).
 
 ## Audit the log against the transcript
 
@@ -64,7 +64,7 @@ Correct the log, not the story. The audit never edits or removes a row, even an 
 
 ## Cross-model review of the trail
 
-Before handing back, spawn a fresh-context reviewer per "A judge from a different model family" in [models.md](../models.md). Self-review is not a substitute. Give it the audit trail and the transcript path from `info current`, never your own reasoning. It reads the trail and the run's transcript through the reader, then flags what the user should pay attention to. Not a redo of the work, a scan for what's suboptimal or risky. Pick its reasoning level for the job, per the Subagents section of `~/.claude/skills/pclaude-poteto-mode/SKILL.md`.
+Before handing back, spawn a fresh-context reviewer from the main session, per "A judge from a different model family" in [models.md](../models.md): an Agent call with `subagent_type: "general-purpose"`, a do-not-edit instruction, and the `judgment and prose` model. Fresh context is the independence, so give it the log path and the transcript path from `info current`, never your own reasoning. Self-review is not a substitute. The subagent reads the audit trail and the run's transcript through the reader, then flags what the user should pay attention to. Not a redo of the work, a scan for what's suboptimal or risky. Pick its reasoning level for the job, per the Subagents section of `~/.claude/skills/pclaude-poteto-mode/SKILL.md`.
 
 - Decisions logged with weak or absent evidence.
 - Verification steps skipped or claimed without proof in the transcript.
@@ -79,6 +79,6 @@ Read top to bottom, follow the evidence pointers, spot-check. GitHub renders a c
 
 ## Composing this skill
 
-Other skills route their audit trail here instead of inventing one. Reference it by name and let it own the format. Don't restate the columns.
+Other skills route their audit trail here instead of inventing one. Point at `~/.claude/skills/pclaude-show-me-your-work/SKILL.md` and let it own the format. Don't restate the columns.
 
 Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

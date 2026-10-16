@@ -167,7 +167,6 @@ export interface ResolveGateParams {
 
 export interface SetFrontierParams {
   readonly repo: string;
-  readonly forge?: Forge;
   readonly prs?: readonly number[];
 }
 
@@ -968,49 +967,13 @@ function countLine(value: Counts): string {
     : entries.map(([name, count]) => `${name}=${count}`).join(", ");
 }
 
-export type Forge = "gh" | "origin";
+const PULL_REQUEST_STATES: ReadonlyMap<string, FrontierPrState> = new Map([
+  ["OPEN", "OPEN"],
+  ["MERGED", "MERGED"],
+  ["CLOSED", "CLOSED"],
+]);
 
-interface ForgePullRequestQuery {
-  readonly stateField: string;
-  readonly headField: string;
-  readonly baseField: string;
-  readonly states: ReadonlyMap<string, FrontierPrState>;
-}
-
-const FORGE_PULL_REQUEST_QUERIES: Readonly<
-  Record<Forge, ForgePullRequestQuery>
-> = {
-  gh: {
-    stateField: "state",
-    headField: "headRefName",
-    baseField: "baseRefName",
-    states: new Map<string, FrontierPrState>([
-      ["OPEN", "OPEN"],
-      ["MERGED", "MERGED"],
-      ["CLOSED", "CLOSED"],
-    ]),
-  },
-  origin: {
-    stateField: "status",
-    headField: "headRef",
-    baseField: "baseRef",
-    states: new Map<string, FrontierPrState>([
-      ["open", "OPEN"],
-      ["draft", "OPEN"],
-      ["merged", "MERGED"],
-      ["closed", "CLOSED"],
-    ]),
-  },
-};
-
-export function parseForge(value: string): Forge {
-  if (value === "gh" || value === "origin") {
-    return value;
-  }
-  throw new UserError("forge must be gh or origin");
-}
-
-interface ForgePullRequest {
+interface ListedPullRequest {
   readonly pr: number;
   readonly state: FrontierPrState;
   readonly branch: string;
@@ -1043,20 +1006,17 @@ function runTool({
 function listPullRequests({
   filter,
   branch,
-  forge,
   repo,
 }: {
   filter: "--head" | "--base";
   branch: string;
-  forge: Forge;
   repo: string;
-}): readonly ForgePullRequest[] {
-  const query = FORGE_PULL_REQUEST_QUERIES[forge];
-  const command = `${forge} pr list ${filter} ${branch}`;
+}): readonly ListedPullRequest[] {
+  const command = `gh pr list ${filter} ${branch}`;
   // Every state is fetched because a merged or closed PR still anchors the
   // chain, and a draft counts as OPEN.
   const raw = runTool({
-    command: forge,
+    command: "gh",
     args: [
       "pr",
       "list",
@@ -1065,9 +1025,7 @@ function listPullRequests({
       "--state",
       "all",
       "--json",
-      ["number", query.stateField, query.headField, query.baseField].join(
-        ","
-      ),
+      "number,state,headRefName,baseRefName",
     ],
     repo,
   });
@@ -1081,11 +1039,11 @@ function listPullRequests({
     throw new UserError(`${command} output is not a JSON array`);
   }
   return value.map((row) => {
-    const status = isRecord(row) ? row[query.stateField] : undefined;
+    const status = isRecord(row) ? row.state : undefined;
     const state =
-      typeof status === "string" ? (query.states.get(status) ?? null) : null;
-    const head = isRecord(row) ? row[query.headField] : undefined;
-    const base = isRecord(row) ? row[query.baseField] : undefined;
+      typeof status === "string" ? (PULL_REQUEST_STATES.get(status) ?? null) : null;
+    const head = isRecord(row) ? row.headRefName : undefined;
+    const base = isRecord(row) ? row.baseRefName : undefined;
     if (
       !isRecord(row) ||
       typeof row.number !== "number" ||
@@ -1105,18 +1063,16 @@ function listPullRequests({
 
 function branchPullRequest({
   branch,
-  forge,
   repo,
 }: {
   branch: string;
-  forge: Forge;
   repo: string;
-}): ForgePullRequest {
-  const rows = listPullRequests({ filter: "--head", branch, forge, repo });
+}): ListedPullRequest {
+  const rows = listPullRequests({ filter: "--head", branch, repo });
   const row = rows[0];
   if (row === undefined) {
     throw new UserError(
-      `branch ${branch} has no pull request; open one with ${forge} pr create, or resolve the frontier from a branch whose chain is fully submitted`
+      `branch ${branch} has no pull request; open one with gh pr create, or resolve the frontier from a branch whose chain is fully submitted`
     );
   }
   if (rows.length > 1) {
@@ -1129,14 +1085,12 @@ function branchPullRequest({
 
 function openChildren({
   branch,
-  forge,
   repo,
 }: {
   branch: string;
-  forge: Forge;
   repo: string;
-}): readonly ForgePullRequest[] {
-  return listPullRequests({ filter: "--base", branch, forge, repo }).filter(
+}): readonly ListedPullRequest[] {
+  return listPullRequests({ filter: "--base", branch, repo }).filter(
     (row) => row.state === "OPEN"
   );
 }
@@ -1181,14 +1135,14 @@ function trunkBranch(repo: string): string {
   }
 }
 
-function resolveFrontier(repo: string, forge: Forge): readonly FrontierPr[] {
+function resolveFrontier(repo: string): readonly FrontierPr[] {
   const trunk = trunkBranch(repo);
   const current = currentBranch(repo);
   if (current === trunk) {
     return [];
   }
   const seen = new Set([current]);
-  let bottom = branchPullRequest({ branch: current, forge, repo });
+  let bottom = branchPullRequest({ branch: current, repo });
   const chain = [bottom];
   while (bottom.base !== trunk) {
     if (seen.has(bottom.base)) {
@@ -1197,12 +1151,12 @@ function resolveFrontier(repo: string, forge: Forge): readonly FrontierPr[] {
       );
     }
     seen.add(bottom.base);
-    bottom = branchPullRequest({ branch: bottom.base, forge, repo });
+    bottom = branchPullRequest({ branch: bottom.base, repo });
     chain.unshift(bottom);
   }
   let tip = current;
   for (;;) {
-    const children = openChildren({ branch: tip, forge, repo });
+    const children = openChildren({ branch: tip, repo });
     const child = children[0];
     if (child === undefined) {
       break;
@@ -1553,7 +1507,6 @@ export function openStore(
       set: async (params) => {
         await beginWrite();
         const repo = resolve(requiredLine(params.repo, "repo directory"));
-        const forge = parseForge(params.forge ?? "gh");
         const pin =
           params.prs === undefined
             ? undefined
@@ -1562,7 +1515,7 @@ export function openStore(
           throw new UserError("--prs must not contain duplicates");
         }
         const old = await readFrontier(store);
-        const prs = resolveFrontier(repo, forge);
+        const prs = resolveFrontier(repo);
         if (pin !== undefined) {
           validateFrontierPin({
             actual: prs.map((row) => row.pr),

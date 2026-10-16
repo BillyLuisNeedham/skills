@@ -21,7 +21,7 @@ function ciCell(row: T.PrSnapshot): string {
 }
 function reviewCell(row: T.PrSnapshot): string {
   if (row.kind !== "open") return "\u2014";
-  const open = row.threads.length;
+  const open = row.threads.length + row.comments.length;
   return row.reviewAutomationRunning
     ? open
       ? `🤖 running, ${open} open`
@@ -59,9 +59,19 @@ function threadLine(thread: T.ReviewThread): string {
     comment?.path ?? "None",
     comment?.line ?? "None",
     comment?.authorLogin ?? "None",
-    `isBugBot=${thread.isBugbot}`,
-    `bugbotReviewPasses=${thread.bugbotReviewPasses}`,
+    `author=${thread.authorKind}`,
+    `botReviewPasses=${thread.botReviewPasses}`,
     (comment?.body ?? "").split(/\r?\n/, 1)[0]?.slice(0, 180) ?? "",
+  ].join(" ");
+}
+function commentLine(comment: T.PrComment): string {
+  return [
+    comment.source,
+    comment.createdAt,
+    comment.authorLogin ?? "None",
+    `author=${comment.authorKind}`,
+    comment.url,
+    comment.body.split(/\r?\n/, 1)[0]?.slice(0, 180) ?? "",
   ].join(" ");
 }
 type StatusQueryBlocker = {
@@ -85,6 +95,14 @@ function renderBlocker(blocker: T.MergeBlocker | StatusQueryBlocker): string {
         `pr=${blocker.pr.number}`,
         `unresolved=${blocker.threads.length}`,
         ...blocker.threads.map(threadLine),
+      ].join("\n");
+    case "pr-comments":
+      return [
+        "BLOCKER: pr-comments",
+        `pr=${blocker.pr.number}`,
+        `new=${blocker.comments.length}`,
+        `commentsCursor=${blocker.commentsCursor}`,
+        ...blocker.comments.map(commentLine),
       ].join("\n");
     case "failing-checks": {
       const failed = blocker.ci.kind === "ci-failing" ? blocker.ci.failed : [];

@@ -55,8 +55,16 @@ export interface OpenPullRequest {
   readonly headRefName: string;
   readonly baseRefName: string;
 }
+// A comment with no author (a deleted account) counts as human, so the triage
+// rubric never auto-dismisses it.
+export type AuthorKind = "human" | "bot";
 export interface ReviewComment {
+  readonly id: string;
+  readonly databaseId: number | null;
+  readonly url: string;
   readonly authorLogin: string | null;
+  readonly authorKind: AuthorKind;
+  readonly reviewId: string | null;
   readonly body: string;
   readonly path: string | null;
   readonly line: number | null;
@@ -65,8 +73,25 @@ export interface ReviewComment {
 export interface ReviewThread {
   readonly id: string;
   readonly firstComment: ReviewComment | null;
-  readonly isBugbot: boolean;
-  readonly bugbotReviewPasses: number;
+  readonly authorKind: AuthorKind;
+  readonly botReviewPasses: number;
+}
+export type PrCommentSource = "issue-comment" | "review" | "thread-reply";
+export interface PrComment {
+  readonly id: string;
+  readonly databaseId: number | null;
+  readonly source: PrCommentSource;
+  // A thread reply names its thread and the thread's first comment, which is
+  // the comment GitHub's reply endpoint takes. Null for every other source.
+  readonly thread: {
+    readonly id: string;
+    readonly rootDatabaseId: number | null;
+  } | null;
+  readonly url: string;
+  readonly authorLogin: string | null;
+  readonly authorKind: AuthorKind;
+  readonly body: string;
+  readonly createdAt: string;
 }
 interface CheckDetails {
   readonly name: string;
@@ -153,6 +178,7 @@ export type PrSnapshot =
       readonly context: PrContext;
       readonly facts: PullRequestFacts;
       readonly threads: readonly ReviewThread[];
+      readonly comments: readonly PrComment[];
       readonly ci: CiState;
       readonly reviewAutomationRunning: boolean;
     };
@@ -162,6 +188,7 @@ export interface ReadyPr {
   readonly proof: {
     readonly mergeability: "clear";
     readonly threads: readonly [];
+    readonly comments: readonly [];
     readonly ci: CiClean;
     readonly gate: {
       readonly state: "OPEN";
@@ -189,6 +216,12 @@ export type MergeBlocker =
       readonly kind: "review-threads";
       readonly pr: PrContext;
       readonly threads: NonEmpty<ReviewThread>;
+    }
+  | {
+      readonly kind: "pr-comments";
+      readonly pr: PrContext;
+      readonly comments: NonEmpty<PrComment>;
+      readonly commentsCursor: string;
     }
   | {
       readonly kind: "failing-checks";
@@ -314,6 +347,9 @@ export type BlockerVerdict =
         { readonly kind: "review-threads" }
       >;
     })
+  | (Terminal<"BLOCKER", 8> & {
+      readonly blocker: Extract<MergeBlocker, { readonly kind: "pr-comments" }>;
+    })
   | (Terminal<"BLOCKER", 4> & {
       readonly blocker: Extract<
         MergeBlocker,
@@ -382,7 +418,12 @@ export interface RollupPage {
 export interface RawReviewThread {
   readonly id: string;
   readonly firstComment: ReviewComment | null;
+  readonly replies: readonly ReviewComment[];
   readonly resolved: boolean;
+}
+export interface ConversationPage {
+  readonly comments: readonly PrComment[];
+  readonly endCursor: string | null;
 }
 export interface ReviewThreadPage {
   readonly threads: readonly RawReviewThread[];
@@ -402,6 +443,11 @@ export interface GitHubReader {
     context: PrContext,
     after: string | null
   ): Promise<ReviewThreadPage>;
+  conversationPage(
+    context: PrContext,
+    connection: "comments" | "reviews",
+    after: string | null
+  ): Promise<ConversationPage>;
   commitRollups(context: PrContext): Promise<readonly CommitRollup[]>;
 }
 export interface PollingOptions {
@@ -410,4 +456,5 @@ export interface PollingOptions {
   readonly timeout: number;
   readonly maxQueryErrors: number;
   readonly allowDraft: boolean;
+  readonly commentsSince: string | null;
 }

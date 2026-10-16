@@ -2,8 +2,10 @@ import type {
   Check,
   ChecksFastPath,
   CommitRollup,
+  ConversationPage,
   GitHubReader,
   OpenPullRequest,
+  PrComment,
   PrContext,
   PullRequestFacts,
   Repository,
@@ -20,6 +22,8 @@ export interface FakeReaderOptions {
   readonly rollupPages?: readonly RollupPage[];
   readonly threads?: readonly ReviewThread[];
   readonly threadPages?: readonly ReviewThreadPage[];
+  readonly comments?: readonly PrComment[];
+  readonly reviews?: readonly PrComment[];
   readonly commitRollups?: readonly CommitRollup[];
   readonly openPullRequests?: readonly OpenPullRequest[];
   readonly origin?: Repository | null;
@@ -27,7 +31,12 @@ export interface FakeReaderOptions {
 }
 
 function toRawThread(thread: ReviewThread): RawReviewThread {
-  return { id: thread.id, firstComment: thread.firstComment, resolved: false };
+  return {
+    id: thread.id,
+    firstComment: thread.firstComment,
+    replies: [],
+    resolved: false,
+  };
 }
 
 export function passingCheck(name = "ci"): Check {
@@ -116,10 +125,22 @@ export function fakeReader(
     },
     async reviewThreadPage(_requested, after) {
       calls.push(`reviewThreadPage:${after ?? "null"}`);
-      return options.threadPages?.[threadPage++] ?? {
-        threads: (options.threads ?? []).map(toRawThread),
+      return (
+        options.threadPages?.[threadPage++] ?? {
+          threads: (options.threads ?? []).map(toRawThread),
+          endCursor: null,
+        }
+      );
+    },
+    async conversationPage(_requested, connection, after) {
+      calls.push(`conversationPage:${connection}:${after ?? "null"}`);
+      const page: ConversationPage = {
+        comments:
+          (connection === "comments" ? options.comments : options.reviews) ??
+          [],
         endCursor: null,
       };
+      return page;
     },
     async commitRollups() {
       calls.push("commitRollups");

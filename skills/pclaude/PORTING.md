@@ -158,63 +158,63 @@ Helper skills and pclaude-help.
 
 ### pclaude-create-verification-skill/SKILL.md
 
-- [ ] L9 [cursor:.cursor] `.cursor` in `` …at as a project-local skill (`.cursor/skills/verify-<app>/`) tailor… ``
-- [ ] L25 [cursor:.cursor] `.cursor` in `` Write `.cursor/skills/verify-<app>/SKILL.md`… ``
-- [ ] L36 [cursor:.cursor] `.cursor` in `` Create `.cursor/skills/verify-<app>/features/… ``
+- [x] L9 [cursor:.cursor] `.cursor` in `` …at as a project-local skill (`.cursor/skills/verify-<app>/`) tailor… ``
+- [x] L25 [cursor:.cursor] `.cursor` in `` Write `.cursor/skills/verify-<app>/SKILL.md`… ``
+- [x] L36 [cursor:.cursor] `.cursor` in `` Create `.cursor/skills/verify-<app>/features/… ``
 
 ### pclaude-help/SKILL.md
 
-- [ ] L13 [cursor:cursor.com] `github.com/cursor/` in `` …file's public copy: `https://github.com/cursor/plugins/blob/main/pstack/` fol… ``
-- [ ] L13 [pstack] `pstack` in `` ….com/cursor/plugins/blob/main/pstack/` followed by its path. ``
-- [ ] L27 [cursor:.cursor] `.cursor` in `` - No `~/.cursor/rules/pclaude-models.mdc` mea… ``
-- [ ] L27 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc` means `/setup-pstack` hasn't… ``
-- [ ] L27 [pstack] `pstack` in `` …ude-models.mdc` means `/setup-pstack` hasn't run for this user, so… ``
-- [ ] L27 [unported-skill] `setup-pstack` in `` …s/pclaude-models.mdc` means `/setup-pstack` hasn't run for this user, so… ``
-- [ ] L27 [unknown-skill] `pclaude-models` in `` - No `~/.cursor/rules/pclaude-models.mdc` means `/setup-pstack` ha… ``
-- [ ] L32 [pstack] `pstack` in `` - Now: give them `/setup-pstack` to type, and answer their qu… ``
-- [ ] L32 [unported-skill] `setup-pstack` in `` - Now: give them `/setup-pstack` to type, and answer their qu… ``
-- [ ] L33 [pstack] `pstack` in `` …model until they run `/setup-pstack`. ``
-- [ ] L33 [unported-skill] `setup-pstack` in `` …efault model until they run `/setup-pstack`. ``
-- [ ] L38 [pstack] `pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
-- [ ] L38 [pstack] `pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
-- [ ] L38 [unported-skill] `setup-pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
-- [ ] L38 [unported-skill] `setup-pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
-- [ ] L38 [dangling-link] `../setup-pstack/SKILL.md` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning bud… ``
-- [ ] L41 [pstack] `pstack` in `` …invokes a skill. Only `/setup-pstack` loads from the user's words.… ``
-- [ ] L41 [unported-skill] `setup-pstack` in `` …user invokes a skill. Only `/setup-pstack` loads from the user's words.… ``
-- [ ] L41 [dangling-link] `../../README.md` in `…he user's words. The [README](../../README.md) and [guide page 1](../docs/0…`
-- [ ] L43 [pstack] `pstack` in `` …review panels. Rerun `/setup-pstack` and pick a smaller budget or… ``
-- [ ] L43 [unported-skill] `setup-pstack` in `` …ts and review panels. Rerun `/setup-pstack` and pick a smaller budget or… ``
-- [ ] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
-- [ ] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
-- [ ] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
-- [ ] L55 [cursor:Cursor] `Cursor` in `- Cursor's docs list Custom Modes in t…`
-- [ ] L57 [cursor:Cursor] `Cursor` in `Link [Cursor's skills docs](https://cursor…`
-- [ ] L57 [cursor:cursor.com] `cursor.com` in `…Cursor's skills docs](https://cursor.com/docs/skills) when this comes…`
-- [ ] L89 [pstack] `pstack` in `` …a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
-- [ ] L89 [pstack] `pstack` in `` …a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
-- [ ] L89 [unported-skill] `setup-pstack` in `` …e and a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
-- [ ] L89 [unported-skill] `setup-pstack` in `` …e and a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
-- [ ] L89 [dangling-link] `../setup-pstack/SKILL.md` in `` …ng budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
-- [ ] L93 [cursor:grok] `Grok` in `` …d a page whose buttons wake a Grok Bot over a webhook | [`/make-… ``
-- [ ] L93 [unported-skill] `make-bot-ui` in `` …Grok Bot over a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
-- [ ] L93 [unported-skill] `make-bot-ui` in `` …Grok Bot over a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
-- [ ] L93 [dangling-link] `../make-bot-ui/SKILL.md` in `` …a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
-- [ ] L109 [cursor:deslop] `deslop` in `` - `/deslop`, `control-cli`, and `control… ``
-- [ ] L109 [cursor:control-ui] `control-ui` in `` …/deslop`, `control-cli`, and `control-ui` ship in the `cursor-team-kit… ``
-- [ ] L109 [cursor:control-cli] `control-cli` in `` - `/deslop`, `control-cli`, and `control-ui` ship in th… ``
-- [ ] L109 [cursor:cursor-team-kit] `cursor-team-kit` in `` …and `control-ui` ship in the `cursor-team-kit` plugin. ``
-- [ ] L110 [cursor:Cursor] `Cursor` in `` …loop` and `/create-skill` are Cursor built-ins. ``
-- [ ] L124 [cursor:Cursor] `Cursor` in `…s "babysit this pr" can start Cursor's own skill for the same job…`
-- [ ] L126 [cursor:Cursor] `Cursor` in `…claude has no planning skill. Cursor's Plan Mode works alongside i…`
-- [ ] L136 [pstack] `pstack` in `` …ffect | The rule from `/setup-pstack` applies to new chats. Start… ``
-- [ ] L136 [unported-skill] `setup-pstack` in `` …d no effect | The rule from `/setup-pstack` applies to new chats. Start… ``
-- [ ] L138 [pstack] `pstack` in `` …oad on its own | Only `/setup-pstack` loads from the user's words.… ``
-- [ ] L138 [unported-skill] `setup-pstack` in `` …dn't load on its own | Only `/setup-pstack` loads from the user's words.… ``
+- [x] L13 [cursor:cursor.com] `github.com/cursor/` in `` …file's public copy: `https://github.com/cursor/plugins/blob/main/pstack/` fol… ``
+- [x] L13 [pstack] `pstack` in `` ….com/cursor/plugins/blob/main/pstack/` followed by its path. ``
+- [x] L27 [cursor:.cursor] `.cursor` in `` - No `~/.cursor/rules/pclaude-models.mdc` mea… ``
+- [x] L27 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc` means `/setup-pstack` hasn't… ``
+- [x] L27 [pstack] `pstack` in `` …ude-models.mdc` means `/setup-pstack` hasn't run for this user, so… ``
+- [x] L27 [unported-skill] `setup-pstack` in `` …s/pclaude-models.mdc` means `/setup-pstack` hasn't run for this user, so… ``
+- [x] L27 [unknown-skill] `pclaude-models` in `` - No `~/.cursor/rules/pclaude-models.mdc` means `/setup-pstack` ha… ``
+- [x] L32 [pstack] `pstack` in `` - Now: give them `/setup-pstack` to type, and answer their qu… ``
+- [x] L32 [unported-skill] `setup-pstack` in `` - Now: give them `/setup-pstack` to type, and answer their qu… ``
+- [x] L33 [pstack] `pstack` in `` …model until they run `/setup-pstack`. ``
+- [x] L33 [unported-skill] `setup-pstack` in `` …efault model until they run `/setup-pstack`. ``
+- [x] L38 [pstack] `pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
+- [x] L38 [pstack] `pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
+- [x] L38 [unported-skill] `setup-pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
+- [x] L38 [unported-skill] `setup-pstack` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md).… ``
+- [x] L38 [dangling-link] `../setup-pstack/SKILL.md` in `` 2. Run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning bud… ``
+- [x] L41 [pstack] `pstack` in `` …invokes a skill. Only `/setup-pstack` loads from the user's words.… ``
+- [x] L41 [unported-skill] `setup-pstack` in `` …user invokes a skill. Only `/setup-pstack` loads from the user's words.… ``
+- [x] L41 [dangling-link] `../../README.md` in `…he user's words. The [README](../../README.md) and [guide page 1](../docs/0…`
+- [x] L43 [pstack] `pstack` in `` …review panels. Rerun `/setup-pstack` and pick a smaller budget or… ``
+- [x] L43 [unported-skill] `setup-pstack` in `` …ts and review panels. Rerun `/setup-pstack` and pick a smaller budget or… ``
+- [x] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
+- [x] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
+- [x] L45 [cursor:Cursor] `Cursor` in `pclaude is built for Cursor. Its skills use the Agent Ski…`
+- [x] L55 [cursor:Cursor] `Cursor` in `- Cursor's docs list Custom Modes in t…`
+- [x] L57 [cursor:Cursor] `Cursor` in `Link [Cursor's skills docs](https://cursor…`
+- [x] L57 [cursor:cursor.com] `cursor.com` in `…Cursor's skills docs](https://cursor.com/docs/skills) when this comes…`
+- [x] L89 [pstack] `pstack` in `` …a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
+- [x] L89 [pstack] `pstack` in `` …a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
+- [x] L89 [unported-skill] `setup-pstack` in `` …e and a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
+- [x] L89 [unported-skill] `setup-pstack` in `` …e and a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
+- [x] L89 [dangling-link] `../setup-pstack/SKILL.md` in `` …ng budget | [`/setup-pstack`](../setup-pstack/SKILL.md) | ``
+- [x] L93 [cursor:grok] `Grok` in `` …d a page whose buttons wake a Grok Bot over a webhook | [`/make-… ``
+- [x] L93 [unported-skill] `make-bot-ui` in `` …Grok Bot over a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
+- [x] L93 [unported-skill] `make-bot-ui` in `` …Grok Bot over a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
+- [x] L93 [dangling-link] `../make-bot-ui/SKILL.md` in `` …a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) | ``
+- [x] L109 [cursor:deslop] `deslop` in `` - `/deslop`, `control-cli`, and `control… ``
+- [x] L109 [cursor:control-ui] `control-ui` in `` …/deslop`, `control-cli`, and `control-ui` ship in the `cursor-team-kit… ``
+- [x] L109 [cursor:control-cli] `control-cli` in `` - `/deslop`, `control-cli`, and `control-ui` ship in th… ``
+- [x] L109 [cursor:cursor-team-kit] `cursor-team-kit` in `` …and `control-ui` ship in the `cursor-team-kit` plugin. ``
+- [x] L110 [cursor:Cursor] `Cursor` in `` …loop` and `/create-skill` are Cursor built-ins. ``
+- [x] L124 [cursor:Cursor] `Cursor` in `…s "babysit this pr" can start Cursor's own skill for the same job…`
+- [x] L126 [cursor:Cursor] `Cursor` in `…claude has no planning skill. Cursor's Plan Mode works alongside i…`
+- [x] L136 [pstack] `pstack` in `` …ffect | The rule from `/setup-pstack` applies to new chats. Start… ``
+- [x] L136 [unported-skill] `setup-pstack` in `` …d no effect | The rule from `/setup-pstack` applies to new chats. Start… ``
+- [x] L138 [pstack] `pstack` in `` …oad on its own | Only `/setup-pstack` loads from the user's words.… ``
+- [x] L138 [unported-skill] `setup-pstack` in `` …dn't load on its own | Only `/setup-pstack` loads from the user's words.… ``
 
 ### pclaude-maintain-verification-skill/SKILL.md
 
-- [ ] L25 [cursor:.cursor] `.cursor` in `` …s and a feature map (usually `.cursor/skills/verify-*/`). Several c… ``
+- [x] L25 [cursor:.cursor] `.cursor` in `` …s and a feature map (usually `.cursor/skills/verify-*/`). Several c… ``
 
 ## Ticket 11
 
@@ -294,37 +294,37 @@ Remaining simple playbooks and multi-phase-plan.
 
 ### pclaude-poteto-mode/playbooks/authoring-a-skill.md
 
-- [ ] L5 [cursor:Cursor] `Cursor` in `…e the **create-skill** skill (Cursor's built-in for authoring SKIL…`
+- [x] L5 [cursor:Cursor] `Cursor` in `…e the **create-skill** skill (Cursor's built-in for authoring SKIL…`
 
 ### pclaude-poteto-mode/playbooks/autonomous-run.md
 
-- [ ] L6 [cursor:Cursor] `Cursor` in `` …Pick the wake mechanism using Cursor's `/loop` command (a built-in… ``
-- [ ] L9 [cursor:AskQuestion] `AskQuestion` in `` …le work for the human or use `AskQuestion`. Surface only irreversible a… ``
+- [x] L6 [cursor:Cursor] `Cursor` in `` …Pick the wake mechanism using Cursor's `/loop` command (a built-in… ``
+- [x] L9 [cursor:AskQuestion] `AskQuestion` in `` …le work for the human or use `AskQuestion`. Surface only irreversible a… ``
 
 ### pclaude-poteto-mode/playbooks/hillclimb.md
 
-- [ ] L12 [cursor:grok] `grok` in `` …red hillclimb model (default `grok-4.7-xhigh-fast`) with a tight… ``
+- [x] L12 [cursor:grok] `grok` in `` …red hillclimb model (default `grok-4.7-xhigh-fast`) with a tight… ``
 
 ### pclaude-poteto-mode/playbooks/multi-phase-plan.md
 
-- [ ] L13 [cursor:grok] `grok` in `` …warm workers` model (default `grok-4.7-xhigh-fast`). Each lane i… ``
-- [ ] L15 [cursor:control-ui] `control-ui` in `` …r, Electron, and web UIs use `control-ui` from `cursor-team-kit`. CLIs… ``
-- [ ] L15 [cursor:control-cli] `control-cli` in `` …team-kit`. CLIs and TUIs use `control-cli` from `cursor-team-kit`. Nati… ``
-- [ ] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
-- [ ] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
-- [ ] L59 [cursor:deslop] `deslop` in `` - [ ] Run `/deslop` before each commit and `/pcl… ``
-- [ ] L71 [cursor:control-ui] `control-ui` in `` …t the PR head. Drive through `control-ui` or `control-cli` from `curso… ``
-- [ ] L71 [cursor:control-cli] `control-cli` in `` …rive through `control-ui` or `control-cli` from `cursor-team-kit`. ``
-- [ ] L71 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`. ``
+- [x] L13 [cursor:grok] `grok` in `` …warm workers` model (default `grok-4.7-xhigh-fast`). Each lane i… ``
+- [x] L15 [cursor:control-ui] `control-ui` in `` …r, Electron, and web UIs use `control-ui` from `cursor-team-kit`. CLIs… ``
+- [x] L15 [cursor:control-cli] `control-cli` in `` …team-kit`. CLIs and TUIs use `control-cli` from `cursor-team-kit`. Nati… ``
+- [x] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
+- [x] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
+- [x] L59 [cursor:deslop] `deslop` in `` - [x] Run `/deslop` before each commit and `/pcl… ``
+- [x] L71 [cursor:control-ui] `control-ui` in `` …t the PR head. Drive through `control-ui` or `control-cli` from `curso… ``
+- [x] L71 [cursor:control-cli] `control-cli` in `` …rive through `control-ui` or `control-cli` from `cursor-team-kit`. ``
+- [x] L71 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`. ``
 
 ### pclaude-poteto-mode/playbooks/perf-issue.md
 
-- [ ] L17 [cursor:grok] `grok` in `` …ed perf-issue model (default `grok-4.7-xhigh-fast`). Pick each s… ``
+- [x] L17 [cursor:grok] `grok` in `` …ed perf-issue model (default `grok-4.7-xhigh-fast`). Pick each s… ``
 
 ### pclaude-poteto-mode/playbooks/worktree-cleanup.md
 
-- [ ] L3 [cursor:.cursor] `.cursor` in `` …/x` misses one that lives at `.cursor/worktrees/myrepo/x` (principl… ``
-- [ ] L8 [cursor:Cursor] `Cursor` in `` …~/Library/Application Support/Cursor` (`state.vscdb.backup`, and `… ``
+- [x] L3 [cursor:.cursor] `.cursor` in `` …/x` misses one that lives at `.cursor/worktrees/myrepo/x` (principl… ``
+- [x] L8 [cursor:Cursor] `Cursor` in `` …~/Library/Application Support/Cursor` (`state.vscdb.backup`, and `… ``
 
 ## Ticket 13
 
@@ -332,33 +332,33 @@ babysit, shipping and watch-pr over every PR comment.
 
 ### pclaude-poteto-mode/playbooks/babysit.md
 
-- [ ] L3 [cursor:Cursor] `Cursor` in `…ins.** This playbook replaces Cursor's built-in babysit skill for…`
+- [x] L3 [cursor:Cursor] `Cursor` in `…ins.** This playbook replaces Cursor's built-in babysit skill for…`
 
 ### pclaude-poteto-mode/playbooks/shipping.md
 
-- [ ] L5 [cursor:control-ui] `control-ui` in `` …ching control skill (such as `control-ui` or `control-cli` from `curso… ``
-- [ ] L5 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`), par… ``
-- [ ] L5 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`), parent against head, and p… ``
-- [ ] L5 [cursor:Cursor] `Cursor` in `…. One verifier per PR, each a Cursor cloud agent, runs the change…`
+- [x] L5 [cursor:control-ui] `control-ui` in `` …ching control skill (such as `control-ui` or `control-cli` from `curso… ``
+- [x] L5 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`), par… ``
+- [x] L5 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`), parent against head, and p… ``
+- [x] L5 [cursor:Cursor] `Cursor` in `…. One verifier per PR, each a Cursor cloud agent, runs the change…`
 
 ### pclaude-poteto-mode/scripts/bun.lock
 
-- [ ] L6 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
+- [x] L6 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
 
 ### pclaude-poteto-mode/scripts/package.json
 
-- [ ] L2 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
+- [x] L2 [cursor:cursor-name] `cursor-skill` in `"name": "@cursor-skill/poteto-mode-tools",`
 
 ### pclaude-poteto-mode/scripts/watch-pr/github.test.ts
 
-- [ ] L258 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `body: "CURSOR_AUTOMATION_ID: run-2 severity high",`
-- [ ] L262 [cursor:cursor-name] `"cursor"` in `…author: { login: "cursor" },`
+- [x] L258 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `body: "CURSOR_AUTOMATION_ID: run-2 severity high",`
+- [x] L262 [cursor:cursor-name] `"cursor"` in `…author: { login: "cursor" },`
 
 ### pclaude-poteto-mode/scripts/watch-pr/github.ts
 
-- [ ] L335 [cursor:cursor-name] `"cursor"` in `(author === "cursor" &&`
-- [ ] L338 [cursor:cursor-name] `cursor_automation_id` in `"cursor_automation_id",`
-- [ ] L349 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `/CURSOR_AUTOMATION_ID:\s*([a-zA-Z0-9_.:-]+)/,`
+- [x] L335 [cursor:cursor-name] `"cursor"` in `(author === "cursor" &&`
+- [x] L338 [cursor:cursor-name] `cursor_automation_id` in `"cursor_automation_id",`
+- [x] L349 [cursor:cursor-name] `CURSOR_AUTOMATION_ID` in `/CURSOR_AUTOMATION_ID:\s*([a-zA-Z0-9_.:-]+)/,`
 
 ## Ticket 14
 
@@ -366,23 +366,23 @@ Autopilots and orchestrate.
 
 ### pclaude-poteto-mode/playbooks/autopilot-full.md
 
-- [ ] L8 [cursor:Cursor] `Cursor` in `` …phite (`gt`). Each owner is a Cursor cloud agent that builds, open… ``
-- [ ] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
-- [ ] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
-- [ ] L10 [cursor:cursor-team-kit] `cursor-team-kit` in `` …(the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`)) and the… ``
-- [ ] L14 [cursor:control-ui] `control-ui` in `` …h its control skill (such as `control-ui` or `control-cli` from `curso… ``
-- [ ] L14 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`) or a… ``
-- [ ] L14 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`) or a named driver, and audi… ``
+- [x] L8 [cursor:Cursor] `Cursor` in `` …phite (`gt`). Each owner is a Cursor cloud agent that builds, open… ``
+- [x] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
+- [x] L10 [cursor:deslop] `deslop` in `` …ly after the slop-strip (the `deslop` skill from the `cursor-team-… ``
+- [x] L10 [cursor:cursor-team-kit] `cursor-team-kit` in `` …(the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`)) and the… ``
+- [x] L14 [cursor:control-ui] `control-ui` in `` …h its control skill (such as `control-ui` or `control-cli` from `curso… ``
+- [x] L14 [cursor:control-cli] `control-cli` in `` …ill (such as `control-ui` or `control-cli` from `cursor-team-kit`) or a… ``
+- [x] L14 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`) or a named driver, and audi… ``
 
 ### pclaude-poteto-mode/playbooks/orchestrate.md
 
-- [ ] L15 [cursor:Task-tool] `the Task` in `…med, and drained only through the Task tool. Pick each subagent's re…`
-- [ ] L16 [cursor:Task-tool] `Task schema` in `` …d a nested spawn has the full Task schema including `environment`). Rol… ``
-- [ ] L17 [cursor:control-ui] `control-ui` in `` …the task needs this machine: `control-ui` or `control-cli` runtime ver… ``
-- [ ] L17 [cursor:control-cli] `control-cli` in `` …his machine: `control-ui` or `control-cli` runtime verification (from `… ``
-- [ ] L17 [cursor:cursor-team-kit] `cursor-team-kit` in `` …` runtime verification (from `cursor-team-kit`). Reading local transcripts… ``
-- [ ] L96 [cursor:Cursor] `Cursor` in `…e cloud agent's status in the Cursor dashboard. Transcript mtime i…`
-- [ ] L102 [cursor:Cursor] `Cursor` in `- After a Cursor restart: local agents are dea…`
+- [x] L15 [cursor:Task-tool] `the Task` in `…med, and drained only through the Task tool. Pick each subagent's re…`
+- [x] L16 [cursor:Task-tool] `Task schema` in `` …d a nested spawn has the full Task schema including `environment`). Rol… ``
+- [x] L17 [cursor:control-ui] `control-ui` in `` …the task needs this machine: `control-ui` or `control-cli` runtime ver… ``
+- [x] L17 [cursor:control-cli] `control-cli` in `` …his machine: `control-ui` or `control-cli` runtime verification (from `… ``
+- [x] L17 [cursor:cursor-team-kit] `cursor-team-kit` in `` …` runtime verification (from `cursor-team-kit`). Reading local transcripts… ``
+- [x] L96 [cursor:Cursor] `Cursor` in `…e cloud agent's status in the Cursor dashboard. Transcript mtime i…`
+- [x] L102 [cursor:Cursor] `Cursor` in `- After a Cursor restart: local agents are dea…`
 
 ## Ticket 15
 

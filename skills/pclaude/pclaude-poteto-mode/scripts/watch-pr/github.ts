@@ -2,7 +2,11 @@ import { spawn } from "node:child_process";
 import type * as T from "./types.ts";
 import { nonEmpty, parsePrNumber } from "./types.ts";
 export const REVIEW_THREADS_QUERY =
-  "\nquery ReviewThreads($owner: String!, $repo: String!, $pr: Int!, $after: String) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      reviewThreads(first: 100, after: $after) {\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n        nodes {\n          id\n          isResolved\n          comments(first: 10) {\n            nodes {\n              body\n              createdAt\n              path\n              line\n              author { login }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n";
+  "\nquery ReviewThreads($owner: String!, $repo: String!, $pr: Int!, $after: String) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      reviewThreads(first: 100, after: $after) {\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n        nodes {\n          id\n          isResolved\n          first: comments(first: 1) {\n            nodes {\n              id\n              databaseId\n              url\n              body\n              createdAt\n              path\n              line\n              author { login __typename }\n              pullRequestReview { id }\n            }\n          }\n          recent: comments(last: 20) {\n            nodes {\n              id\n              databaseId\n              url\n              body\n              createdAt\n              path\n              line\n              author { login __typename }\n              pullRequestReview { id }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n";
+export const CONVERSATION_COMMENTS_QUERY =
+  "\nquery ConversationComments($owner: String!, $repo: String!, $pr: Int!, $after: String) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      items: comments(first: 100, after: $after) {\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n        nodes {\n          id\n          databaseId\n          url\n          body\n          createdAt\n          author { login __typename }\n        }\n      }\n    }\n  }\n}\n";
+export const REVIEWS_QUERY =
+  "\nquery Reviews($owner: String!, $repo: String!, $pr: Int!, $after: String) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      items: reviews(first: 100, after: $after) {\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n        nodes {\n          id\n          databaseId\n          url\n          body\n          createdAt\n          author { login __typename }\n        }\n      }\n    }\n  }\n}\n";
 export const PR_COMMIT_STATUS_QUERY =
   "\nquery PrCommitStatuses($owner: String!, $repo: String!, $pr: Int!) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      commits(last: 50) {\n        nodes {\n          commit {\n            oid\n            statusCheckRollup {\n              state\n            }\n          }\n        }\n      }\n    }\n  }\n}\n";
 export const PR_CHECK_ROLLUP_QUERY =
@@ -304,17 +308,40 @@ export function mapRollupNode(value: unknown): T.Check | null {
     ? { ...details, link, kind: "passed", reportedState: state }
     : { ...details, link, kind: "failed", reportedState: state || "FAILURE" };
 }
+// The body prefix every comment and reply pclaude posts starts with. The
+// watcher skips these, so the agent's own posts never wake it, while a human
+// posting from the same account still does.
+export const PCLAUDE_MARKER = "<!-- pclaude -->";
+function author(value: unknown, path: string) {
+  if (value === null) return { login: null, kind: "human" as const };
+  const object = record(value, path);
+  const login = optionalString(object.login, `${path}.login`);
+  const bot =
+    object.__typename === "Bot" ||
+    (login ?? "").toLowerCase().endsWith("[bot]");
+  return { login, kind: bot ? ("bot" as const) : ("human" as const) };
+}
+function databaseId(value: unknown, path: string): number | null {
+  if (value === null || value === undefined) return null;
+  return Number.isInteger(value) ? Number(value) : missing(path, value);
+}
 function parseComment(value: unknown): T.ReviewComment {
   const object = record(value, "review comment");
-  const author =
-    object.author === null
+  const who = author(object.author ?? null, "review comment.author");
+  const review =
+    object.pullRequestReview === null || object.pullRequestReview === undefined
       ? null
-      : record(object.author, "review comment.author");
+      : record(object.pullRequestReview, "review comment.pullRequestReview");
   return {
-    authorLogin:
-      author === null
+    id: string(object.id, "review comment.id"),
+    databaseId: databaseId(object.databaseId, "review comment.databaseId"),
+    url: string(object.url, "review comment.url"),
+    authorLogin: who.login,
+    authorKind: who.kind,
+    reviewId:
+      review === null
         ? null
-        : optionalString(author.login, "review comment.author.login"),
+        : string(review.id, "review comment.pullRequestReview.id"),
     body: string(object.body, "review comment.body"),
     path: optionalString(object.path, "review comment.path"),
     line:
@@ -325,33 +352,6 @@ function parseComment(value: unknown): T.ReviewComment {
           : missing("review comment.line", object.line),
     createdAt: string(object.createdAt, "review comment.createdAt"),
   };
-}
-function isBugbot(comment: T.ReviewComment | null): boolean {
-  if (comment === null) return false;
-  const author = (comment.authorLogin ?? "").toLowerCase();
-  const body = comment.body.toLowerCase();
-  return (
-    author.includes("bugbot") ||
-    (author === "cursor" &&
-      [
-        "bugbot",
-        "cursor_automation_id",
-        "agentic security review",
-        "description start",
-        "severity",
-      ].some((token) => body.includes(token)))
-  );
-}
-function passKey(comment: T.ReviewComment | null): string | null {
-  if (comment === null) return null;
-  for (const pattern of [
-    /RUN_ID:\s*([a-zA-Z0-9_.:-]+)/,
-    /CURSOR_AUTOMATION_ID:\s*([a-zA-Z0-9_.:-]+)/,
-  ]) {
-    const match = pattern.exec(comment.body);
-    if (match?.[1]) return match[1];
-  }
-  return null;
 }
 export function parseReviewThreadPage(value: unknown): T.ReviewThreadPage {
   const reviewThreads = record(
@@ -364,13 +364,19 @@ export function parseReviewThreadPage(value: unknown): T.ReviewThreadPage {
     const thread = record(node, "review thread");
     if (typeof thread.isResolved !== "boolean")
       missing("review thread.isResolved", thread.isResolved);
-    const comments = list(
-      at(thread, ["comments", "nodes"]),
-      "review thread.comments.nodes"
+    const first = list(
+      at(thread, ["first", "nodes"]),
+      "review thread.first.nodes"
     );
+    const recent = list(
+      at(thread, ["recent", "nodes"]),
+      "review thread.recent.nodes"
+    ).map(parseComment);
+    const firstComment = first.length === 0 ? null : parseComment(first[0]);
     threads.push({
       id: string(thread.id, "review thread.id"),
-      firstComment: comments.length === 0 ? null : parseComment(comments[0]),
+      firstComment,
+      replies: recent.filter((comment) => comment.id !== firstComment?.id),
       resolved: thread.isResolved,
     });
   }
@@ -383,26 +389,106 @@ export function parseReviewThreadPage(value: unknown): T.ReviewThreadPage {
   );
   return { threads, endCursor: page.hasNextPage && cursor ? cursor : null };
 }
+export function parseConversationPage(
+  value: unknown,
+  source: "issue-comment" | "review"
+): T.ConversationPage {
+  const items = record(
+    at(value, ["data", "repository", "pullRequest", "items"]),
+    "items"
+  );
+  const comments = list(items.nodes, "items.nodes").map((node) => {
+    const object = record(node, "conversation comment");
+    const who = author(object.author ?? null, "conversation comment.author");
+    return {
+      id: string(object.id, "conversation comment.id"),
+      databaseId: databaseId(
+        object.databaseId,
+        "conversation comment.databaseId"
+      ),
+      source,
+      thread: null,
+      url: string(object.url, "conversation comment.url"),
+      authorLogin: who.login,
+      authorKind: who.kind,
+      body: string(object.body, "conversation comment.body"),
+      createdAt: string(object.createdAt, "conversation comment.createdAt"),
+    };
+  });
+  const page = record(items.pageInfo, "items.pageInfo");
+  if (typeof page.hasNextPage !== "boolean")
+    missing("items.pageInfo.hasNextPage", page.hasNextPage);
+  const cursor = optionalString(page.endCursor, "items.pageInfo.endCursor");
+  return { comments, endCursor: page.hasNextPage && cursor ? cursor : null };
+}
+// A bot's review passes are the distinct reviews its threads came from, so a
+// bot that reviews the PR three times reads as three passes.
 export function buildReviewThreads(
   threads: readonly T.RawReviewThread[]
 ): readonly T.ReviewThread[] {
-  const keys = new Set<string>();
-  let keyless = false;
-  for (const thread of threads) {
-    if (!isBugbot(thread.firstComment)) continue;
-    const key = passKey(thread.firstComment);
-    if (key === null) keyless = true;
-    else keys.add(key);
+  const passes = new Map<string, Set<string>>();
+  for (const { firstComment } of threads) {
+    if (firstComment?.authorKind !== "bot") continue;
+    const login = firstComment.authorLogin ?? "";
+    const reviews = passes.get(login) ?? new Set<string>();
+    reviews.add(firstComment.reviewId ?? firstComment.id);
+    passes.set(login, reviews);
   }
-  const passes = keys.size > 0 ? keys.size : keyless ? 1 : 0;
   return threads
     .filter((thread) => !thread.resolved)
     .map(({ id, firstComment }) => ({
       id,
       firstComment,
-      isBugbot: isBugbot(firstComment),
-      bugbotReviewPasses: passes,
+      authorKind: firstComment?.authorKind ?? "human",
+      botReviewPasses:
+        firstComment?.authorKind === "bot"
+          ? (passes.get(firstComment.authorLogin ?? "")?.size ?? 0)
+          : 0,
     }));
+}
+const isNewer = (createdAt: string, since: string | null): boolean =>
+  since === null || Date.parse(createdAt) > Date.parse(since);
+// Every comment newer than the cursor that pclaude did not post: conversation
+// comments, non-empty review bodies, and replies in resolved threads. An
+// unresolved thread already blocks as a review thread, so its replies are not
+// repeated here.
+export function selectNewComments(args: {
+  readonly threads: readonly T.RawReviewThread[];
+  readonly conversation: readonly T.PrComment[];
+  readonly since: string | null;
+}): readonly T.PrComment[] {
+  const replies = args.threads
+    .filter((thread) => thread.resolved)
+    .flatMap((thread) =>
+      thread.replies.map((reply) => ({
+        reply,
+        thread: {
+          id: thread.id,
+          rootDatabaseId: thread.firstComment?.databaseId ?? null,
+        },
+      }))
+    )
+    .map(
+      ({ reply, thread }): T.PrComment => ({
+        id: reply.id,
+        databaseId: reply.databaseId,
+        source: "thread-reply",
+        thread,
+        url: reply.url,
+        authorLogin: reply.authorLogin,
+        authorKind: reply.authorKind,
+        body: reply.body,
+        createdAt: reply.createdAt,
+      })
+    );
+  return [...args.conversation, ...replies]
+    .filter(
+      (comment) =>
+        comment.body.trim() !== "" &&
+        !comment.body.trimStart().startsWith(PCLAUDE_MARKER) &&
+        isNewer(comment.createdAt, args.since)
+    )
+    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
 }
 export function parsePullRequest(
   value: unknown,
@@ -581,6 +667,21 @@ export class GhGitHubReader implements T.GitHubReader {
     if (after !== null) argv.push("-f", `after=${after}`);
     return parseReviewThreadPage(await runJson(argv));
   }
+  async conversationPage(
+    context: T.PrContext,
+    connection: "comments" | "reviews",
+    after: string | null
+  ): Promise<T.ConversationPage> {
+    const argv = graphqlArgs(
+      connection === "comments" ? CONVERSATION_COMMENTS_QUERY : REVIEWS_QUERY,
+      context
+    );
+    if (after !== null) argv.push("-f", `after=${after}`);
+    return parseConversationPage(
+      await runJson(argv),
+      connection === "comments" ? "issue-comment" : "review"
+    );
+  }
   async commitRollups(
     context: T.PrContext
   ): Promise<readonly T.CommitRollup[]> {
@@ -629,10 +730,10 @@ export async function resolveChecks(
       : "fast path and GraphQL rollup were empty";
   throw new ChecksUnavailable(`could not read PR checks: ${suffix}`);
 }
-export async function resolveReviewThreads(
+export async function readReviewThreads(
   reader: T.GitHubReader,
   context: T.PrContext
-): Promise<readonly T.ReviewThread[]> {
+): Promise<readonly T.RawReviewThread[]> {
   const threads: T.RawReviewThread[] = [];
   let after: string | null = null;
   do {
@@ -640,7 +741,28 @@ export async function resolveReviewThreads(
     threads.push(...page.threads);
     after = page.endCursor;
   } while (after !== null);
-  return buildReviewThreads(threads);
+  return threads;
+}
+export async function resolveReviewThreads(
+  reader: T.GitHubReader,
+  context: T.PrContext
+): Promise<readonly T.ReviewThread[]> {
+  return buildReviewThreads(await readReviewThreads(reader, context));
+}
+export async function readConversation(
+  reader: T.GitHubReader,
+  context: T.PrContext
+): Promise<readonly T.PrComment[]> {
+  const comments: T.PrComment[] = [];
+  for (const connection of ["comments", "reviews"] as const) {
+    let after: string | null = null;
+    do {
+      const page = await reader.conversationPage(context, connection, after);
+      comments.push(...page.comments);
+      after = page.endCursor;
+    } while (after !== null);
+  }
+  return comments;
 }
 export async function resolveContext(args: {
   readonly reader: T.GitHubReader;

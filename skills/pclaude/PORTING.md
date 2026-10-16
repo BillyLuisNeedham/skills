@@ -294,37 +294,37 @@ Remaining simple playbooks and multi-phase-plan.
 
 ### pclaude-poteto-mode/playbooks/authoring-a-skill.md
 
-- [ ] L5 [cursor:Cursor] `Cursor` in `…e the **create-skill** skill (Cursor's built-in for authoring SKIL…`
+- [x] L5 [cursor:Cursor] `Cursor` in `…e the **create-skill** skill (Cursor's built-in for authoring SKIL…`
 
 ### pclaude-poteto-mode/playbooks/autonomous-run.md
 
-- [ ] L6 [cursor:Cursor] `Cursor` in `` …Pick the wake mechanism using Cursor's `/loop` command (a built-in… ``
-- [ ] L9 [cursor:AskQuestion] `AskQuestion` in `` …le work for the human or use `AskQuestion`. Surface only irreversible a… ``
+- [x] L6 [cursor:Cursor] `Cursor` in `` …Pick the wake mechanism using Cursor's `/loop` command (a built-in… ``
+- [x] L9 [cursor:AskQuestion] `AskQuestion` in `` …le work for the human or use `AskQuestion`. Surface only irreversible a… ``
 
 ### pclaude-poteto-mode/playbooks/hillclimb.md
 
-- [ ] L12 [cursor:grok] `grok` in `` …red hillclimb model (default `grok-4.7-xhigh-fast`) with a tight… ``
+- [x] L12 [cursor:grok] `grok` in `` …red hillclimb model (default `grok-4.7-xhigh-fast`) with a tight… ``
 
 ### pclaude-poteto-mode/playbooks/multi-phase-plan.md
 
-- [ ] L13 [cursor:grok] `grok` in `` …warm workers` model (default `grok-4.7-xhigh-fast`). Each lane i… ``
-- [ ] L15 [cursor:control-ui] `control-ui` in `` …r, Electron, and web UIs use `control-ui` from `cursor-team-kit`. CLIs… ``
-- [ ] L15 [cursor:control-cli] `control-cli` in `` …team-kit`. CLIs and TUIs use `control-cli` from `cursor-team-kit`. Nati… ``
-- [ ] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
-- [ ] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
-- [ ] L59 [cursor:deslop] `deslop` in `` - [ ] Run `/deslop` before each commit and `/pcl… ``
-- [ ] L71 [cursor:control-ui] `control-ui` in `` …t the PR head. Drive through `control-ui` or `control-cli` from `curso… ``
-- [ ] L71 [cursor:control-cli] `control-cli` in `` …rive through `control-ui` or `control-cli` from `cursor-team-kit`. ``
-- [ ] L71 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`. ``
+- [x] L13 [cursor:grok] `grok` in `` …warm workers` model (default `grok-4.7-xhigh-fast`). Each lane i… ``
+- [x] L15 [cursor:control-ui] `control-ui` in `` …r, Electron, and web UIs use `control-ui` from `cursor-team-kit`. CLIs… ``
+- [x] L15 [cursor:control-cli] `control-cli` in `` …team-kit`. CLIs and TUIs use `control-cli` from `cursor-team-kit`. Nati… ``
+- [x] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
+- [x] L15 [cursor:cursor-team-kit] `cursor-team-kit` in `` …eb UIs use `control-ui` from `cursor-team-kit`. CLIs and TUIs use `control-… ``
+- [x] L59 [cursor:deslop] `deslop` in `` - [x] Run `/deslop` before each commit and `/pcl… ``
+- [x] L71 [cursor:control-ui] `control-ui` in `` …t the PR head. Drive through `control-ui` or `control-cli` from `curso… ``
+- [x] L71 [cursor:control-cli] `control-cli` in `` …rive through `control-ui` or `control-cli` from `cursor-team-kit`. ``
+- [x] L71 [cursor:cursor-team-kit] `cursor-team-kit` in `` …ol-ui` or `control-cli` from `cursor-team-kit`. ``
 
 ### pclaude-poteto-mode/playbooks/perf-issue.md
 
-- [ ] L17 [cursor:grok] `grok` in `` …ed perf-issue model (default `grok-4.7-xhigh-fast`). Pick each s… ``
+- [x] L17 [cursor:grok] `grok` in `` …ed perf-issue model (default `grok-4.7-xhigh-fast`). Pick each s… ``
 
 ### pclaude-poteto-mode/playbooks/worktree-cleanup.md
 
-- [ ] L3 [cursor:.cursor] `.cursor` in `` …/x` misses one that lives at `.cursor/worktrees/myrepo/x` (principl… ``
-- [ ] L8 [cursor:Cursor] `Cursor` in `` …~/Library/Application Support/Cursor` (`state.vscdb.backup`, and `… ``
+- [x] L3 [cursor:.cursor] `.cursor` in `` …/x` misses one that lives at `.cursor/worktrees/myrepo/x` (principl… ``
+- [x] L8 [cursor:Cursor] `Cursor` in `` …~/Library/Application Support/Cursor` (`state.vscdb.backup`, and `… ``
 
 ## Ticket 13
 

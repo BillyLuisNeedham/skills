@@ -13,8 +13,24 @@
 # so it can be deleted.
 
 # The footer spec section 4 puts on every SKILL.md credits upstream by name.
+# The two agents and CONVENTIONS.md (which states the footer) carry it too.
 **/SKILL.md	Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.
+agents/*.md	Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.
+CONVENTIONS.md	`Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.`
 
 # A template line in why's synthesizer prompt: `url` is a placeholder for the
 # PR link the synthesizer fills in, not a relative file.
 pclaude-why/references/synthesizer-prompt.md	[PR #123](url)
+
+# CONVENTIONS.md holds the one substitutes table: it has to name each Cursor
+# feature it replaces, so its heading, intro and rows are allowed.
+CONVENTIONS.md	## Substitutes for Cursor features
+CONVENTIONS.md	Upstream pstack was written for Cursor. Where it named a Cursor feature, pclaude uses the substitute below. A feature with no substitute is cut, along with every mention of it.
+CONVENTIONS.md	| `deslop` (cursor-team-kit) | `pclaude-unslop` for prose, `/simplify` for code |
+CONVENTIONS.md	| `control-ui` | the `claude-in-chrome` skill |
+CONVENTIONS.md	| `control-cli` | the `run` skill, or tmux |
+CONVENTIONS.md	| `AskQuestion` | numbered free-text questions, each with a recommendation (above) |
+CONVENTIONS.md	| `Task` tool, background tasks | the Agent tool with `run_in_background: true` |
+CONVENTIONS.md	| model slugs, `pstack-models.mdc`, `/setup-pstack` | a role in `models.md` |
+CONVENTIONS.md	| `~/.cursor` transcripts | `~/.claude/projects`, read through the pclaude scripts package |
+CONVENTIONS.md	| Custom Modes, `mode: true` | the user-invoked `/pclaude-poteto-mode <task>` |

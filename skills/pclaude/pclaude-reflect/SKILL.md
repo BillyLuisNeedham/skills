@@ -65,3 +65,5 @@ Short list, no preamble:
 - New skills created: `<skill path>`. One line each (rare).
 - Backlog filed to the devex tracker: `<issue title>` (`<tags>`). One line each.
 - Dropped: one line per rejected finding + reason from the synthesizer.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

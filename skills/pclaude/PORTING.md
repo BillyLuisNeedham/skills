@@ -31,10 +31,10 @@ Foundations: models, principles, conventions, agents.
 
 ### agents/pclaude-poteto-agent.md
 
-- [ ] L9 [cursor:.cursor] `.cursor` in `` …ore any other work, search `~/.cursor/plugins/` for a file whose pa… ``
-- [ ] L9 [cursor:.cursor] `.cursor` in `` …ore any other work, search `~/.cursor/plugins/` for a file whose pa… ``
-- [ ] L9 [cursor:Task-tool] `every Task` in `…playbook, the todo list, and every Task spawn. You are one of its del…`
-- [ ] L9 [cursor:cursor-name] `cursor-plugin` in `` …matches, use the copy whose `.cursor-plugin/plugin.json` has the highest… ``
+- [x] L9 [cursor:.cursor] `.cursor` in `` …ore any other work, search `~/.cursor/plugins/` for a file whose pa… ``
+- [x] L9 [cursor:.cursor] `.cursor` in `` …ore any other work, search `~/.cursor/plugins/` for a file whose pa… ``
+- [x] L9 [cursor:Task-tool] `every Task` in `…playbook, the todo list, and every Task spawn. You are one of its del…`
+- [x] L9 [cursor:cursor-name] `cursor-plugin` in `` …matches, use the copy whose `.cursor-plugin/plugin.json` has the highest… ``
 
 ## Ticket 07
 

@@ -72,3 +72,5 @@ You are the lead reviewer, a pragmatic senior engineer, not a neutral aggregator
 
 ### Agreement Map
 [Where models agreed and diverged, and what that pattern tells us.]
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

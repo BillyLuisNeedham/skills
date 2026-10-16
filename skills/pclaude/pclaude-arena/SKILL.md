@@ -46,3 +46,5 @@ Verify the synthesized artifact like any other output, per the **prove-it-works*
 ## Outputs
 
 One synthesized artifact, with a short synthesis note alongside naming the base and why, the cross-judge's verdict, each graft with its source candidate, what was rejected and why, any convergence or dropouts, and the verification result.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

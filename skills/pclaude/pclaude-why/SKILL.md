@@ -96,3 +96,5 @@ After Sources Consulted, if the user's `pclaude-why` question is a precursor to 
 ## Common Failure Modes to Avoid
 
 - **Recency bias**. Assuming the most recent commit is authoritative. The current shape is often the accretion of many earlier decisions. Trace back.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

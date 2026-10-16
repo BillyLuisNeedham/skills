@@ -1,0 +1,5 @@
+interface:
+  display_name: "pclaude-reflect"
+  short_description: "Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill"
+policy:
+  allow_implicit_invocation: false

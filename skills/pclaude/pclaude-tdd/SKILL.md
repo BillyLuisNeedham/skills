@@ -40,3 +40,5 @@ Report the evidence, not just the outcome:
 - Name the failing-before test or executable check and the failure it produced.
 - Name the passing-after test run and any nearby validation performed.
 - If failing-before evidence could not be demonstrated, state why and describe the closest regression check used instead.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

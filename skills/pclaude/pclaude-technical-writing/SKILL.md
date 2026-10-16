@@ -104,3 +104,5 @@ Before:
 After:
 
 > `budget.mjs` reads the committed budget from `budget.json` and counts the files that import protos. If the count exceeds the budget, CI fails. Run `budget.mjs --write` only to lower the budget.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

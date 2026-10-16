@@ -77,3 +77,5 @@ When you scrap:
 ## Outputs
 
 The caller's usage is written first and the type sketch derived from it. One file with new types and signatures for small changes. Module map plus type definitions for larger work. The rationale ships alongside, shaped per `references/rationale-template.md`, including the usage sketch and the synthesis decision.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

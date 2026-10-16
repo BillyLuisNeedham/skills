@@ -29,3 +29,5 @@ Apply the **type-system-discipline** principle skill first.
 | Structured telemetry | Prefer structured logger diagnostics with enough context to debug from an id. No `console.log` in shipped code. |
 
 Examples: `references/patterns.md`.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

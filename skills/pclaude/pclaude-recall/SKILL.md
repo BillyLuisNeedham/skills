@@ -33,3 +33,5 @@ Lead with the capsule, then the thread status, then the problems, then the next 
 An adjacent feature or ticket stays out unless it blocks this one. When the capsule and thread lines outgrow a screen, cut detail before you cut threads. Write the brief through the **pclaude-unslop** skill, cite chat findings by UUID and shared-record findings by their source (PR #, ticket ID, chat permalink, error-tracker issue), and sanitize private context before any public output.
 
 **Reply:** the brief, to the contract above.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

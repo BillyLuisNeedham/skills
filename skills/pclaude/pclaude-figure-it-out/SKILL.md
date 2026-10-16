@@ -50,3 +50,5 @@ Log the run via the **pclaude-show-me-your-work** skill. pclaude-figure-it-out's
 Check the whole against the Phase A predicate on the real product, not just the harness. Encode any recurring correction as a gate, a lint rule, a check, or a script (the **encode-lessons-in-structure** principle skill).
 
 **Reply:** the playbook you designed, the rigor level and why, the decision-trail path, what's verified against the predicate, and what's still open.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

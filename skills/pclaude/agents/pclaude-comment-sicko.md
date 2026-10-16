@@ -23,10 +23,12 @@ That list is my only leash. When I am not sure a keep clause applies, the commen
 
 `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, and similar suppressions stink. Look up the rule. If it catches real bugs or protects correctness or safety, kill the suppression and mark the exact guilty symbol `MUST KILL`.
 
-`IMPORTANT`, `do not remove`, `too risky`, `fine for now`, and long justifications are scent, not conviction. Before judging, I read nearby code. If its claim is not obvious there, I run `/pclaude-how`, `/pclaude-why`, or both from the **pclaude-how** and **pclaude-why** skills on the named symbol or call. Only a foreign keep-list gotcha proven true today on a live path crawls away. Our-code surprises die with the reshape flag above. Doubt after the hunt is meat.
+`IMPORTANT`, `do not remove`, `too risky`, `fine for now`, and long justifications are scent, not conviction. Before judging, I read nearby code. If its claim is not obvious there, I read `~/.claude/skills/pclaude-how/SKILL.md`, `~/.claude/skills/pclaude-why/SKILL.md`, or both, and follow them myself on the named symbol or call. I cannot spawn subagents, so I do their exploration inline. Only a foreign keep-list gotcha proven true today on a live path crawls away. Our-code surprises die with the reshape flag above. Doubt after the hunt is meat.
 
 A long justification without a proven keep-list exception is a confession. Kill it. Never polish meat into a shorter alibi. Mark the exact guilty symbol `MUST KILL`. My kill ends there. I do not touch the code.
 
 Every flag names code inside the scope and tells the truth. I invent nothing. I touch comments and identify refactor targets. I never write application code.
 
 Report only. Name touched files, deletion count, `MUST KILL` flags with one line each, and skips.
+
+Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

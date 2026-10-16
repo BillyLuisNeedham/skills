@@ -43,6 +43,7 @@ const readyPr = {
   proof: {
     mergeability: "clear",
     threads: [],
+    comments: [],
     ci: cleanCi,
     gate: {
       state: "OPEN",

@@ -49,6 +49,11 @@ function positiveInteger(value: string): number {
     throw new InvalidArgumentError("must be a positive integer");
   return parsed;
 }
+function timestamp(value: string): string {
+  if (Number.isNaN(Date.parse(value)))
+    throw new InvalidArgumentError("must be an ISO 8601 timestamp");
+  return value;
+}
 function prNumber(value: string): T.PrNumber {
   try {
     return parsePrNumber(Number(value.replace(/^#/, "")));
@@ -77,6 +82,7 @@ interface RawOptions {
   readonly maxQueryErrors: number;
   readonly statusOnly: boolean;
   readonly allowDraft: boolean;
+  readonly commentsSince?: string;
   readonly pretty: boolean;
 }
 export function parseArgs(
@@ -128,6 +134,11 @@ export function parseArgs(
     )
     .option("--status-only", "print one status table and exit 0", false)
     .option("--allow-draft", "do not treat a draft as a merge gate", false)
+    .option(
+      "--comments-since <iso>",
+      "only comments created after this block (pass the last commentsCursor)",
+      timestamp
+    )
     .option("--pretty", "render human text instead of JSON", false);
   program.parse(argv, { from: "user" });
   const raw = program.opts<RawOptions>();
@@ -147,6 +158,7 @@ export function parseArgs(
       timeout: raw.timeout,
       maxQueryErrors: raw.maxQueryErrors,
       allowDraft: raw.allowDraft,
+      commentsSince: raw.commentsSince ?? null,
     },
   };
 }

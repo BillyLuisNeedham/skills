@@ -31,7 +31,7 @@ Every spawn is an Agent tool call.
 
 Claude Code subagents cannot spawn subagents. So the main session is always the lead that fans out. arena, swarm, interrogate, how and why spawn their agents from the main session, never from inside a delegate.
 
-- A delegate owns its diff directly. It writes, tests and commits its own change instead of handing it to a further agent.
+- A delegate owns its diff directly. It writes and tests its change, runs `/simplify` over it, and commits it, instead of handing it to a further agent.
 - A delegate that hits a step that says to fan out does that work itself, in sequence, or reports back so the lead can fan out.
 - A skill that runs inside a delegate (a delegate reading `pclaude-how`, say) follows its steps inline, without spawning.
 

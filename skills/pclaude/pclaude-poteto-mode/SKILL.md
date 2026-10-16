@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Every pclaude skill is user-invoked, so you reach one by Reading its file. A skill named below is at `~/.claude/skills/pclaude-<name>/SKILL.md`. Read the whole file, then follow it. A principle is a leaf file at `~/.claude/skills/pclaude-principles/<name>.md`.
 
-Before the first spawn, Read the pclaude `CONVENTIONS.md` (reaching skills, spawning, nesting, asking the human) and `models.md` (the model for each role). `realpath ~/.claude/skills/pclaude-poteto-mode/../CONVENTIONS.md` and `realpath ~/.claude/skills/pclaude-poteto-mode/../models.md` print their paths. Put this file's absolute path in every `pclaude-poteto-agent` prompt.
+At the start of every run, before the todo list, Read three files in full: the principles index (`~/.claude/skills/pclaude-principles/SKILL.md`), the pclaude `CONVENTIONS.md` (reaching skills, spawning, nesting, asking the human) and `models.md` (the model for each role). `realpath ~/.claude/skills/pclaude-poteto-mode/../CONVENTIONS.md` and `realpath ~/.claude/skills/pclaude-poteto-mode/../models.md` print the last two paths. Printing a path is not reading the file. Put this file's absolute path in every `pclaude-poteto-agent` prompt.
 
 ## Non-negotiables
 
@@ -25,8 +25,8 @@ Remaining triggers:
 - Nontrivial multi-step → write the throughput checkpoint (Feature step 3).
 - Any prose surface, your reply to the user included → Read `~/.claude/skills/pclaude-unslop/SKILL.md` and apply it. Write the reply per **Writing the reply**. Agent-facing prose (a SKILL.md, an agent definition, a CLAUDE.md) also follows the `writing-for-agents` skill, loaded with the Skill tool.
 - Docs, RFCs, readmes, PR descriptions, or commit messages → Read `~/.claude/skills/pclaude-technical-writing/SKILL.md` and apply it.
-- Before commit → the `simplify` skill (`/simplify`, loaded with the Skill tool) over the code in the diff. Prose in the diff gets `pclaude-unslop`.
-- Before review → Read `~/.claude/skills/pclaude-no-comments/SKILL.md` and run it.
+- Before commit → the `simplify` skill (`/simplify`, loaded with the Skill tool) over the code in the diff. Prose in the diff gets `pclaude-unslop`. A delegate commits its own change, so its prompt tells it to run `/simplify` before that commit.
+- Before review → Read `~/.claude/skills/pclaude-no-comments/SKILL.md` and run it. A run that commits code but opens no PR still runs it, over the commits it made, before the reply. The lead runs it, since a delegate cannot spawn Comment Sicko.
 - Shipping UI / IDE / CLI → drive it on its real surface. Use the `claude-in-chrome` skill for browser and web UIs. Use the `run` skill for CLIs, TUIs, servers, and Electron apps, or drive a CLI in tmux. For bug fixes, reproduce first on the same surface yourself. Hand to the user only under the narrow Bug fix step 1 exception.
 - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → Read `~/.claude/skills/pclaude-benchmark-checklist/SKILL.md` and work through it before you report or act on the number.
 - Any PR-status request ("babysit this", "get it green", "address the review comments", and most often "check on PR X" or "anything outstanding on X") → the **Babysit** playbook (`playbooks/babysit.md`). Never triggered by merely opening a PR. Declare its mode before polling. The playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a phase agent stops that agent finishing its turn.
@@ -83,7 +83,7 @@ Comments follow the same rule as the reply. Write them clean as you go. Keep a c
 
 ## Playbooks
 
-Open a todo list whose first items are the matched playbook's steps, copied in verbatim, before any task-specific todos. A step you choose not to do stays in the list with a one-line `skip: <reason>`. Match the task to a playbook below and open its full steps at `playbooks/<title>.md`, with the title in kebab case, hyphens kept and other punctuation dropped, unless the entry gives its file. Copy its steps in verbatim.
+Open a todo list with the task tools (`TaskCreate` and `TaskUpdate`, loaded with ToolSearch when deferred) right after the three start-of-run reads. Its first items are the matched playbook's steps, one item per step, copied in verbatim, before any task-specific todos. A step you choose not to do stays in the list with a one-line `skip: <reason>`. Match the task to a playbook below and open its full steps at `playbooks/<title>.md`, with the title in kebab case, hyphens kept and other punctuation dropped, unless the entry gives its file. Copy its steps in verbatim.
 
 A large or cross-cutting effort (a migration across many call sites, an ambitious multi-part change), or work the user steps away from to trust later, routes to the **pclaude-figure-it-out** skill (Read `~/.claude/skills/pclaude-figure-it-out/SKILL.md`) even when a narrower playbook like Feature fits. Use **pclaude-figure-it-out** whenever no bundled playbook fits. It designs a bespoke, rigorous playbook for the task. A standing project-scale program (multi-day, many stacked PRs, a fleet of subagents under one coordinator) routes to **Orchestrate** instead. pclaude-figure-it-out designs one bespoke run, orchestrate runs the program.
 

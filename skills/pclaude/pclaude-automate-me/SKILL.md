@@ -1,6 +1,6 @@
 ---
 name: pclaude-automate-me
-description: "Use for \"automate me\", \"create/update/refresh my -mode skill\", \"turn/capture my preferences or working style into a skill\", or wanting agents to follow how the user works. Drafts or revises a personal -mode skill via create-skill + unslop, optionally pulling fresh evidence from recent transcripts."
+description: "Use for \"automate me\", \"create/update/refresh my -mode skill\", \"turn/capture my preferences or working style into a skill\", or wanting agents to follow how the user works. Drafts or revises a personal -mode skill via writing-for-agents + pclaude-unslop, optionally pulling fresh evidence from recent transcripts."
 disable-model-invocation: true
 ---
 
@@ -8,13 +8,13 @@ disable-model-invocation: true
 
 A guided flow for turning the user's working conventions into a skill agents will follow. The output is one `-mode` skill tailored to them (e.g. `jay-mode`, `priya-mode`).
 
-This skill orchestrates three others: an inline mining pass (see step 1), Cursor's built-in `create-skill` (authoring), and the **pclaude-unslop** skill (prose discipline). It sequences them. It doesn't replace them.
+This skill orchestrates three others: an inline mining pass (see step 1), the `writing-for-agents` skill (authoring, loaded with the Skill tool), and `pclaude-unslop` (prose discipline, `~/.claude/skills/pclaude-unslop/SKILL.md`). It sequences them. It doesn't replace them.
 
 ## Flow
 
 ### 0. Check for an existing skill
 
-Look recursively for `.cursor/skills/**/*-mode/SKILL.md` and `~/.cursor/skills/*-mode/SKILL.md` matching the user's handle. Mode skills can live in a personal category directory (`.cursor/skills/<handle>/`), not only at the top level. If one exists, confirm intent with `AskQuestion` (unless they already said "update my skill" or similar):
+Look for `.claude/skills/*-mode/SKILL.md` in the project and `~/.claude/skills/*-mode/SKILL.md` matching the user's handle. Follow symlinks. A linked skill's source can live in a repo folder of its own, and that source is the file to edit. If one exists, confirm intent with a numbered question and your recommendation (Asking the human in [CONVENTIONS.md](../CONVENTIONS.md)), unless they already said "update my skill" or similar:
 
 - Update the existing skill (default for repeat runs)
 - Start fresh (rare, ask why before doing it)
@@ -26,9 +26,9 @@ Update mode changes the rest of the flow:
 
 ### 1. Mine their history
 
-Locate the active workspace's transcripts before fanning out. The system prompt names the workspace's `agent-transcripts/` directory. Use only that path. Don't glob across `~/.cursor/projects/*/`. That crosses workspace boundaries and reads private chats from unrelated projects.
+Read history through the transcript reader (Reading transcripts in [CONVENTIONS.md](../CONVENTIONS.md)), written here as `transcript`. `transcript list --since 28d --limit 200` lists the active project's chats. Use only that project. Never point `--project` elsewhere or glob across `~/.claude/projects/*/` unless the user asks, since that reads private chats from unrelated projects.
 
-Survey recent agent conversations within that scope for recurring patterns. Run multiple parallel subagents across slices of history (e.g. last 2-4 weeks, split into 3 slices so each has enough material). Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **pclaude-poteto-mode** skill. Each slice mining subagent reads transcripts from the workspace-scoped path the parent provides, looks for the signals below, and returns a short structured list of patterns it saw with evidence pointers. Default signals worth hunting:
+Survey recent agent conversations within that scope for recurring patterns. Run multiple parallel Agent calls on the `how explorer` line of [models.md](../models.md) across slices of history (e.g. last 2-4 weeks, split into 3 slices so each has enough material). Pick each subagent's reasoning level for the job, per the Subagents section of `~/.claude/skills/pclaude-poteto-mode/SKILL.md`. Each slice mining subagent gets its slice of session ids and reads each one with `transcript show <id>`, looks for the signals below, and returns a short structured list of patterns it saw with evidence pointers. Default signals worth hunting:
 
 - Response preferences (length, tone, format, "dumb it down" corrections)
 - Delegation habits (subagents, models, specialized workflows, parallelism)
@@ -41,9 +41,9 @@ Cross-check across slices before elevating a signal. Patterns seen in 2+ slices 
 
 ### 2. Ask the user directly
 
-Mining misses intent that hasn't come up yet. Use the `AskQuestion` tool (structured multi-choice) rather than asking the user to type from scratch.
+Mining misses intent that hasn't come up yet. Ask in plain text per Asking the human in [CONVENTIONS.md](../CONVENTIONS.md). Number the questions, ask them all at once, and give each one your recommendation drawn from what the mining found, so the user can answer in one reply.
 
-Shape: one or two questions with 4-6 options each, `allow_multiple: true` for category questions. Start broad ("Which areas matter most?"), then follow up on selected areas with specific options. After the structured rounds, one free-form chat question catches anything the options missed.
+Shape: one broad round first ("Which areas matter most?", with the mined candidates named so the user can confirm or strike them), then one follow-up round on the areas they picked. Close with one open question that catches anything the rounds missed.
 
 Don't dump 20 questions.
 
@@ -60,21 +60,21 @@ Group the combined signals into sections. Common ones (use only what applies):
 - **Process**: git worktrees, commits, PRs, review/merge tooling.
 - **Skills**: skill-authoring habits, fix-the-skill-first, proposing new skills.
 
-The **pclaude-poteto-mode** skill shows the shape. Read it for granularity. Don't copy its content. The user's rules are not the same as pclaude-poteto-mode's.
+`~/.claude/skills/pclaude-poteto-mode/SKILL.md` shows the shape. Read it for granularity. Don't copy its content. The user's rules are not the same as pclaude-poteto-mode's.
 
 ### 4. Draft the skill
 
-Use Cursor's built-in `create-skill` skill to author the skill. Placement:
+Load the `writing-for-agents` skill with the Skill tool and follow it to author the skill. Placement:
 
-- Path: preserve an existing mode skill's category. For a new mode, use `.cursor/skills/<handle>/<handle>-mode/SKILL.md` when the repo has an established personal category for that handle. Otherwise default to `.cursor/skills/<handle>-mode/SKILL.md` in the project (or `~/.cursor/skills/<handle>-mode/` if the user prefers a personal skill).
+- Path: preserve an existing mode skill's location. For a new mode, default to `.claude/skills/<handle>-mode/SKILL.md` in the project, or `~/.claude/skills/<handle>-mode/SKILL.md` if the user prefers a personal skill. Where the repo keeps its skills in folders of its own and links them into `~/.claude/skills/`, put it beside the user's other personal skills and link it the way they are linked.
 - Handle: the user's first name or chosen identifier.
 - Frontmatter `description`: trigger on their name + `/<handle>-mode` + "work in their style", not on generic keywords like "write code" or "review PR".
-- Frontmatter formatting: follow `create-skill`'s YAML rules. Keep `description` as one YAML scalar. Quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.
+- Frontmatter formatting: follow `writing-for-agents`' YAML rules. Keep `description` as one YAML scalar. Quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.
 - Frontmatter `disable-model-invocation: true` by default. Opt out only if the user explicitly wants their mode to apply on every turn.
 
 ### 5. Iterate on prose
 
-Apply the **pclaude-unslop** skill and `create-skill`'s writing guidelines to every line.
+Apply `pclaude-unslop` and `writing-for-agents`' writing guidelines to every line.
 
 Show the draft to the user and take feedback. Expect multiple iterations. Cut ruthlessly. A mode skill is not a manual.
 
@@ -93,13 +93,13 @@ Work in a worktree off main. Commit and open a PR. Don't push to main directly.
 
 ## Evaluation
 
-A `-mode` skill is subjective output. A `create-skill`-style test/iterate benchmark loop isn't useful here. Vibe-check with the user: does it read like them? Did it miss anything? Then ship.
+A `-mode` skill is subjective output. A test/iterate benchmark loop isn't useful here. Vibe-check with the user: does it read like them? Did it miss anything? Then ship.
 
 Run a description-optimization loop only if the skill's trigger accuracy turns out to be a problem in practice.
 
 ## When not to use
 
-- User wants a task-specific skill (not working conventions): `create-skill` alone, no mining required.
+- User wants a task-specific skill (not working conventions): `writing-for-agents` alone, no mining required.
 - User wants to capture one narrow workflow (e.g. "how I write commit messages"). That's a regular skill, not a mode skill.
 
 Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

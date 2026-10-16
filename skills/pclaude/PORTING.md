@@ -222,71 +222,71 @@ Shared transcript reader and the skills that read transcripts.
 
 ### pclaude-automate-me/SKILL.md
 
-- [ ] L11 [cursor:Cursor] `Cursor` in `` …ine mining pass (see step 1), Cursor's built-in `create-skill` (au… ``
-- [ ] L17 [cursor:AskQuestion] `AskQuestion` in `` …exists, confirm intent with `AskQuestion` (unless they already said "u… ``
-- [ ] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
-- [ ] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
-- [ ] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
-- [ ] L29 [cursor:.cursor] `.cursor` in `` …at path. Don't glob across `~/.cursor/projects/*/`. That crosses wo… ``
-- [ ] L44 [cursor:AskQuestion] `AskQuestion` in `` …hasn't come up yet. Use the `AskQuestion` tool (structured multi-choic… ``
-- [ ] L67 [cursor:Cursor] `Cursor` in `` Use Cursor's built-in `create-skill` ski… ``
-- [ ] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
-- [ ] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
-- [ ] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
+- [x] L11 [cursor:Cursor] `Cursor` in `` …ine mining pass (see step 1), Cursor's built-in `create-skill` (au… ``
+- [x] L17 [cursor:AskQuestion] `AskQuestion` in `` …exists, confirm intent with `AskQuestion` (unless they already said "u… ``
+- [x] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
+- [x] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
+- [x] L17 [cursor:.cursor] `.cursor` in `` Look recursively for `.cursor/skills/**/*-mode/SKILL.md` an… ``
+- [x] L29 [cursor:.cursor] `.cursor` in `` …at path. Don't glob across `~/.cursor/projects/*/`. That crosses wo… ``
+- [x] L44 [cursor:AskQuestion] `AskQuestion` in `` …hasn't come up yet. Use the `AskQuestion` tool (structured multi-choic… ``
+- [x] L67 [cursor:Cursor] `Cursor` in `` Use Cursor's built-in `create-skill` ski… ``
+- [x] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
+- [x] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
+- [x] L69 [cursor:.cursor] `.cursor` in `` …ategory. For a new mode, use `.cursor/skills/<handle>/<handle>-mode… ``
 
 ### pclaude-poteto-mode/playbooks/eval.md
 
-- [ ] L22 [cursor:.cursor] `.cursor` in `` …path). Do not glob across `~/.cursor/projects/*/`. That crosses wo… ``
+- [x] L22 [cursor:.cursor] `.cursor` in `` …path). Do not glob across `~/.cursor/projects/*/`. That crosses wo… ``
 
 ### pclaude-poteto-mode/playbooks/session-pickup.md
 
-- [ ] L5 [cursor:.cursor] `.cursor` in `` …e path. Do not glob across `~/.cursor/projects/*/`, that crosses wo… ``
+- [x] L5 [cursor:.cursor] `.cursor` in `` …e path. Do not glob across `~/.cursor/projects/*/`, that crosses wo… ``
 
 ### pclaude-poteto-mode/scripts/worktree-audit.sh
 
-- [ ] L64 [cursor:.cursor] `.cursor` in `# Transcripts dir: ~/.cursor/projects/<slugified-repo-path…`
-- [ ] L66 [cursor:.cursor] `.cursor` in `transcripts="$HOME/.cursor/projects/$slug/agent-transcri…`
+- [x] L64 [cursor:.cursor] `.cursor` in `# Transcripts dir: ~/.cursor/projects/<slugified-repo-path…`
+- [x] L66 [cursor:.cursor] `.cursor` in `transcripts="$HOME/.cursor/projects/$slug/agent-transcri…`
 
 ### pclaude-recall/SKILL.md
 
-- [ ] L15 [cursor:.cursor] `.cursor` in `` Transcripts live at `~/.cursor/projects/<slug>/agent-transcr… ``
+- [x] L15 [cursor:.cursor] `.cursor` in `` Transcripts live at `~/.cursor/projects/<slug>/agent-transcr… ``
 
 ### pclaude-reflect/SKILL.md
 
-- [ ] L15 [cursor:.cursor] `.cursor` in `` …names. Do not glob across `~/.cursor/projects/*/`. That crosses wo… ``
-- [ ] L25 [cursor:Task-tool] `` `Task` `` in `` One message, three `Task` calls, `subagent_type: genera… ``
-- [ ] L27 [cursor:.mdc] `.mdc` in `` …le line in the `pclaude-models.mdc` rule and a default. Set `mod… ``
-- [ ] L27 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
-- [ ] L27 [unknown-skill] `pclaude-models` in `` …izer name a role line in the `pclaude-models.mdc` rule and a default. Set… ``
-- [ ] L32 [cursor:grok] `grok` in `` …ooling | `reflect tooling` | `grok-4.7-xhigh-fast` | `references… ``
-- [ ] L35 [cursor:Task-tool] `` `Task` `` in `` …iewers return findings in the `Task` response body. ``
-- [ ] L39 [cursor:Task-tool] `` `Task` `` in `` One `Task` call, `subagent_type: general… ``
-- [ ] L54 [cursor:Cursor] `Cursor` in `` …more than ~10 lines): hand to Cursor's built-in `create-skill` ski… ``
+- [x] L15 [cursor:.cursor] `.cursor` in `` …names. Do not glob across `~/.cursor/projects/*/`. That crosses wo… ``
+- [x] L25 [cursor:Task-tool] `` `Task` `` in `` One message, three `Task` calls, `subagent_type: genera… ``
+- [x] L27 [cursor:.mdc] `.mdc` in `` …le line in the `pclaude-models.mdc` rule and a default. Set `mod… ``
+- [x] L27 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
+- [x] L27 [unknown-skill] `pclaude-models` in `` …izer name a role line in the `pclaude-models.mdc` rule and a default. Set… ``
+- [x] L32 [cursor:grok] `grok` in `` …ooling | `reflect tooling` | `grok-4.7-xhigh-fast` | `references… ``
+- [x] L35 [cursor:Task-tool] `` `Task` `` in `` …iewers return findings in the `Task` response body. ``
+- [x] L39 [cursor:Task-tool] `` `Task` `` in `` One `Task` call, `subagent_type: general… ``
+- [x] L54 [cursor:Cursor] `Cursor` in `` …more than ~10 lines): hand to Cursor's built-in `create-skill` ski… ``
 
 ### pclaude-reflect/references/divergent-reviewer.md
 
-- [ ] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L21 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
+- [x] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L21 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L21 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
 
 ### pclaude-reflect/references/judgment-reviewer.md
 
-- [ ] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L20 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
+- [x] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L20 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L20 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
 
 ### pclaude-reflect/references/tooling-reviewer.md
 
-- [ ] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
-- [ ] L31 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
+- [x] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L31 [cursor:.cursor] `.cursor` in `` …ad` of its `SKILL.md` (under `.cursor/skills/`, `~/.cursor/skills/`… ``
+- [x] L31 [cursor:Task-tool] `` `Task` `` in `` …, or `~/.cursor/plugins/`), a `Task` prompt naming its path, or a… ``
 
 ### pclaude-show-me-your-work/SKILL.md
 
-- [ ] L57 [cursor:.cursor] `.cursor` in `` …e path). Don't glob across `~/.cursor/projects/*/`. That reads unre… ``
+- [x] L57 [cursor:.cursor] `.cursor` in `` …e path). Don't glob across `~/.cursor/projects/*/`. That reads unre… ``
 
 ## Ticket 12
 

@@ -1,0 +1,5 @@
+interface:
+  display_name: "pclaude update"
+  short_description: "Merge upstream pstack into skills/pclaude, resolve, check and commit"
+policy:
+  allow_implicit_invocation: false

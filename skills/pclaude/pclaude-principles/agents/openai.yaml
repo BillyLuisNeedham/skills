@@ -1,0 +1,5 @@
+interface:
+  display_name: "pclaude-principles"
+  short_description: "The 24 pclaude principles as a trigger index"
+policy:
+  allow_implicit_invocation: false

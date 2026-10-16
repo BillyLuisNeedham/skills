@@ -1,5 +1,7 @@
 A fork of the excellent https://skills.sh/b/mattpocock/skills plus some other useful skills I use, with an easy sync script 
 
+Fork extras, none of them in the plugin: `/king` (in `king/`) shows and switches the active skill sets; the `pclaude` set is pstack ported to Claude Code ([skills/pclaude](./skills/pclaude/README.md)); and `/my-pclaude-update` merges upstream pstack changes into it. See [FORK.md](./FORK.md).
+
 <p>
   <a href="https://www.aihero.dev/s/skills-newsletter">
     <picture>

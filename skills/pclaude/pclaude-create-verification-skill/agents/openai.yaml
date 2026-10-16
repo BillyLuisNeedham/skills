@@ -1,0 +1,5 @@
+interface:
+  display_name: "pclaude-create-verification-skill"
+  short_description: "Generate a project-local verification skill that drives your app the way a user does, in any language, framework, or platform"
+policy:
+  allow_implicit_invocation: false

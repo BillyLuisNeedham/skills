@@ -5,8 +5,8 @@ set -euo pipefail
 # It is not a supported installer. Modifications to it, or requests for
 # modifications, will not be approved.
 #
-# Links every skill in the active skill set (see scripts/skill-sets.sh and
-# scripts/use-skills.sh), plus the always-on buckets, into the local skill
+# Links every skill in the active skill sets (see scripts/skill-sets.sh and
+# scripts/use-skills.sh), plus the always-on paths, into the local skill
 # directories used by each agent harness:
 #   - ~/.claude/skills: Claude Code (symlink)
 #   - ~/.agents/skills: Codex and other Agent Skills-compatible harnesses (symlink)
@@ -15,8 +15,15 @@ set -euo pipefail
 # needed to keep those installed skills up to date. Cursor's copies are
 # refreshed by re-running this script.
 #
-# Vendored agents of the active set (skills/addy/agents/, skills/pstack/agents/)
-# are symlinked into ~/.claude/agents the same way.
+# Cursor's list differs from the other two: skills/pclaude is never copied
+# there, and skills/pstack (its Cursor twin) is copied while pclaude is active.
+# skills/pstack is never linked into ~/.claude or ~/.agents.
+#
+# When two active sets hold a skill or agent with the same name, the set listed
+# later in .skill-set wins and a warning names both copies.
+#
+# Vendored agents of the active sets (skills/<bucket>/agents/*.md) are
+# symlinked into ~/.claude/agents the same way.
 #
 # Entries this script owns that belong to an inactive set are removed: symlinks
 # pointing into this repo, and Cursor copies stamped with a .linked-from marker
@@ -37,26 +44,30 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 . "$REPO/scripts/skill-sets.sh"
 
 CURSOR_DEST="$HOME/.cursor/skills"
-DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills" "$CURSOR_DEST")
+CLAUDE_DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills")
+DESTS=("${CLAUDE_DESTS[@]}" "$CURSOR_DEST")
 AGENTS_DEST="$HOME/.claude/agents"
-ACTIVE_SKILL_SET="$(active_skill_set)"
+ACTIVE_SKILL_SETS="$(active_skill_sets | tr '\n' ' ')"
 
-# Active repo skills as NUL-delimited SKILL.md paths, and their names (all repo
-# skill names too, so stale Cursor copies can be told apart from user ones).
-ACTIVE_SKILL_MDS=()
+# Winning skill dirs per target, after name clashes are resolved by set order
+# (see skill-sets.sh). Claude Code and ~/.agents share one list; Cursor gets
+# its own, since pstack is Cursor-only and pclaude never goes to Cursor.
+CLAUDE_SKILLS="$(winning_skill_dirs claude)"
+CURSOR_SKILLS="$(winning_skill_dirs cursor)"
+CLAUDE_AGENTS="$(winning_agent_mds claude)"
+
+# All repo skill names, so stale Cursor copies can be told apart from user
+# ones, and the names each target installs.
 ALL_NAMES=""
-ACTIVE_NAMES=""
 while IFS= read -r -d '' skill_md; do
-  dir="$(dirname "$skill_md")"
-  name="$(basename "$dir")"
-  ALL_NAMES="$ALL_NAMES$name"$'\n'
-  if skill_path_active "$dir"; then
-    ACTIVE_SKILL_MDS+=("$skill_md")
-    ACTIVE_NAMES="$ACTIVE_NAMES$name"$'\n'
-  fi
+  ALL_NAMES="$ALL_NAMES$(basename "$(dirname "$skill_md")")"$'\n'
 done < <(all_skill_mds)
+CURSOR_NAMES=""
+while IFS= read -r dir; do
+  [ -n "$dir" ] && CURSOR_NAMES="$CURSOR_NAMES$(basename "$dir")"$'\n'
+done <<<"$CURSOR_SKILLS"
 
-echo "skill set: $ACTIVE_SKILL_SET"
+echo "skill sets: $ACTIVE_SKILL_SETS"
 
 guard_dest() {
   local dest="$1"
@@ -75,28 +86,27 @@ guard_dest() {
 }
 
 link_skill() {
-  local src="$1" name="$2"
-  for dest in "${DESTS[@]}"; do
-    local target="$dest/$name"
-    if [ "$dest" = "$CURSOR_DEST" ]; then
-      # Cursor's slash-command picker does not follow symlinks; it needs real
-      # dirs. Drop any prior symlink/dir and copy so the picker sees the skill.
+  local src="$1" name="$2" dest="$3"
+  local target="$dest/$name"
+  if [ "$dest" = "$CURSOR_DEST" ]; then
+    # Cursor's slash-command picker does not follow symlinks; it needs real
+    # dirs. Drop any prior symlink/dir and copy so the picker sees the skill.
+    rm -rf "$target"
+    cp -R "$src" "$target"
+    printf '%s\n' "$REPO" > "$target/.linked-from"
+    echo "copied $name -> $src ($dest)"
+  else
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
       rm -rf "$target"
-      cp -R "$src" "$target"
-      printf '%s\n' "$REPO" > "$target/.linked-from"
-      echo "copied $name -> $src ($dest)"
-    else
-      if [ -e "$target" ] && [ ! -L "$target" ]; then
-        rm -rf "$target"
-      fi
-      ln -sfn "$src" "$target"
-      echo "linked $name -> $src ($dest)"
     fi
-  done
+    ln -sfn "$src" "$target"
+    echo "linked $name -> $src ($dest)"
+  fi
 }
 
 prune_stale() {
-  local dest="$1"
+  local dest="$1" target_kind=claude
+  [ "$dest" = "$CURSOR_DEST" ] && target_kind=cursor
   for target in "$dest"/*; do
     [[ -e "$target" || -L "$target" ]] || continue
     local name resolved
@@ -121,7 +131,7 @@ prune_stale() {
           if [[ ! -f "$resolved/SKILL.md" ]]; then
             rm "$target"
             echo "removed orphan $name ($dest)"
-          elif ! skill_path_active "$resolved"; then
+          elif ! skill_path_active "$resolved" "$target_kind"; then
             rm "$target"
             echo "removed inactive $name ($dest)"
           fi
@@ -144,7 +154,7 @@ prune_stale() {
         "$REPO"|"$REPO"/*) owned=1 ;;
         "") grep -qxF "$name" <<<"$ALL_NAMES" && owned=1 ;;
       esac
-      if (( owned )) && ! grep -qxF "$name" <<<"$ACTIVE_NAMES"; then
+      if (( owned )) && ! grep -qxF "$name" <<<"$CURSOR_NAMES"; then
         rm -rf "$target"
         echo "removed stale $name ($dest)"
       fi
@@ -164,11 +174,16 @@ for dest in "${DESTS[@]}"; do
   prune_stale "$dest"
 done
 
-for skill_md in "${ACTIVE_SKILL_MDS[@]}"; do
-  src="$(dirname "$skill_md")"
-  name="$(basename "$src")"
-  link_skill "$src" "$name"
-done
+while IFS= read -r src; do
+  [ -n "$src" ] || continue
+  for dest in "${CLAUDE_DESTS[@]}"; do
+    link_skill "$src" "$(basename "$src")" "$dest"
+  done
+done <<<"$CLAUDE_SKILLS"
+while IFS= read -r src; do
+  [ -n "$src" ] || continue
+  link_skill "$src" "$(basename "$src")" "$CURSOR_DEST"
+done <<<"$CURSOR_SKILLS"
 
 # Agents: symlink the active set's vendored agents into ~/.claude/agents and
 # drop symlinks into this repo that are inactive or dangling. Regular files
@@ -179,15 +194,15 @@ for target in "$AGENTS_DEST"/*; do
   resolved="$(readlink "$target" 2>/dev/null || true)"
   case "$resolved" in
     "$REPO"/*)
-      if [[ ! -f "$resolved" ]] || ! skill_path_active "$resolved"; then
+      if [[ ! -f "$resolved" ]] || ! grep -qxF "$resolved" <<<"$CLAUDE_AGENTS"; then
         rm "$target"
         echo "removed agent $(basename "$target") ($AGENTS_DEST)"
       fi
       ;;
   esac
 done
-while IFS= read -r -d '' agent_md; do
-  skill_path_active "$agent_md" || continue
+while IFS= read -r agent_md; do
+  [ -n "$agent_md" ] || continue
   target="$AGENTS_DEST/$(basename "$agent_md")"
   if [[ -e "$target" && ! -L "$target" ]]; then
     echo "skipped agent $(basename "$agent_md"): $target is not a symlink ($AGENTS_DEST)" >&2
@@ -195,4 +210,4 @@ while IFS= read -r -d '' agent_md; do
   fi
   ln -sfn "$agent_md" "$target"
   echo "linked agent $(basename "$agent_md") -> $agent_md ($AGENTS_DEST)"
-done < <(all_agent_mds)
+done <<<"$CLAUDE_AGENTS"

@@ -1,0 +1,5 @@
+interface:
+  display_name: "pclaude-help"
+  short_description: "Guides users through pclaude setup, /pclaude-poteto-mode, and picking the skill, playbook, or principle for a task"
+policy:
+  allow_implicit_invocation: false

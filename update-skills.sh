@@ -681,7 +681,7 @@ EFFECTIVE_HTML_SKILLS=(html design-artifact html-wireframe html-prototype html-p
 sync_single_skill "https://github.com/plannotator/effective-html.git" "${EFFECTIVE_HTML_SKILLS[@]/#/skills/}"
 for s in "${EFFECTIVE_HTML_SKILLS[@]}"; do make_user_invoked "personal/$s"; done
 
-echo "==> Linking the active skill set ($(cat "$REPO_DIR/.skill-set" 2>/dev/null || echo pocock)) to ~/.claude/skills, ~/.agents/skills, ~/.cursor/skills and ~/.claude/agents..."
+echo "==> Linking the active skill sets ($(bash "$REPO_DIR/scripts/use-skills.sh" | tr '\n' ' ' | sed 's/ $//')) to ~/.claude/skills, ~/.agents/skills, ~/.cursor/skills and ~/.claude/agents..."
 bash "$REPO_DIR/scripts/link-skills.sh"
 
 echo "==> Generating OpenCode slash commands..."

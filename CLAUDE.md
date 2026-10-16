@@ -10,6 +10,7 @@ Skills are organized into bucket folders under `skills/`:
 - `android/`: Android skills, not promoted, synced from upstream
 - `addy/`: Addy Osmani's agent skills and agents, not promoted, synced from upstream
 - `pstack/`: the pstack skills and agents from Cursor's plugins repo, not promoted, synced from upstream
+- `pclaude/`: pstack ported to Claude Code, not promoted and with no docs page. A generated bucket Billy edits directly, updated by three-way merge through `/my-pclaude-update` (see [FORK.md](./FORK.md))
 
 `gcp/`, `android/`, `addy/` and `pstack/` are upstream-synced, non-promoted buckets. `update-skills.sh` clones https://github.com/google/skills.git into `skills/gcp/`, https://github.com/android/skills.git into `skills/android/`, https://github.com/addyosmani/agent-skills.git into `skills/addy/`, and the `pstack/` plugin of https://github.com/cursor/plugins.git into `skills/pstack/`, keeping each skill's `gcp-`/`android-`/`addy-`/`pstack-` prefixed name, and regenerates each bucket's `README.md` every run. `addy/` and `pstack/` also carry their upstream subagents in `agents/`, `addy/` also gets its upstream slash commands as user-invoked `addy-<cmd>` skills, and the sync rewrites references to each bucket's own skills and agents to the prefixed names (see [FORK.md](./FORK.md)). None of these buckets may appear in the top-level `README.md`, `.claude-plugin/plugin.json`, `docs/`, or `ask-matt`.
 

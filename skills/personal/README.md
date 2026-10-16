@@ -11,7 +11,7 @@ Skills tied to my own setup, not promoted in the plugin. Fork-owned — upstream
 - **[thermo-nuclear-code-quality-review](./thermo-nuclear-code-quality-review/SKILL.md)** — Extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Vendored from cursor/plugins.
 - **[my-verify](./my-verify/SKILL.md)**: Verify a branch's work end to end and write an HTML evidence report with video, captioned screenshots and logs.
 - **[show-me](./show-me/SKILL.md)** — Help the user understand the current topic visually with concise ASCII diagrams, code-shape sketches, and focused HTML artifacts.
-- **[my-pclaude-update](./my-pclaude-update/SKILL.md)**: Merge upstream pstack changes into `skills/pclaude`, resolve conflicts and check hits by translating the new text, and commit.
+- **[my-pclaude-update](./my-pclaude-update/SKILL.md)**: Merge upstream pstack changes into `skills/pclaude`, resolve conflicts and check hits by translating the new text, and commit. The bucket is listed in [skills/pclaude](../pclaude/README.md); switch the `pclaude` set on with `/king`.
 
 Vendored from [plannotator/effective-html](https://github.com/plannotator/effective-html) (MIT), patched to be user-invoked on every sync. Start at `/html`, which routes to the others by reading their `SKILL.md` files.
 

@@ -34,3 +34,6 @@ CONVENTIONS.md	| `Task` tool, background tasks | the Agent tool with `run_in_bac
 CONVENTIONS.md	| model slugs, `pstack-models.mdc`, `/setup-pstack` | a role in `models.md` |
 CONVENTIONS.md	| `~/.cursor` transcripts | `~/.claude/projects`, read through the pclaude scripts package |
 CONVENTIONS.md	| Custom Modes, `mode: true` | the user-invoked `/pclaude-poteto-mode <task>` |
+
+# The bucket README credits upstream with the footer every SKILL.md carries.
+README.md	Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.

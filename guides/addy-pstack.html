@@ -127,7 +127,7 @@ nav.toc li { break-inside: avoid; }
 
 .tag { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; vertical-align: 1px; white-space: nowrap; }
 .tag.addy { background: var(--addy-soft); color: var(--addy); }
-.tag.pstack { background: var(--pstack-soft); color: var(--pstack); }
+.tag.pstack, .tag.pclaude { background: var(--pstack-soft); color: var(--pstack); }
 .tag.pocock { background: var(--accent-soft); color: var(--accent); }
 .tag.ok { background: var(--ok-soft); color: var(--ok); }
 .tag.warn { background: var(--warn-soft); color: var(--warn); }
@@ -190,7 +190,7 @@ footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1
 <header class="top">
   <div>
     <h1>addy and pstack: how to use them</h1>
-    <p class="muted">Personal reference for running the <span class="tag addy">addy</span> and <span class="tag pstack">pstack</span> skill sets in Claude Code. Checklists come first; everything below them is depth for when you want it. Snapshot taken 2026-10-12 from the local buckets plus pstack's upstream guide.</p>
+    <p class="muted">Personal reference for running the <span class="tag addy">addy</span> and <span class="tag pstack">pstack</span> skill sets in Claude Code, plus <span class="tag pclaude">pclaude</span>, the Claude Code port of pstack (<a href="#pclaude">section 6</a>). Checklists come first; everything below them is depth for when you want it. Snapshot taken 2026-10-12 from the local buckets plus pstack's upstream guide.</p>
   </div>
   <button class="theme-btn" id="themeBtn" type="button">Theme: auto</button>
 </header>
@@ -203,19 +203,21 @@ footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1
     <li><a href="#addy">addy deep dive</a></li>
     <li><a href="#pstack">pstack deep dive</a></li>
     <li><a href="#compat">pstack in Claude Code: what breaks</a></li>
+    <li><a href="#pclaude">pclaude: pstack ported to Claude Code</a></li>
   </ol>
 </nav>
 
 <!-- ============================================================ -->
 <h2 id="switch">0. Step zero: turn a set on</h2>
-<p>Only one switchable set is linked at a time. The default is <span class="tag pocock">pocock</span>, so neither addy nor pstack is loaded until you switch.</p>
+<p>Sets now stack. Several can be active at once, and the default is <code>pocock personal gcp android</code>, so addy and pclaude are off until you add them. Run <code>/king</code> in Claude Code, or the script below. <code>pstack</code> is no longer a set: it is Cursor's copy, linked into Cursor only while <code>pclaude</code> is on. The rest of this step and sections 1 to 5 predate that change; read <code>pstack</code> there as <code>pclaude</code> for Claude Code.</p>
 <pre><code>cd ~/repos/skills
-scripts/use-skills.sh            # print the active set
-scripts/use-skills.sh addy       # or: pstack | pocock | all
-# then restart Claude Code</code></pre>
+scripts/use-skills.sh            # print the active sets
+scripts/use-skills.sh +addy      # add a set; -addy removes it
+scripts/use-skills.sh +pclaude   # the Claude Code port of pstack
+# a running session picks up new skills live; run /reload-skills if one is missing</code></pre>
 <ul>
   <li><strong>What the switch does:</strong> writes the name to the git-ignored <code>.skill-set</code>, re-runs <code>scripts/link-skills.sh</code> (symlinks into <code>~/.claude/skills</code> and <code>~/.agents/skills</code>, copies into <code>~/.cursor/skills</code>, links the set's agents into <code>~/.claude/agents</code>), and regenerates OpenCode commands. It only removes links it owns.</li>
-  <li><strong>Always on, whatever the set:</strong> <code>gcp/</code>, <code>android/</code>, <code>personal/</code> and <code>peer-review/</code>.</li>
+  <li><strong>Always on, whatever the sets:</strong> <code>peer-review/</code> and <code>king/</code>. <code>gcp</code>, <code>android</code> and <code>personal</code> are sets in the default list.</li>
   <li><strong>Invoke names carry the prefix.</strong> You type <code>/addy-spec</code> or <code>/pstack-poteto-mode</code>. The skill listing may show the upstream name in brackets, like <code>addy-spec (spec)</code>.</li>
   <li><strong><code>all</code> is noisy.</strong> The three sets each bring their own TDD, review and planning flow, and pstack's <code>tdd</code> and <code>teach</code> share frontmatter names with pocock's. Use <code>all</code> only to compare.</li>
 </ul>
@@ -648,9 +650,21 @@ when a step names a pstack skill or principle, Read ~/.claude/skills/pstack-&lt;
 <p><strong>Broken outright:</strong> <code>pstack-setup-pstack</code> (writes a Cursor <code>.mdc</code> rule Claude Code never loads) and <code>/pstack-make-bot-ui</code> (needs Cursor's <code>update_state</code> and a Grok bot). <strong>Heavy:</strong> orchestrate assumes Cursor cloud workers; the <code>bun scripts/orch</code> part runs, but "hundreds of subagents" doesn't.</p>
 <p><strong>Clean:</strong> investigation, prototype, runtime-forensics, trace-forensics, pause-safely, babysit, shipping; teach, bro, ketchup, blast-radius, correct, tdd, unslop, technical-writing, benchmark-checklist, typescript-best-practices, figure-it-out, no-comments; all principles (read, not invoked).</p>
 
+<!-- ============================================================ -->
+<h2 id="pclaude">6. pclaude: pstack ported to Claude Code</h2>
+<p><span class="tag pclaude">pclaude</span> is pstack rewritten for Claude Code, so section 5's breakage is fixed at the source instead of worked around. It lives in <code>skills/pclaude/</code>, and its own guide is <code>skills/pclaude/docs/</code>.</p>
+<ul>
+  <li><strong>Turn it on:</strong> <code>/king</code>, or <code>scripts/use-skills.sh +pclaude</code>. Its two agents link into <code>~/.claude/agents</code> with it.</li>
+  <li><strong>Start:</strong> <code>/pclaude-poteto-mode &lt;task&gt;</code> runs the 23 playbooks. <code>/pclaude-help</code> picks a skill, playbook or principle for you.</li>
+  <li><strong>Skills reach each other by path.</strong> Every pclaude skill is user-invoked, and one reads another at <code>~/.claude/skills/pclaude-&lt;name&gt;/SKILL.md</code>. That fixes A above.</li>
+  <li><strong>Models come from one file.</strong> <code>skills/pclaude/models.md</code> maps roles to <code>sonnet</code>, <code>opus</code> and <code>haiku</code>. Edit it to retune every skill at once.</li>
+  <li><strong>No Cursor left.</strong> deslop is <code>pclaude-unslop</code> for prose and <code>/simplify</code> for code, control-ui is claude-in-chrome, transcripts are read from <code>~/.claude/projects</code> by a shared script, and cloud agents are local background agents in worktrees. make-bot-ui and setup-pstack were cut.</li>
+  <li><strong>Updates:</strong> <code>/my-pclaude-update</code> pulls upstream pstack and three-way merges it into your edited copy, then runs <code>scripts/pclaude-check.sh</code>. Edit <code>skills/pclaude/</code> directly; there are no patch files.</li>
+</ul>
+
 <footer>
   Fork-owned file, outside the sync's reach. Rebuild by hand after a big upstream change to either bucket.
-  Sources: <code>skills/addy/</code>, <code>skills/pstack/</code>, <code>FORK.md</code>, <code>scripts/use-skills.sh</code>, and the pstack upstream guide. Snapshot 2026-10-12.
+  Sources: <code>skills/addy/</code>, <code>skills/pstack/</code>, <code>skills/pclaude/</code>, <code>FORK.md</code>, <code>scripts/use-skills.sh</code>, and the pstack upstream guide. Snapshot 2026-10-12.
 </footer>
 
 </div>

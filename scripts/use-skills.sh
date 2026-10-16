@@ -122,4 +122,6 @@ echo "==> Generating OpenCode slash commands..."
 bash "$REPO/scripts/link-opencode-commands.sh"
 
 echo ""
-echo "Done. Restart Claude Code (and any other open harness) to pick up the new skill sets."
+echo "Done. A running Claude Code session picks this up live (run /reload-skills if a"
+echo "skill is missing; restart only if ~/.claude/agents did not exist at session start)."
+echo "Restart Cursor, Codex and OpenCode to pick up the new skill sets."

@@ -42,62 +42,62 @@ Core building blocks: how, why, architect, arena, swarm, interrogate.
 
 ### pclaude-architect/SKILL.md
 
-- [ ] L31 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Alias and re… ``
-- [ ] L31 [cursor:.mdc] `.mdc` in `` …s` line in the `pclaude-models.mdc` rule, in place of the `arena… ``
-- [ ] L31 [unknown-skill] `pclaude-models` in `` …chitect runners` line in the `pclaude-models.mdc` rule, in place of the `a… ``
+- [x] L31 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Alias and re… ``
+- [x] L31 [cursor:.mdc] `.mdc` in `` …s` line in the `pclaude-models.mdc` rule, in place of the `arena… ``
+- [x] L31 [unknown-skill] `pclaude-models` in `` …chitect runners` line in the `pclaude-models.mdc` rule, in place of the `a… ``
 
 ### pclaude-arena/SKILL.md
 
-- [ ] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
-- [ ] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
-- [ ] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
-- [ ] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
-- [ ] L17 [cursor:.cursor] `.cursor` in `` …he `arena runners` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
-- [ ] L17 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
-- [ ] L17 [cursor:Task-tool] `the Task` in `` …l, so omit `model` for it. If the Task tool rejects a configured ent… ``
-- [ ] L17 [cursor:cursor-name] `cursor-grok` in `` …claude-*`, and `grok-*` with `cursor-grok-*` and `composer-*`. A refuse… ``
-- [ ] L17 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
-- [ ] L28 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Prefer a dif… ``
-- [ ] L28 [cursor:.cursor] `.cursor` in `` …cross-judge pool` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
-- [ ] L28 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
-- [ ] L28 [unknown-skill] `pclaude-models` in `` …ool` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
+- [x] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
+- [x] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
+- [x] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
+- [x] L17 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. An `auto` or… ``
+- [x] L17 [cursor:.cursor] `.cursor` in `` …he `arena runners` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
+- [x] L17 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
+- [x] L17 [cursor:Task-tool] `the Task` in `` …l, so omit `model` for it. If the Task tool rejects a configured ent… ``
+- [x] L17 [cursor:cursor-name] `cursor-grok` in `` …claude-*`, and `grok-*` with `cursor-grok-*` and `composer-*`. A refuse… ``
+- [x] L17 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
+- [x] L28 [cursor:grok] `grok` in `` …`claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Prefer a dif… ``
+- [x] L28 [cursor:.cursor] `.cursor` in `` …cross-judge pool` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
+- [x] L28 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
+- [x] L28 [unknown-skill] `pclaude-models` in `` …ool` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
 
 ### pclaude-how/SKILL.md
 
-- [ ] L11 [cursor:grok] `grok` in `` …de-models.mdc` rule (default `grok-4.7-xhigh-fast`), and every e… ``
-- [ ] L11 [cursor:.mdc] `.mdc` in `` …r` line in the `pclaude-models.mdc` rule (default `grok-4.7-xhig… ``
-- [ ] L11 [cursor:Task-tool] `Task subagent` in `` Every spawn is a Task subagent with `subagent_type: generalP… ``
-- [ ] L11 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
-- [ ] L11 [unknown-skill] `pclaude-models` in `` …e `how explorer` line in the `pclaude-models.mdc` rule (default `grok-4.7-… ``
+- [x] L11 [cursor:grok] `grok` in `` …de-models.mdc` rule (default `grok-4.7-xhigh-fast`), and every e… ``
+- [x] L11 [cursor:.mdc] `.mdc` in `` …r` line in the `pclaude-models.mdc` rule (default `grok-4.7-xhig… ``
+- [x] L11 [cursor:Task-tool] `Task subagent` in `` Every spawn is a Task subagent with `subagent_type: generalP… ``
+- [x] L11 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
+- [x] L11 [unknown-skill] `pclaude-models` in `` …e `how explorer` line in the `pclaude-models.mdc` rule (default `grok-4.7-… ``
 
 ### pclaude-interrogate/SKILL.md
 
-- [ ] L27 [cursor:.cursor] `.cursor` in `` …rrogate reviewers` line in `~/.cursor/rules/pclaude-models.mdc`, la… ``
-- [ ] L27 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`, labeled Reviewer A, B, and… ``
-- [ ] L27 [cursor:Task-tool] `the Task` in `` …wers in a single message with the Task tool, one per entry on the `i… ``
-- [ ] L27 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`, labeled Reviewer A, B,… ``
-- [ ] L32 [cursor:grok] `grok` in `` | Reviewer B | `grok-4.7-xhigh-fast` | ``
-- [ ] L36 [cursor:grok] `grok` in `` …o by prefix: `claude-*`, and `grok-*` with `cursor-grok-*` and `… ``
-- [ ] L36 [cursor:grok] `grok` in `` …o by prefix: `claude-*`, and `grok-*` with `cursor-grok-*` and `… ``
-- [ ] L36 [cursor:Task-tool] `the Task` in `If the Task tool rejects a configured ent…`
-- [ ] L36 [cursor:cursor-name] `cursor-grok` in `` …claude-*`, and `grok-*` with `cursor-grok-*` and `composer-*`. A refuse… ``
+- [x] L27 [cursor:.cursor] `.cursor` in `` …rrogate reviewers` line in `~/.cursor/rules/pclaude-models.mdc`, la… ``
+- [x] L27 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`, labeled Reviewer A, B, and… ``
+- [x] L27 [cursor:Task-tool] `the Task` in `` …wers in a single message with the Task tool, one per entry on the `i… ``
+- [x] L27 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`, labeled Reviewer A, B,… ``
+- [x] L32 [cursor:grok] `grok` in `` | Reviewer B | `grok-4.7-xhigh-fast` | ``
+- [x] L36 [cursor:grok] `grok` in `` …o by prefix: `claude-*`, and `grok-*` with `cursor-grok-*` and `… ``
+- [x] L36 [cursor:grok] `grok` in `` …o by prefix: `claude-*`, and `grok-*` with `cursor-grok-*` and `… ``
+- [x] L36 [cursor:Task-tool] `the Task` in `If the Task tool rejects a configured ent…`
+- [x] L36 [cursor:cursor-name] `cursor-grok` in `` …claude-*`, and `grok-*` with `cursor-grok-*` and `composer-*`. A refuse… ``
 
 ### pclaude-swarm/SKILL.md
 
-- [ ] L22 [cursor:grok] `grok` in `` …or that line is missing, use `grok-4.7-xhigh-fast`. For `auto` o… ``
-- [ ] L22 [cursor:.cursor] `.cursor` in `` …he `swarm workers` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
-- [ ] L22 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
-- [ ] L22 [cursor:Task-tool] `the Task` in `…s run on the parent model. If the Task tool rejects a slug, use the…`
-- [ ] L22 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
+- [x] L22 [cursor:grok] `grok` in `` …or that line is missing, use `grok-4.7-xhigh-fast`. For `auto` o… ``
+- [x] L22 [cursor:.cursor] `.cursor` in `` …he `swarm workers` line in `~/.cursor/rules/pclaude-models.mdc`. If… ``
+- [x] L22 [cursor:.mdc] `.mdc` in `` …~/.cursor/rules/pclaude-models.mdc`. If the rule or that line is… ``
+- [x] L22 [cursor:Task-tool] `the Task` in `…s run on the parent model. If the Task tool rejects a slug, use the…`
+- [x] L22 [unknown-skill] `pclaude-models` in `` …ers` line in `~/.cursor/rules/pclaude-models.mdc`. If the rule or that lin… ``
 
 ### pclaude-why/SKILL.md
 
-- [ ] L11 [cursor:.mdc] `.mdc` in `` …le line in the `pclaude-models.mdc` rule and a default. Set `mod… ``
-- [ ] L11 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
-- [ ] L11 [unknown-skill] `pclaude-models` in `` …low names a role line in the `pclaude-models.mdc` rule and a default. Set… ``
-- [ ] L35 [cursor:Cursor] `Cursor` in `…t the available MCPs from the Cursor environment. Use the availabl…`
-- [ ] L35 [cursor:Cursor] `Cursor` in `…t the available MCPs from the Cursor environment. Use the availabl…`
-- [ ] L49 [cursor:grok] `grok` in `` …investigators` line, default `grok-4.7-xhigh-fast`. ``
+- [x] L11 [cursor:.mdc] `.mdc` in `` …le line in the `pclaude-models.mdc` rule and a default. Set `mod… ``
+- [x] L11 [cursor:Task-tool] `the Task` in `` …auto` or `inherit-parent`. If the Task tool rejects a slug, use the… ``
+- [x] L11 [unknown-skill] `pclaude-models` in `` …low names a role line in the `pclaude-models.mdc` rule and a default. Set… ``
+- [x] L35 [cursor:Cursor] `Cursor` in `…t the available MCPs from the Cursor environment. Use the availabl…`
+- [x] L35 [cursor:Cursor] `Cursor` in `…t the available MCPs from the Cursor environment. Use the availabl…`
+- [x] L49 [cursor:grok] `grok` in `` …investigators` line, default `grok-4.7-xhigh-fast`. ``
 
 ## Ticket 08
 

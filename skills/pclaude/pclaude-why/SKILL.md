@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 Investigate the motivation and intent behind code. The companion `pclaude-how` skill answers what the code does and how it works. `pclaude-why` answers what forces led to its shape.
 
-Each spawn below names a role line in the `pclaude-models.mdc` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **pclaude-poteto-mode** skill.
+Each spawn below is an Agent tool call made from the main session (see Nesting in [CONVENTIONS.md](../CONVENTIONS.md)) and names a role in [models.md](../models.md). Pass the role's value as the Agent tool's `model`, and omit `model` when the value is `inherit`. If this skill runs inside a delegate that cannot spawn, run each investigation yourself in sequence, then synthesize, following the same prompts.
 
-Every spawn is `generalPurpose` with `readonly: false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables the MCP-backed investigators and the synthesizer's citation spot-checks. Investigators still shouldn't write anything.
+Every spawn is `subagent_type: "general-purpose"`, because investigators run `git` and `gh` and call MCP tools, and the synthesizer spot-checks citations the same way. Every prompt says: do not edit files, commit, or change any external state. Investigators still shouldn't write anything.
 
 ## Operating Posture
 
@@ -20,7 +20,7 @@ Operate as a **careful, cautious, and precise investigator**. Be honest about wh
 
 The **target** is usually a chunk of code, a pattern, a feature, or a named design decision. The **question** is usually a design rationale, a tradeoff, a motivating edge case, an external constraint, dead code, or a broad history sweep.
 
-If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from conversation context (open files, recent edits, cursor location, what was just discussed). State your interpretation briefly so the user can redirect if you're off, then proceed.
+If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from conversation context (open files, recent edits, the IDE selection if one is shared, what was just discussed). State your interpretation briefly so the user can redirect if you're off, then proceed.
 
 ## Step 2. Establish the Code Anchor
 
@@ -32,7 +32,7 @@ Before spawning investigators, build the seed context inline: file paths and lin
 
 ### Discovery
 
-Before spawning investigators, list the available MCPs from the Cursor environment. Use the available-tools map when present. Otherwise inspect the `mcps/` directory Cursor exposes for enabled MCP servers.
+Before spawning investigators, list the MCP servers this session has. Claude Code names their tools `mcp__<server>__<tool>`. Some are loaded already, and the rest appear by name as deferred tools in the session's system reminders. Load a deferred tool's schema with ToolSearch before calling it, and search ToolSearch by keyword for a server still connecting. `claude mcp list` from Bash prints every configured server and whether it is connected. Name the exact `mcp__<server>__` prefix in each investigator's prompt, since a subagent may need to load the same tools with ToolSearch.
 
 Map each available MCP to one evidence category:
 
@@ -46,7 +46,7 @@ Map each available MCP to one evidence category:
 
 Source control is always available through git and `gh`. For the other six, classify using the MCP name, server instructions, tool names, and resource descriptors. If an MCP could fit more than one category, choose the one matching its primary evidence. Record ambiguous cases in the coverage map.
 
-Spawn one investigator per category that has a matching MCP, all in a single message so they run concurrently, each owning exactly one tool or MCP. Don't ask one agent to cover multiple MCPs. `model`: the `why investigators` line, default `grok-4.7-xhigh-fast`.
+Spawn one investigator per category that has a matching MCP, all in a single message so they run concurrently, each owning exactly one tool or MCP. Don't ask one agent to cover multiple MCPs. `model`: the `why investigators` role. Pass `run_in_background: true` to each, and synthesize once every investigator has reported.
 
 Each investigator's prompt is `references/investigator-prompt.md` filled in, plus:
 - the category playbook `references/sources/<source>.md` for the selected MCP, adapted from the examples in `references/source-playbook.md`
@@ -76,7 +76,7 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 ## Step 4. Synthesize
 
-Spawn one synthesizer. `model`: the `why synthesizer` line, default `claude-opus-5-5-xhigh`. It gets:
+Spawn one synthesizer. `model`: the `why synthesizer` role. It runs in the foreground, since you present its output next. It gets:
 1. The investigator findings, including any null results and any categories skipped with justification
 2. The code anchor
 3. The user's original question

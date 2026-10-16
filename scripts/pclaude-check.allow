@@ -14,3 +14,7 @@
 
 # The footer spec section 4 puts on every SKILL.md credits upstream by name.
 **/SKILL.md	Ported from pstack by poteto (MIT). See skills/pclaude/LICENSE.
+
+# A template line in why's synthesizer prompt: `url` is a placeholder for the
+# PR link the synthesizer fills in, not a relative file.
+pclaude-why/references/synthesizer-prompt.md	[PR #123](url)

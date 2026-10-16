@@ -88,7 +88,8 @@ description: The main mode.
 ---
 
 Babysit an upstack PR. Run \`node pstack/skills/poteto-mode/scripts/check.mjs\`.
-Then poteto-mode's playbooks apply."
+Then poteto-mode's playbooks apply.
+Read \`git show origin/main:pstack/skills/<each other leaf skill the program uses>\`."
 write pstack/skills/poteto-mode/scripts/check.mjs "// check: pstack/skills/poteto-mode/scripts/check.mjs"
 chmod +x "$T/origin/pstack/skills/poteto-mode/scripts/check.mjs"
 write pstack/skills/principle-fix-root-causes/SKILL.md "---
@@ -154,6 +155,7 @@ ok "bare /poteto-help becomes /pclaude-help" has "$R/pclaude-help/SKILL.md" "Sta
 ok "bare hyphenated name" has "$R/pclaude-poteto-mode/SKILL.md" "Then pclaude-poteto-mode's playbooks"
 ok "plain-text upstream path" has "$R/pclaude-poteto-mode/SKILL.md" "node skills/pclaude/pclaude-poteto-mode/scripts/check.mjs"
 ok "path in a code file" has "$R/pclaude-poteto-mode/scripts/check.mjs" "skills/pclaude/pclaude-poteto-mode/scripts/check.mjs"
+ok "placeholder skill path with spaces" has "$R/pclaude-poteto-mode/SKILL.md" "origin/main:skills/pclaude/pclaude-<each other leaf skill the program uses>\`"
 ok "executable bit kept" test -x "$R/pclaude-poteto-mode/scripts/check.mjs"
 ok "prose pstack renamed" has "$R/pclaude-why/SKILL.md" "pclaude's notes"
 ok "upstack untouched" has "$R/pclaude-poteto-mode/SKILL.md" "an upstack PR"
@@ -254,7 +256,7 @@ C="$T/checkdir"
 mkdir -p "$C/pclaude-how" "$C/pclaude-principles" "$C/agents" "$C/docs"
 printf -- '---\nname: pclaude-how\n---\nRead [why](../pclaude-why/SKILL.md).\n' > "$C/pclaude-how/SKILL.md"
 printf 'Prove it.\n' > "$C/pclaude-principles/prove-it-works.md"
-printf 'Fine: [how](../pclaude-how/SKILL.md), pclaude-principles/prove-it-works.md, ~/.claude/skills/pclaude-how/SKILL.md, skills/pclaude/docs/a.md.\n' > "$C/docs/a.md"
+printf 'Fine: [how](../pclaude-how/SKILL.md), pclaude-principles/prove-it-works.md, ~/.claude/skills/pclaude-how/SKILL.md, skills/pclaude/docs/a.md, skills/pclaude/pclaude-<each leaf>/SKILL.md, the cursor location, endCursor.\n' > "$C/docs/a.md"
 cat > "$C/docs/bad.md" <<'EOF'
 Use grok-4.7-xhigh-fast for code.
 Ask with AskQuestion.
@@ -271,6 +273,8 @@ Run setup-pstack or make-bot-ui.
 Read ~/.claude/skills/pclaude-nope/SKILL.md and skills/pclaude/missing.md.
 Use pclaude-nope and pclaude-principles/missing.
 An upstack PR is fine.
+See https://cursor.com/docs and https://github.com/cursor/plugins.
+Package @cursor-skill/tools, CURSOR_AUTOMATION_ID, author === "cursor".
 EOF
 printf -- '---\nname: pclaude-x\nreminder: x\nicon: x\n---\n' > "$C/pclaude-how/extra.md"
 printf '<<<<<<< pclaude\n' > "$C/docs/markers.md"
@@ -280,12 +284,14 @@ ok "check exits 1 on hits" test "$rc" -eq 1
 for rule in cursor:grok cursor:AskQuestion cursor:.cursor cursor:.mdc cursor:deslop cursor:control-ui \
   cursor:control-cli cursor:Task-tool cursor:cursor-team-kit cursor:mode-true cursor:api2.cursor.sh \
   cursor:Cursor pstack unported-skill dangling-link dangling-path unknown-skill unknown-principle \
-  cursor:reminder-frontmatter conflict-marker; do
+  cursor:reminder-frontmatter conflict-marker cursor:cursor.com cursor:cursor-name; do
   ok "flags [$rule]" has "$T/check.log" "[$rule]"
 done
 ok "flags both Task wordings" sh -c "[ \$(grep -c 'docs/bad.md:6: \[cursor:Task-tool\]' '$T/check.log') -eq 2 ]"
 ok "dangling link names the target" has "$T/check.log" "pclaude-how/SKILL.md:4: [dangling-link] ../pclaude-why/SKILL.md"
 ok "mode:/icon: only flagged in SKILL.md frontmatter" lacks "$T/check.log" "[cursor:icon-frontmatter]"
+ok "flags both cursor links" sh -c "[ \$(grep -c 'docs/bad.md:16: \[cursor:cursor.com\]' '$T/check.log') -eq 2 ]"
+ok "flags all three cursor names" sh -c "[ \$(grep -c 'docs/bad.md:17: \[cursor:cursor-name\]' '$T/check.log') -eq 3 ]"
 ok "upstack is not flagged" lacks "$T/check.log" "bad.md:15:"
 ok "valid links, paths and names pass" lacks "$T/check.log" "docs/a.md"
 cat > "$T/allow-ok" <<'EOF'

@@ -91,6 +91,8 @@ export function mapPath(model, up) {
   if (parts[0] === "skills" && parts.length >= 2) {
     const s = parts[1];
     const rest = parts.slice(2);
+    // A placeholder such as `<each leaf skill>` stands for any ported skill.
+    if (/^<[^>]*>$/.test(s)) return [`${P}-${s}`, ...rest].join("/");
     if (EXCLUDED_SKILLS.includes(s) || !model.skills.includes(s)) return null;
     if (s.startsWith("principle-")) {
       const leaf = s.slice("principle-".length);
@@ -183,7 +185,7 @@ export function renameText(model, fromUp, fromP, text) {
         line = line.replace(/(\bsrc=["'])([^"']+)/g, (_, a, t) => a + link(t));
       }
       line = line.replace(
-        new RegExp(`(?<![\\w.-])pstack/((?:skills|agents|docs/guide)(?:/[\\w.<>-]+)*/?)`, "g"),
+        new RegExp(`(?<![\\w.-])pstack/((?:skills|agents|docs/guide)(?:/(?:<[^>\\n]*>[\\w.-]*|[\\w.<>-]+))*/?)`, "g"),
         (whole, rest) => {
           const trailing = rest.endsWith("/");
           const mapped = mapPath(model, rest.replace(/\/$/, ""));

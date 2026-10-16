@@ -105,52 +105,52 @@ poteto-mode core and the main code playbooks.
 
 ### pclaude-no-comments/SKILL.md
 
-- [ ] L19 [cursor:Task-tool] `` `Task` `` in `` 1. Spawn `Task` with `subagent_type: "pclaude… ``
+- [x] L19 [cursor:Task-tool] `` `Task` `` in `` 1. Spawn `Task` with `subagent_type: "pclaude… ``
 
 ### pclaude-poteto-mode/SKILL.md
 
-- [ ] L5 [cursor:icon-frontmatter] `icon: crown`
-- [ ] L20 [cursor:AskQuestion] `AskQuestion` in `` - About to `AskQuestion` on a "which approach", "how… ``
-- [ ] L26 [cursor:Cursor] `Cursor` in `…s the **create-skill** skill (Cursor's built-in for authoring SKIL…`
-- [ ] L28 [cursor:deslop] `deslop` in `` - Before commit → the `deslop` skill from the `cursor-team-… ``
-- [ ] L28 [cursor:deslop] `deslop` in `` - Before commit → the `deslop` skill from the `cursor-team-… ``
-- [ ] L28 [cursor:cursor-team-kit] `cursor-team-kit` in `` …the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`). ``
-- [ ] L30 [cursor:control-ui] `control-ui` in `` …rol-cli` (CLIs and TUIs) and `control-ui` (browser / Electron / web UI… ``
-- [ ] L30 [cursor:control-cli] `control-cli` in `` …`cursor-team-kit` publishes `control-cli` (CLIs and TUIs) and `control… ``
-- [ ] L30 [cursor:cursor-team-kit] `cursor-team-kit` in `` …the matching control skill. `cursor-team-kit` publishes `control-cli` (CLI… ``
-- [ ] L32 [cursor:Cursor] `Cursor` in `` …(`playbooks/babysit.md`), not Cursor's built-in babysit skill, who… ``
-- [ ] L95 [cursor:grok] `grok` in `` …ia `/setup-pstack`. Defaults `grok-4.7-xhigh-fast` for code, `cl… ``
-- [ ] L95 [cursor:Task-tool] `` `Task` `` in `` **Defaults for every `Task` call.** `run_in_background: t… ``
-- [ ] L95 [cursor:Task-tool] `omit Task` in `` …ole on the parent chat model (omit Task `model`). Each code playbook'… ``
-- [ ] L95 [pstack] `pstack` in `` …ole (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
-- [ ] L95 [pstack] `pstack` in `` …ole (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
-- [ ] L95 [unported-skill] `setup-pstack` in `` …per role (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
-- [ ] L95 [unported-skill] `setup-pstack` in `` …per role (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
-- [ ] L97 [cursor:grok] `grok` in `` …rm workers` model and speed (`grok-4.7-xhigh-fast` by default).… ``
-- [ ] L97 [cursor:Task-tool] `the Task` in `…stays on the parent model. If the Task tool rejects the adjusted slu…`
-- [ ] L97 [pstack] `pstack` in `` …ed the job needs. The `/setup-pstack` budget sets each role's star… ``
-- [ ] L97 [unported-skill] `setup-pstack` in `` …nd speed the job needs. The `/setup-pstack` budget sets each role's star… ``
-- [ ] L146 [cursor:Cursor] `Cursor` in `…licit pause, going offline, a Cursor restart, or imminent context…`
+- [x] L5 [cursor:icon-frontmatter] `icon: crown`
+- [x] L20 [cursor:AskQuestion] `AskQuestion` in `` - About to `AskQuestion` on a "which approach", "how… ``
+- [x] L26 [cursor:Cursor] `Cursor` in `…s the **create-skill** skill (Cursor's built-in for authoring SKIL…`
+- [x] L28 [cursor:deslop] `deslop` in `` - Before commit → the `deslop` skill from the `cursor-team-… ``
+- [x] L28 [cursor:deslop] `deslop` in `` - Before commit → the `deslop` skill from the `cursor-team-… ``
+- [x] L28 [cursor:cursor-team-kit] `cursor-team-kit` in `` …the `deslop` skill from the `cursor-team-kit` plugin (`/deslop`). ``
+- [x] L30 [cursor:control-ui] `control-ui` in `` …rol-cli` (CLIs and TUIs) and `control-ui` (browser / Electron / web UI… ``
+- [x] L30 [cursor:control-cli] `control-cli` in `` …`cursor-team-kit` publishes `control-cli` (CLIs and TUIs) and `control… ``
+- [x] L30 [cursor:cursor-team-kit] `cursor-team-kit` in `` …the matching control skill. `cursor-team-kit` publishes `control-cli` (CLI… ``
+- [x] L32 [cursor:Cursor] `Cursor` in `` …(`playbooks/babysit.md`), not Cursor's built-in babysit skill, who… ``
+- [x] L95 [cursor:grok] `grok` in `` …ia `/setup-pstack`. Defaults `grok-4.7-xhigh-fast` for code, `cl… ``
+- [x] L95 [cursor:Task-tool] `` `Task` `` in `` **Defaults for every `Task` call.** `run_in_background: t… ``
+- [x] L95 [cursor:Task-tool] `omit Task` in `` …ole on the parent chat model (omit Task `model`). Each code playbook'… ``
+- [x] L95 [pstack] `pstack` in `` …ole (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
+- [x] L95 [pstack] `pstack` in `` …ole (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
+- [x] L95 [unported-skill] `setup-pstack` in `` …per role (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
+- [x] L95 [unported-skill] `setup-pstack` in `` …per role (configurable via `/setup-pstack`. Defaults `grok-4.7-xhigh-fa… ``
+- [x] L97 [cursor:grok] `grok` in `` …rm workers` model and speed (`grok-4.7-xhigh-fast` by default).… ``
+- [x] L97 [cursor:Task-tool] `the Task` in `…stays on the parent model. If the Task tool rejects the adjusted slu…`
+- [x] L97 [pstack] `pstack` in `` …ed the job needs. The `/setup-pstack` budget sets each role's star… ``
+- [x] L97 [unported-skill] `setup-pstack` in `` …nd speed the job needs. The `/setup-pstack` budget sets each role's star… ``
+- [x] L146 [cursor:Cursor] `Cursor` in `…licit pause, going offline, a Cursor restart, or imminent context…`
 
 ### pclaude-poteto-mode/playbooks/bug-fix.md
 
-- [ ] L8 [cursor:Cursor] `Cursor` in `` …a long or stubborn hunt with Cursor's `/loop` command. Confirm th… ``
-- [ ] L9 [cursor:grok] `grok` in `` …gured bug-fix model (default `grok-4.7-xhigh-fast`) with a speci… ``
+- [x] L8 [cursor:Cursor] `Cursor` in `` …a long or stubborn hunt with Cursor's `/loop` command. Confirm th… ``
+- [x] L9 [cursor:grok] `grok` in `` …gured bug-fix model (default `grok-4.7-xhigh-fast`) with a speci… ``
 
 ### pclaude-poteto-mode/playbooks/feature.md
 
-- [ ] L12 [cursor:grok] `grok` in `` …gured feature model (default `grok-4.7-xhigh-fast`) with a speci… ``
+- [x] L12 [cursor:grok] `grok` in `` …gured feature model (default `grok-4.7-xhigh-fast`) with a speci… ``
 
 ### pclaude-poteto-mode/playbooks/opening-a-pr.md
 
-- [ ] L5 [cursor:Task-tool] `` `Task` `` in `` …ubagents inherit it. Multiple `Task` calls on the same branch each… ``
-- [ ] L9 [cursor:deslop] `deslop` in `` **PRs.** Run `/deslop` from `cursor-team-kit` over… ``
-- [ ] L9 [cursor:cursor-team-kit] `cursor-team-kit` in `` **PRs.** Run `/deslop` from `cursor-team-kit` over the diff before commit… ``
-- [ ] L34 [cursor:deslop] `deslop` in `` …runs `pclaude-interrogate`, `/deslop`, and `/pclaude-no-comments`,… ``
+- [x] L5 [cursor:Task-tool] `` `Task` `` in `` …ubagents inherit it. Multiple `Task` calls on the same branch each… ``
+- [x] L9 [cursor:deslop] `deslop` in `` **PRs.** Run `/deslop` from `cursor-team-kit` over… ``
+- [x] L9 [cursor:cursor-team-kit] `cursor-team-kit` in `` **PRs.** Run `/deslop` from `cursor-team-kit` over the diff before commit… ``
+- [x] L34 [cursor:deslop] `deslop` in `` …runs `pclaude-interrogate`, `/deslop`, and `/pclaude-no-comments`,… ``
 
 ### pclaude-poteto-mode/playbooks/refactoring.md
 
-- [ ] L11 [cursor:grok] `grok` in `` …d refactoring model (default `grok-4.7-xhigh-fast`) with a speci… ``
+- [x] L11 [cursor:grok] `grok` in `` …d refactoring model (default `grok-4.7-xhigh-fast`) with a speci… ``
 
 ## Ticket 10
 

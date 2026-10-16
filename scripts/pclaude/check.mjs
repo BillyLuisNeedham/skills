@@ -19,8 +19,8 @@ const SKIP_FILES = new Set(["LICENSE", "UPSTREAM"]);
 const BINARY_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf"]);
 
 // Text patterns, checked on every line of every text file. Spec section 3
-// lists the Cursor-isms; `Cursor`, the unported skill names and conflict
-// markers are additions that catch the same leftovers.
+// lists the Cursor-isms; `Cursor`, the lowercase cursor names, the unported
+// skill names and conflict markers are additions that catch the same leftovers.
 const TEXT_RULES = [
   { id: "cursor:grok", re: /grok/gi },
   { id: "cursor:AskQuestion", re: /AskQuestion/g },
@@ -37,6 +37,11 @@ const TEXT_RULES = [
   },
   { id: "cursor:mode-true", re: /\bmode:\s*true\b/g },
   { id: "cursor:Cursor", re: /\bCursor\b/g },
+  // Lowercase names a capitalised `Cursor` misses: cursor.com and
+  // github.com/cursor/ links, `@cursor-skill/` package names, Bugbot's
+  // `cursor_automation_id`, and the `"cursor"` bot login.
+  { id: "cursor:cursor.com", re: /\bcursor\.com\b|github\.com\/cursor\//g },
+  { id: "cursor:cursor-name", re: /\bcursor[-_](?!team-kit\b)\w+|(["'])cursor\1/gi },
   { id: "pstack", re: /(?<![A-Za-z])pstack/gi },
   { id: "unported-skill", re: /(?<![\w-])(?:make-bot-ui|setup-pstack|setup-pclaude)(?![\w-])/g },
   { id: "conflict-marker", re: /^(?:<{7}|\|{7}|>{7})(?: |$)/g },
@@ -146,6 +151,9 @@ function pclaudeNames(root) {
 
 const isConcrete = (p) => !/[<>*{}$]/.test(p);
 
+// A path that runs into a `<placeholder>` names no single file.
+const runsIntoPlaceholder = (line, m) => /^[\w.-]*</.test(line.slice(m.index + m[0].length - 1));
+
 // Reference checks. Each yields [start, end, rule, text] for a reference that
 // points at nothing.
 function referenceHits(root, names, file, line) {
@@ -172,11 +180,11 @@ function referenceHits(root, names, file, line) {
   // ~/.claude/skills/pclaude-<name>/<path> and skills/pclaude/<path>.
   for (const m of line.matchAll(/~\/\.claude\/skills\/(pclaude-[\w.-]+(?:\/[\w.-]+)*)/g)) {
     const rel = m[1].replace(/[.,:;)]+$/, "");
-    if (!exists(rel)) hits.push([m.index, m.index + m[0].length, "dangling-path", m[0]]);
+    if (!exists(rel) && !runsIntoPlaceholder(line, m)) hits.push([m.index, m.index + m[0].length, "dangling-path", m[0]]);
   }
   for (const m of line.matchAll(/(?<![\w/.-])skills\/pclaude\/([\w.-]+(?:\/[\w.-]+)*)/g)) {
     const rel = m[1].replace(/[.,:;)]+$/, "");
-    if (!exists(rel)) hits.push([m.index, m.index + m[0].length, "dangling-path", m[0]]);
+    if (!exists(rel) && !runsIntoPlaceholder(line, m)) hits.push([m.index, m.index + m[0].length, "dangling-path", m[0]]);
   }
 
   // Any pclaude-<name> must name a skill or an agent; pclaude-principles/<x>
